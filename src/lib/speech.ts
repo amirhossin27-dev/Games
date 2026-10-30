@@ -2,6 +2,12 @@ import { activeProfile, getData } from './store';
 
 /** Joy liest vor – über die Sprachausgabe des Browsers (deutsche Stimme, wenn vorhanden). */
 
+/**
+ * Hauptschalter für Joys Stimme. Vorerst aus, bis die Stimme überarbeitet ist.
+ * Auf `true` setzen, dann sind Vorlesen, Lautsprecher-Knöpfe und die Einstellung im Elternbereich wieder da.
+ */
+export const VOICE_ENABLED = false;
+
 let voice: SpeechSynthesisVoice | null | undefined;
 
 function germanVoice(): SpeechSynthesisVoice | null {
@@ -18,7 +24,7 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   });
 }
 
-export const speechAvailable = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
+export const speechAvailable = () => VOICE_ENABLED && typeof window !== 'undefined' && 'speechSynthesis' in window;
 
 export function speak(text: string) {
   if (!speechAvailable() || !text) return;
@@ -47,6 +53,7 @@ export function stopSpeaking() {
 
 /** Soll Joy von selbst vorlesen? (Einstellung im Elternbereich, „auto“ = für 4–7-Jährige.) */
 export function autoSpeak(): boolean {
+  if (!VOICE_ENABLED) return false;
   const d = getData();
   if (d.settings.speech === 'off') return false;
   if (d.settings.speech === 'on') return true;

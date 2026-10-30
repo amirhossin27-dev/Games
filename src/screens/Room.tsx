@@ -6,7 +6,7 @@ import { onlineConfigured } from '../net/config';
 import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
 import { isAway, knocking, maxPlayers, members, ROBO_NAMES, taken, type ReactionId } from '../net/roomLogic';
 import { nav, useNav } from '../lib/nav';
-import { speak, speakIfAuto } from '../lib/speech';
+import { speak, speakIfAuto, VOICE_ENABLED } from '../lib/speech';
 import { LEVEL_LABEL, levelForAge, type Level, type Profile } from '../lib/store';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
@@ -247,9 +247,11 @@ function Lobby({ profile }: { profile: Profile }) {
             <div className="row between">
               <b className="display">Zimmer-Code</b>
               <div className="row" style={{ gap: 8 }}>
-                <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(`Der Zimmer-Code ist: ${codeWords(code)}`)}>
-                  <Icon name="speaker" />
-                </button>
+                {VOICE_ENABLED && (
+                  <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(`Der Zimmer-Code ist: ${codeWords(code)}`)}>
+                    <Icon name="speaker" />
+                  </button>
+                )}
                 <button type="button" className="icon-btn soft" aria-label="Link teilen" onClick={share}>
                   <Icon name="share" />
                 </button>

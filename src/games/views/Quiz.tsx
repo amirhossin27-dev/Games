@@ -4,7 +4,7 @@ import type { PlayProps } from '../../engine/game';
 import { useGame } from '../../engine/useGame';
 import { quizDef, quizPoints, type QuizState } from '../../learn/quiz';
 import type { Subject, Task } from '../../learn/tasks';
-import { speak, speakIfAuto } from '../../lib/speech';
+import { speak, speakIfAuto, VOICE_ENABLED } from '../../lib/speech';
 import { cls } from '../../lib/util';
 import { Icon } from '../../ui/Icon';
 import { AnalogClock, SeatStrip, SpeakButton } from '../../ui/parts';
@@ -170,7 +170,7 @@ export function Quiz(props: PlayProps & { subject: Subject }) {
           <span className="grow">
             {right ? `Richtig! +${quizPoints(mine.ms)} Punkte` : `Richtig ist: ${task.options[task.correct]}. ${task.explain ?? ''}`}
           </span>
-          {!right && task.explain && (
+          {VOICE_ENABLED && !right && task.explain && (
             <button type="button" className="icon-btn soft" aria-label="Tipp vorlesen" onClick={() => speak(`Richtig ist ${task.options[task.correct]}. ${task.explain}`)}>
               <Icon name="speaker" />
             </button>
