@@ -77,6 +77,8 @@ export interface Settings {
   speech: 'auto' | 'on' | 'off';
   /** Nur Namen aus dem Namens-Würfel erlauben */
   onlyGeneratedNames: boolean;
+  /** Vorlese-Stimme (voiceURI) – leer = automatisch die natürlichste */
+  voice?: string;
 }
 
 export interface ParentLock {

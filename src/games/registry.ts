@@ -243,7 +243,7 @@ export const GAMES: GameMeta[] = [
     robo: true,
     levels: true,
     tutorial: [
-      { say: 'Leg eine Karte, die zur obersten Karte passt: gleiche Farbe oder gleiche Zahl.', art: { k: 'cards', cards: [{ t: '♥ 9', red: true }, { t: '♥ K', red: true }, { t: '♠ 9' }, { t: '♣ 7', dim: true }], point: 1 } },
+      { say: 'Leg eine Karte, die zur obersten Karte passt: gleiche Farbe oder gleiche Zahl.', art: { k: 'cards', cards: [{ t: '★ 9', red: true }, { t: '★ K', red: true }, { t: '♠ 9' }, { t: '♣ 7', dim: true }], point: 1 } },
       { say: 'Passt nichts, ziehst du eine Karte vom Stapel.', art: { k: 'cards', cards: [{ t: '' }, { t: '♦ 10', red: true }] } },
       { say: 'Eine 7: der Nächste zieht zwei. Eine 8: der Nächste setzt aus. Mit dem Buben wünschst du dir eine Farbe.', art: { k: 'cards', cards: [{ t: '♣ 7' }, { t: '♦ 8', red: true }, { t: '♠ B' }] } },
       { say: 'Wer zuerst keine Karten mehr hat, gewinnt: Mau-Mau!', art: { k: 'art', art: 'maumau' } },
@@ -315,7 +315,7 @@ export const GAMES: GameMeta[] = [
   {
     id: 'schlange',
     name: 'Schlange',
-    tagline: 'Sammle Herzen und werde immer länger.',
+    tagline: 'Sammle Äpfel und werde immer länger.',
     learn: 'Reaktion und vorausschauend lenken.',
     category: 'arcade',
     minAge: 5,
@@ -325,10 +325,10 @@ export const GAMES: GameMeta[] = [
     kind: 'arcade',
     robo: false,
     levels: false,
-    scoreLabel: 'Herzen',
+    scoreLabel: 'Äpfel',
     tutorial: [
       { say: 'Wische in eine Richtung oder tippe auf die Pfeile, dann biegt die Schlange ab.', art: { k: 'gesture', g: 'right' } },
-      { say: 'Sammle Herzen, dann wird die Schlange länger.', art: { k: 'pics', items: ['🐍', '❤️'] } },
+      { say: 'Sammle Äpfel, dann wird die Schlange länger.', art: { k: 'pics', items: ['🐍', '🍎'] } },
       { say: 'Nicht gegen die Wand fahren und dich nicht selbst beißen!', art: { k: 'art', art: { emoji: '🐍', bg: '#DDEBDD' } } },
     ],
   },
@@ -387,7 +387,7 @@ export const GAMES: GameMeta[] = [
     levels: false,
     scoreLabel: 'Säulen',
     tutorial: [
-      { say: 'Tippe irgendwo hin, dann flattert das Herz nach oben.', art: { k: 'gesture', g: 'tap' } },
+      { say: 'Tippe irgendwo hin, dann flattert der Vogel nach oben.', art: { k: 'gesture', g: 'tap' } },
       { say: 'Flieg durch die Lücken. Jede Säule gibt einen Punkt. Nicht anstoßen!', art: { k: 'art', art: { emoji: '🐦', bg: '#DCE9F3' } } },
     ],
   },
@@ -413,7 +413,7 @@ export const GAMES: GameMeta[] = [
   {
     id: 'mampfer',
     name: 'Mampfer',
-    tagline: 'Herzchen futtern und den Grummelgeistern ausweichen.',
+    tagline: 'Krümel futtern und den Grummelgeistern ausweichen.',
     learn: 'Wege planen und schnell reagieren.',
     category: 'arcade',
     minAge: 6,
@@ -426,8 +426,8 @@ export const GAMES: GameMeta[] = [
     scoreLabel: 'Punkte',
     tutorial: [
       { say: 'Wische in eine Richtung, dann läuft Mampfi los.', art: { k: 'gesture', g: 'left' } },
-      { say: 'Futtere alle Herzchen. Die Geister jagen dich – weich ihnen aus!', art: { k: 'pics', items: ['😋', '💗', '👻'] } },
-      { say: 'Nach einem großen Herz werden die Geister blau. Dann kannst du sie fangen.', art: { k: 'art', art: { emoji: '👻', bg: '#E3E7EE' } } },
+      { say: 'Futtere alle Krümel. Die Geister jagen dich – weich ihnen aus!', art: { k: 'pics', items: ['😋', '🍪', '👻'] } },
+      { say: 'Nach einem Zauberstern werden die Geister blau. Dann kannst du sie fangen.', art: { k: 'pics', items: ['⭐', '➡️', '👻'] } },
     ],
   },
   {
@@ -466,7 +466,7 @@ export const GAMES: GameMeta[] = [
     tutorial: [
       { say: 'Wische nach links oder rechts, um die Spur zu wechseln.', art: { k: 'gesture', g: 'right' } },
       { say: 'Wische nach oben zum Springen und nach unten zum Rutschen.', art: { k: 'gesture', g: 'up' } },
-      { say: 'An Kreuzungen wischst du in Pfeilrichtung. Sammle Herzen für Extrapunkte!', art: { k: 'art', art: { emoji: '🏃', bg: '#DDEBDD' } } },
+      { say: 'An Kreuzungen wischst du in Pfeilrichtung. Sammle Münzen für Extrapunkte!', art: { k: 'art', art: { emoji: '🏃', bg: '#DDEBDD' } } },
     ],
   },
   {
@@ -522,7 +522,7 @@ export const GAMES: GameMeta[] = [
     levels: false,
     scoreLabel: 'Runden',
     tutorial: [
-      { say: 'Die Herzen leuchten nacheinander auf und spielen eine Melodie.', art: { k: 'pics', items: ['💚', '❤️', '💛', '💙'] } },
+      { say: 'Die Felder leuchten nacheinander auf und spielen eine Melodie.', art: { k: 'pics', items: ['🔺', '⭐', '🟩', '🔵'] } },
       { say: 'Tippe sie in der gleichen Reihenfolge nach. Jede Runde kommt eins dazu.', art: { k: 'gesture', g: 'tap' } },
     ],
   },
@@ -563,7 +563,7 @@ export const GAMES: GameMeta[] = [
     scoreLabel: 'Sek.',
     lowerIsBetter: true,
     tutorial: [
-      { say: 'Leg Karten absteigend und abwechselnd rot und schwarz aufeinander.', art: { k: 'cards', cards: [{ t: '♠ 8' }, { t: '♥ 7', red: true }, { t: '♣ 6' }] } },
+      { say: 'Leg Karten absteigend und abwechselnd rot und schwarz aufeinander.', art: { k: 'cards', cards: [{ t: '♠ 8' }, { t: '★ 7', red: true }, { t: '♣ 6' }] } },
       { say: 'Oben sammelst du jede Farbe vom Ass bis zum König. Tippe eine Karte an, dann springt sie an den besten Platz.', art: { k: 'gesture', g: 'tap' } },
     ],
   },
@@ -588,7 +588,7 @@ export const GAMES: GameMeta[] = [
   {
     id: 'blitz',
     name: 'Blitz-Duell',
-    tagline: 'Wer tippt zuerst, wenn das Herz erscheint?',
+    tagline: 'Wer tippt zuerst, wenn der Blitz erscheint?',
     learn: 'Reaktion und Geduld.',
     category: 'arcade',
     minAge: 4,
@@ -600,7 +600,7 @@ export const GAMES: GameMeta[] = [
     levels: false,
     tutorial: [
       { say: 'Jeder legt einen Finger auf seine Hälfte.', art: { k: 'gesture', g: 'hold' } },
-      { say: 'Sobald das Herz erscheint: schnell tippen! Wer zu früh tippt, schenkt den Punkt her.', art: { k: 'pics', items: ['⏳', '💗', '👆'] } },
+      { say: 'Sobald der Blitz erscheint: schnell tippen! Wer zu früh tippt, schenkt den Punkt her.', art: { k: 'pics', items: ['⏳', '⚡', '👆'] } },
     ],
   },
 ];

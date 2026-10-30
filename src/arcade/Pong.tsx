@@ -105,9 +105,14 @@ export function Pong({ p1, p2, starter, onEnd }: GameProps) {
     }
     ctx.shadowBlur = 0;
 
-    // Ball als Herz
-    ctx.font = `${R * 2.6}px serif`;
-    ctx.fillText('💗', st.x, st.y + 1);
+    // Ball
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = '#fff';
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.arc(st.x, st.y, R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
   });
 
   useEffect(() => {

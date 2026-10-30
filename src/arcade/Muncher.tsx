@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
-import { burst, buzz, drawParticles, heartPath, oval, stepParticles, tone, useFitCanvas, useLoop, type Particle } from './engine';
+import { burst, buzz, drawParticles, oval, starPath, stepParticles, tone, useFitCanvas, useLoop, type Particle } from './engine';
 import {
   canGo,
   chooseDir,
@@ -287,19 +287,17 @@ function drawMe(ctx: CanvasRenderingContext2D, st: MState) {
   const y = m.y * CS + CS / 2 + BAR;
   const r = CS * 0.47;
   if (st.phase === 'dying') {
-    // Mampfi wird zum Herz, das zerbricht
-    const k = Math.min(1, (1.8 - st.phaseT) / 0.7);
-    const split = Math.max(0, (1.8 - st.phaseT - 0.7) / 0.9);
-    ctx.fillStyle = '#ff2f6d';
-    for (const side of [-1, 1]) {
+    // Mampfi klappt zusammen und verschwindet
+    const k = Math.min(1, (1.8 - st.phaseT) / 1.1);
+    if (k < 1) {
       ctx.save();
-      ctx.translate(x + side * split * 6, y + split * 10);
-      ctx.rotate(side * split * 0.6);
-      ctx.globalAlpha = 1 - split * 0.8;
+      ctx.translate(x, y);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = '#ff5c93';
       ctx.beginPath();
-      ctx.rect(side < 0 ? -20 : 0, -20, 20, 40);
-      ctx.clip();
-      heartPath(ctx, 0, 0, r * (0.8 + k * 0.4));
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, r, k * Math.PI, Math.PI * 2 - k * Math.PI);
+      ctx.closePath();
       ctx.fill();
       ctx.restore();
     }
@@ -362,16 +360,21 @@ export function Muncher({ best, onEnd }: GameProps) {
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(255,227,241,0.6)';
     ctx.fillText(`LEVEL ${st.level}`, W / 2, BAR / 2);
-    ctx.fillStyle = '#ff4f81';
+    // Leben als kleine Mampfis
+    ctx.fillStyle = '#ff5c93';
     for (let i = 0; i < st.lives - (st.phase === 'ready' || st.phase === 'dying' ? 1 : 0); i++) {
-      heartPath(ctx, W - 14 - i * 16, BAR / 2, 6);
+      const lx = W - 14 - i * 16;
+      ctx.beginPath();
+      ctx.moveTo(lx, BAR / 2);
+      ctx.arc(lx, BAR / 2, 6, Math.PI + 0.6, Math.PI * 3 - 0.6);
+      ctx.closePath();
       ctx.fill();
     }
 
     const flash = st.phase === 'clear' && Math.floor(st.phaseT * 5) % 2 === 0;
     ctx.drawImage(wallsImage(flash), 0, BAR, W, MH * CS);
 
-    // Herzchen
+    // Krümel und Zaubersterne
     const pulse = 0.75 + 0.25 * Math.sin(st.t * 8);
     for (let y = 0; y < MH; y++)
       for (let x = 0; x < MW; x++) {
@@ -380,11 +383,11 @@ export function Muncher({ best, onEnd }: GameProps) {
         const cx = x * CS + CS / 2;
         const cy = y * CS + CS / 2 + BAR;
         if (v === 1) {
-          ctx.fillStyle = '#ffd1e6';
+          ctx.fillStyle = '#ffe2a8';
           ctx.fillRect(cx - 1.5, cy - 1.5, 3, 3);
         } else {
-          ctx.fillStyle = '#ff2f6d';
-          heartPath(ctx, cx, cy + 0.5, 5.5 * pulse);
+          ctx.fillStyle = '#ffd43b';
+          starPath(ctx, cx, cy + 0.5, 6.5 * pulse);
           ctx.fill();
         }
       }
@@ -416,7 +419,7 @@ export function Muncher({ best, onEnd }: GameProps) {
     ctx.globalAlpha = 1;
 
     if (st.phase === 'ready' || st.phase === 'over') {
-      const text = st.phase === 'over' ? 'GAME OVER' : st.level > 1 && st.left === st.total ? `LEVEL ${st.level} 💗` : 'BEREIT!';
+      const text = st.phase === 'over' ? 'GAME OVER' : st.level > 1 && st.left === st.total ? `LEVEL ${st.level} ⭐` : 'BEREIT!';
       const by = 13.5 * CS + BAR;
       ctx.fillStyle = 'rgba(18,8,32,0.85)';
       ctx.beginPath();
@@ -544,7 +547,7 @@ export function Muncher({ best, onEnd }: GameProps) {
           if (g.st === 'roam') g.dir = opposite(g.dir);
         }
         tone(300, 380, 'sawtooth', 0.04, 900);
-        burst(st.parts, tx * CS + CS / 2, ty * CS + CS / 2, '#ff2f6d', 12, 90, { heart: true, size: 3 });
+        burst(st.parts, tx * CS + CS / 2, ty * CS + CS / 2, '#ffd43b', 12, 90, { star: true, size: 3 });
         buzz(20);
       }
       if (st.total - st.left === 70 || st.total - st.left === 170) {

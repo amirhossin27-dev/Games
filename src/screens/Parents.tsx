@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { nav } from '../lib/nav';
 import { checkParentPassword, checkRecoveryCode, PASSWORD_MIN, setParentPassword } from '../lib/parent';
 import { LIMIT_CHOICES, LOCK_MS, nowMs, playActions, usePlaytime } from '../lib/playtime';
 import { actions, useData, type Settings } from '../lib/store';
+import { germanVoices, onVoicesChanged, platform, speak, speechAvailable, type VoiceInfo } from '../lib/speech';
 import { formatClock } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
@@ -124,6 +125,84 @@ function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
   );
 }
 
+const VOICE_SAMPLE = 'Hallo! Ich bin Joy. So lese ich dir die Spielregeln vor.';
+
+const VOICE_TIP: Record<ReturnType<typeof platform>, string> = {
+  ios: 'Natürlichere Stimmen kannst du laden: Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch, z. B. „Anna (Premium)“. Danach Joyboy neu öffnen.',
+  mac: 'Natürlichere Stimmen kannst du laden: Systemeinstellungen → Bedienungshilfen → Gesprochene Inhalte → Systemstimme → Stimmen verwalten → Deutsch, z. B. „Anna (Premium)“. Danach Joyboy neu öffnen.',
+  android: 'Natürlichere Stimmen kannst du laden: Einstellungen → „Sprachausgabe“ suchen → Modul „Sprachausgabe von Google“ → Sprachdaten installieren → Deutsch. Danach Joyboy neu öffnen.',
+  windows: 'Am natürlichsten klingen die Stimmen in Microsoft Edge („Natural“) und Google Chrome („Google Deutsch“).',
+  other: 'Am natürlichsten klingen die Stimmen in Google Chrome und Microsoft Edge.',
+};
+
+/** Stimmen-Auswahl: die natürlichste ist vorgewählt, jede Zeile spielt eine Hörprobe. */
+function VoicePicker({ chosen, onChoose }: { chosen?: string; onChoose: (id: string | undefined) => void }) {
+  const [voices, setVoices] = useState<VoiceInfo[]>(() => germanVoices());
+  const [all, setAll] = useState(false);
+  useEffect(() => {
+    const refresh = () => setVoices(germanVoices());
+    const stop = onVoicesChanged(refresh);
+    // Safari meldet nachgeladene Stimmen nicht immer
+    const t = [window.setTimeout(refresh, 400), window.setTimeout(refresh, 1500)];
+    return () => {
+      stop();
+      t.forEach((x) => window.clearTimeout(x));
+    };
+  }, []);
+  if (!speechAvailable()) return <p className="small muted">Dieser Browser kann leider nicht vorlesen.</p>;
+  if (!voices.length) return <p className="small muted">Auf diesem Gerät ist keine deutsche Stimme zu finden. {VOICE_TIP[platform()]}</p>;
+
+  const best = voices[0];
+  const active = (chosen && voices.find((v) => v.id === chosen)) || null;
+  const good = voices.filter((v) => v.quality !== 'basic');
+  const shown = all || !good.length ? voices : good;
+  const hidden = voices.length - shown.length;
+  const pick = (v: VoiceInfo | null) => {
+    onChoose(v?.id);
+    speak(VOICE_SAMPLE, (v ?? best).id);
+  };
+  const tags = (v: VoiceInfo) => (
+    <span className="voice-tags">
+      {v.quality === 'natural' && (
+        <span className="tag" style={{ '--tag-bg': 'var(--sage-soft)', '--tag-fg': 'var(--sage)' } as CSSProperties}>
+          natürlich
+        </span>
+      )}
+      {v.quality === 'basic' && <span className="tag">klingt künstlich</span>}
+      {v.online && <span className="tag">über Internet</span>}
+    </span>
+  );
+
+  return (
+    <div className="voice-list">
+      <button type="button" className="voice-row" aria-pressed={!active} onClick={() => pick(null)}>
+        <Icon name="sparkle" size={20} />
+        <span className="grow">
+          <b>Automatisch</b>
+          <small>{best.name}</small>
+          {tags(best)}
+        </span>
+      </button>
+      {shown.map((v) => (
+        <button key={v.id} type="button" className="voice-row" aria-pressed={active?.id === v.id} onClick={() => pick(v)}>
+          <Icon name="speaker" size={20} />
+          <span className="grow">
+            <b>{v.name}</b>
+            {tags(v)}
+          </span>
+        </button>
+      ))}
+      {hidden > 0 && (
+        <button type="button" className="btn ghost small" onClick={() => setAll(true)}>
+          {hidden === 1 ? '1 weitere Stimme' : `${hidden} weitere Stimmen`}
+        </button>
+      )}
+      {best.quality !== 'natural' && <p className="small muted">{VOICE_TIP[platform()]}</p>}
+      {voices.some((v) => v.online) && <p className="small muted">„Über Internet“: Diese Stimmen erzeugt Google bzw. Microsoft auf ihren Servern. Der vorgelesene Text geht dafür dorthin.</p>}
+    </div>
+  );
+}
+
 function ParentPanel({ onClose }: { onClose: () => void }) {
   const data = useData();
   const { play, status } = usePlaytime();
@@ -212,6 +291,12 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         </div>
+        {data.settings.speech !== 'off' && (
+          <div className="field">
+            <span className="field-label">Stimme</span>
+            <VoicePicker chosen={data.settings.voice} onChoose={(voice) => set({ voice })} />
+          </div>
+        )}
         <Switch label="Töne" on={data.settings.sound} onChange={(v) => set({ sound: v })} />
         <Switch label="Nur Namen vom Namens-Würfel erlauben" on={data.settings.onlyGeneratedNames} onChange={(v) => set({ onlyGeneratedNames: v })} />
       </section>

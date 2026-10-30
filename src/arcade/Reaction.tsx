@@ -73,7 +73,7 @@ export function Reaction({ p1, p2, onEnd }: GameProps) {
 
   const status = (side: Side): string => {
     if (phase === 'ready') return players[side].cpu ? 'KI ist bereit 🤖' : 'Finger bereit halten!';
-    if (phase === 'wait') return 'Warte auf das Herz …';
+    if (phase === 'wait') return 'Warte auf den Blitz …';
     if (phase === 'go') return 'JETZT TIPPEN!';
     if (info && (phase === 'point' || phase === 'over')) {
       if (info.foulBy === side) return 'Zu früh! 🙈';
@@ -103,7 +103,7 @@ export function Reaction({ p1, p2, onEnd }: GameProps) {
             ))}
           </span>
         </div>
-        {phase === 'go' && <span className="rx-heart">💗</span>}
+        {phase === 'go' && <span className="rx-signal">⚡</span>}
         <p className="rx-status">{status(side)}</p>
       </div>
     );

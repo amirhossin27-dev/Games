@@ -9,6 +9,7 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 - **Profile ohne Konto:** Spielername (mit Namens-Würfel, z. B. „Flinker Fuchs“), Tier-Avatar, Lieblingsfarbe und Alter. Mehrere Kinder können sich ein Gerät teilen („Wer spielt?“).
 - **26 Spiele**, davon 11 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
 - **Tutorials mit Joy:** Das Maskottchen erklärt jedes Spiel in 2–4 Schritten, liest alles vor (für 4–7-Jährige automatisch) und lässt bei den Lernspielen einen Probezug machen. Beim ersten Spielen startet das Tutorial von selbst, danach über das ?.
+- **Natürliche Vorlese-Stimme:** Joyboy bewertet alle deutschen Stimmen des Geräts und nimmt die natürlichste (z. B. „Anna (Premium)“ auf dem iPhone, „Natural“-Stimmen in Edge, Google-Stimmen). Roboterhafte Stimmen werden aussortiert. Unter **Für Eltern → Stimme** lässt sich mit Hörprobe eine andere wählen; dort steht auch, wie man auf dem Gerät bessere Stimmen lädt.
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
 - **Belohnungen:** Sterne (0–3 pro Spiel), Level, 9 Abzeichen, Rekorde, eine Tagesaufgabe und eine Wochen-Rangliste der Kinder auf dem Gerät.
 - **Spielzeit-Limit für Eltern:** siehe unten.

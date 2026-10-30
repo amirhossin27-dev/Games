@@ -95,7 +95,7 @@ export const WORDS: { w: string; e: string; anlaut?: false }[] = [
   { w: 'Elefant', e: '🐘' }, { w: 'Ente', e: '🦆' }, { w: 'Erdbeere', e: '🍓' }, { w: 'Ei', e: '🥚', anlaut: false }, { w: 'Eis', e: '🍦', anlaut: false },
   { w: 'Fisch', e: '🐟' }, { w: 'Frosch', e: '🐸' }, { w: 'Fuchs', e: '🦊' }, { w: 'Flugzeug', e: '✈️' },
   { w: 'Giraffe', e: '🦒' }, { w: 'Gurke', e: '🥒' }, { w: 'Geschenk', e: '🎁' }, { w: 'Gitarre', e: '🎸' },
-  { w: 'Haus', e: '🏠' }, { w: 'Hase', e: '🐰' }, { w: 'Hund', e: '🐶' }, { w: 'Herz', e: '❤️' }, { w: 'Hut', e: '🎩' },
+  { w: 'Haus', e: '🏠' }, { w: 'Hase', e: '🐰' }, { w: 'Hund', e: '🐶' }, { w: 'Hai', e: '🦈' }, { w: 'Hut', e: '🎩' },
   { w: 'Igel', e: '🦔' }, { w: 'Insel', e: '🏝️' },
   { w: 'Kuchen', e: '🍰' }, { w: 'Katze', e: '🐱' }, { w: 'Käse', e: '🧀' }, { w: 'Kuh', e: '🐮' }, { w: 'Krone', e: '👑' },
   { w: 'Löwe', e: '🦁' }, { w: 'Löffel', e: '🥄' }, { w: 'Lampe', e: '💡' },

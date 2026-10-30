@@ -18,7 +18,7 @@ export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: 
   { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: '#2F5F86' },
   { id: 'smile', icon: 'smile', label: 'Lachen', color: '#6B5410' },
   { id: 'wow', icon: 'wow', label: 'Staunen', color: '#5E4277' },
-  { id: 'heart', icon: 'heart', label: 'Herz', color: '#8F3E1F' },
+  { id: 'party', icon: 'party', label: 'Juhu', color: '#8F3E1F' },
   { id: 'star', icon: 'sparkle', label: 'Super', color: '#33673E' },
 ];
 

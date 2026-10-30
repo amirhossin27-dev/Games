@@ -1381,6 +1381,60 @@ p {
 }
 
 /* ───────────── Eltern & Sperre ───────────── */
+.voice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.voice-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+}
+
+.voice-row .grow {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.voice-row b {
+  font-family: var(--font-display);
+  overflow-wrap: break-word;
+}
+
+.voice-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.voice-tags:empty {
+  display: none;
+}
+
+.voice-row small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.voice-row[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--butter-soft);
+  box-shadow: 2px 3px 0 var(--ink);
+}
+
 .setting-row {
   display: flex;
   align-items: center;

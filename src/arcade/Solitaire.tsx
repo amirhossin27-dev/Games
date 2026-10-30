@@ -86,7 +86,7 @@ function CardFace({ c }: { c: SCard }) {
         <b>{rankText(c.r)}</b>
         <i>{suit}</i>
       </span>
-      <span className="sol-mid">{FACE[c.r] ?? (c.r === 1 && c.s === 'H' ? '💗' : suit)}</span>
+      <span className="sol-mid">{FACE[c.r] ?? suit}</span>
       <span className="sol-corner br">
         <b>{rankText(c.r)}</b>
         <i>{suit}</i>
@@ -392,7 +392,7 @@ export function Solitaire({ best, onEnd }: GameProps) {
         <div className="sol-slot" style={{ left: colX(geo, 1), top: geo.gap }} />
         {[0, 1, 2, 3].map((i) => (
           <div key={`f${i}`} className="sol-slot found" style={{ left: colX(geo, 3 + i), top: geo.gap }}>
-            ♥
+            A
           </div>
         ))}
         {[0, 1, 2, 3, 4, 5, 6].map((i) => (

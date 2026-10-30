@@ -28,7 +28,7 @@ const ROW_KIND = [0, 1, 1, 2, 2];
 const ROW_POINTS = [30, 20, 20, 10, 10];
 const ROW_COLOR = ['#ff6b9d', '#c77dff', '#c77dff', '#4fc3f7', '#4fc3f7'];
 const SHIP = ['....X....', '...XXX...', '.XXXXXXX.', 'XXXXXXXXX', 'XXXXXXXXX'];
-const HEART = ['.X.X.', 'XXXXX', '.XXX.', '..X..'];
+const STAR = ['..X..', 'XXXXX', '.XXX.', '.X.X.'];
 
 interface Shot {
   x: number;
@@ -149,7 +149,7 @@ export function Invaders({ best, onEnd }: GameProps) {
     ctx.fillStyle = '#5ee6a8';
     st.bunkers.forEach((b, k) => b.forEach((on, i) => on && ctx.fillRect(bunkerX(k) + (i % BUNKER_W) * BUNKER_CELL, BUNKER_Y + Math.floor(i / BUNKER_W) * BUNKER_CELL, BUNKER_CELL, BUNKER_CELL)));
     // Schüsse
-    for (const sh of st.shots) sprite(ctx, HEART, sh.x - 5, sh.y - 4, '#ff6b9d', 2);
+    for (const sh of st.shots) sprite(ctx, STAR, sh.x - 5, sh.y - 4, '#ffe066', 2);
     ctx.fillStyle = '#ffe066';
     for (const b of st.bombs) {
       ctx.fillRect(b.x - 1, b.y - 4, 2, 3);
@@ -245,7 +245,7 @@ export function Invaders({ best, onEnd }: GameProps) {
     if (keys.current.right) st.px += speed * dt;
     st.px = clamp(st.px, 10, W - 10);
 
-    // Automatisch Herzen abfeuern
+    // Automatisch Sterne abfeuern
     st.fireAcc += dt;
     if (st.fireAcc > 0.42 && st.shots.length < 2 && st.hitFlash <= 0.6) {
       st.fireAcc = 0;
@@ -367,7 +367,7 @@ export function Invaders({ best, onEnd }: GameProps) {
     <div className="g-col fill">
       <div className="score-strip">
         <span>⭐ {score}</span>
-        <span>{'❤️'.repeat(Math.max(0, lives))}</span>
+        <span>{'🚀'.repeat(Math.max(0, lives))}</span>
         <span>🏆 {best ?? '–'}</span>
       </div>
       <div
