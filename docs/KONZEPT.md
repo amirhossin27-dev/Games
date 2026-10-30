@@ -1,7 +1,15 @@
 # Joyboy – Konzept & Umsetzungsplan
 
-> **Status:** Entwurf zur Freigabe. Umgesetzt wird erst, wenn Konzept und Designrichtung abgesegnet sind.
-> **Designvorschläge:** [Design-Leinwand „Joyboy Designkonzepte“](https://claude.ai/artifact/VLqZ1nyDz3JxvtXe7zGeB6) – drei Stilrichtungen, Richtung A als klickbarer Ablauf mit 8 Screens.
+> **Status:** Freigegeben. Phase 1 und 2 sind umgesetzt (siehe Abschnitt 9). Als Nächstes: Phase 3 (Online).
+> **Designvorschläge:** [Design-Leinwand „Joyboy Designkonzepte“](https://claude.ai/artifact/VLqZ1nyDz3JxvtXe7zGeB6) – gewählt wurde **Richtung C „Papierwelt“**.
+
+## Entscheidungen (Freigabe)
+
+- **Design:** Richtung C „Papierwelt“ – Papier, Klebeband, Notizzettel, Grandstander als Titel- und Andika als Leseschrift.
+- **Phase 2** enthält zusätzlich Schiffe versenken, Stadt-Land-Fluss und alle Arcade-Spiele.
+- **Sprache:** zunächst nur Deutsch.
+- **GitHub Pages** ist auf „GitHub Actions“ gestellt.
+- **Neu: Spielzeit-Limit** mit Eltern-Passwort, 12 Stunden Pause nach Ablauf und sichtbarem Timer (Abschnitt 7a).
 
 ---
 
@@ -203,9 +211,21 @@ Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindung
 - **Kein freier Chat** – nur 5 feste Reaktionen (Daumen hoch, Lachen, Staunen, Herz, Super).
 - **Spitznamen statt echter Namen:** Namensvorschläge per Würfel, Hinweis „Nimm einen Spitznamen“, Wortfilter, max. 16 Zeichen. Im Elternbereich lässt sich „nur Vorschlags-Namen“ einschalten.
 - **Klingel-Prinzip** im Spielzimmer, Zimmer schließen beim Spielstart.
-- **Elternbereich hinter einem Eltern-Tor** (z. B. „Tippe die Zahl dreiundvierzig“): Online-Spiel an/aus, Vorlesen, Ton, Spielzeit-Erinnerung, Spielerpass, Profile löschen.
+- **Elternbereich mit Passwort:** Spielzeit-Limit, Vorlesen, Ton, nur Vorschlags-Namen, Profile löschen (später auch Online-Spiel an/aus und Spielerpass).
 - **Datensparsam:** Spielername, Avatar, Altersstufe und Spielstände – sonst nichts. Keine Werbung, keine Käufe, keine Tracker.
 - **Schriften werden mit der App ausgeliefert** (kein Abruf bei Google Fonts – DSGVO).
+
+---
+
+## 7a. Spielzeit-Limit
+
+- Eltern legen im Elternbereich ein **Passwort** fest (gespeichert nur als PBKDF2-Hash) und bekommen einmalig einen **Notfall-Code**.
+- Limit wählbar: aus, 15, 30, 45, 60, 90 oder 120 Minuten pro **12-Stunden-Fenster** (das Fenster beginnt mit der ersten Spielsekunde).
+- Gezählt wird, solange die App sichtbar geöffnet ist – nicht im Elternbereich.
+- Die **Restzeit** steht oben in der App und im Spiel; bei 5 und 1 Minute erinnert Joy (Hinweis + Vorlesen).
+- Ist die Zeit aufgebraucht, endet das laufende Spiel und Joyboy zeigt **12 Stunden** lang den Pausen-Bildschirm mit Countdown.
+- Mit dem Passwort können Eltern **15 Minuten schenken**, die **Sperre aufheben** oder das Limit ändern.
+- Gegen das Vorstellen der Geräte-Uhr gleicht Joyboy die Zeit über den `Date`-Header von GitHub Pages ab, sobald Internet da ist.
 
 ---
 
@@ -259,19 +279,16 @@ Ein Hook `useGame(def, …)` macht daraus – wie `useTurnGame` in Arta – auto
 | Phase | Inhalt | Ergebnis |
 | --- | --- | --- |
 | **0 – Konzept** | Dieses Dokument + Designvorschläge | Deine Freigabe |
-| **1 – Fundament** | PWA-Gerüst, Veröffentlichung über GitHub Pages, Design-System in der gewählten Richtung, Willkommen (Name, Avatar, Alter), Start, Spiel-Seite, Ich-Seite, Tutorial-Engine, Vorlesen, Elternbereich | App lässt sich auf iPhone und Android installieren |
-| **2 – Spiele offline** | Engine für 1–4 Spieler, Robo, Aufgaben-Engine. Erste Spiele: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück – jeweils mit Tutorial | Spielbar allein, gegen Robo und an einem Gerät |
+| **1 – Fundament** ✅ | PWA-Gerüst, Veröffentlichung über GitHub Pages, Design-System „Papierwelt“, Willkommen (Name, Avatar, Alter), „Wer spielt?“, Start, Spiel-Seite, Ich-Seite, Tutorial-Engine, Vorlesen, Elternbereich mit Spielzeit-Limit | App lässt sich auf iPhone und Android installieren |
+| **2 – Spiele offline** ✅ | Engine für 1–4 Spieler, Robo, Aufgaben-Engine. Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken, Stadt-Land-Fluss und 15 Arcade-Spiele – jeweils mit Tutorial | Spielbar allein, gegen Robo und an einem Gerät |
 | **3 – Online** | Firebase-Anbindung, Spielzimmer mit Tier-Code, Klingel, Live-Sync für 4 Plätze, Herzschlag, Robo-Einspringen, Gastgeber-Wechsel, Fortsetzen, Cloud-Profile, Spielerpass, Rangliste | 4 Kinder spielen live zusammen |
-| **4 – Ausbau** | Weitere Spiele aus Arta (Schach, Dame, Mühle, Schiffe versenken, Wer ist es?, Stadt-Land-Fluss, Farbwechsel, Bewegungs-Würfel) und Arcade-Spiele mit Wettkampf-Modus, Welt-Quiz, Wort-Baumeister, English Words | Voller Katalog |
+| **4 – Ausbau** | Weitere Spiele aus Arta (Schach, Dame, Mühle, Wer ist es?, Farbwechsel, Bewegungs-Würfel), Wettkampf-Modus für die Arcade-Spiele, Welt-Quiz, Wort-Baumeister, English Words | Voller Katalog |
 
 Jede Phase endet mit Tests und einer veröffentlichten Version, die du auf dem Handy ausprobieren kannst.
 
 ---
 
-## 10. Was ich von dir brauche
+## 10. Was noch offen ist
 
-1. **Designrichtung:** A „Bonbon-Pop“, B „Galaxie“ oder C „Papierwelt“ – oder eine Mischung (z. B. A als Basis mit einem dunklen Galaxie-Modus für Ältere).
-2. **Spieleauswahl für Phase 2:** passt die Liste oben?
-3. **Firebase:** Für Online-Spiel und Cloud-Speicherung braucht Joyboy ein eigenes, kostenloses Firebase-Projekt (ca. 10 Minuten, ich liefere eine Schritt-für-Schritt-Anleitung). Danach brauche ich nur die Datenbank-Adresse und den Web-API-Key. Bis dahin baue ich alles so, dass die Offline-Modi schon laufen.
-4. **GitHub Pages:** Einmal im Repository unter *Settings → Pages → Source* „GitHub Actions“ wählen. Die App ist dann unter `https://amirhossin27-dev.github.io/Games/` erreichbar.
-5. **Sprache:** zunächst nur Deutsch, Englisch später?
+1. **Firebase für Phase 3:** Für Online-Spielzimmer und Cloud-Spielstände braucht Joyboy ein eigenes, kostenloses Firebase-Projekt (Realtime Database + anonyme Anmeldung). Danach brauche ich nur die Datenbank-Adresse und den Web-API-Key.
+2. **Main-Branch:** Die App wird aktuell vom Entwicklungs-Branch veröffentlicht. Sobald es einen `main`-Branch gibt (z. B. per Pull Request), veröffentlicht der Workflow auch von dort.
