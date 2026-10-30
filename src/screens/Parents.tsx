@@ -3,6 +3,7 @@ import { nav } from '../lib/nav';
 import { checkParentPassword, checkRecoveryCode, PASSWORD_MIN, setParentPassword } from '../lib/parent';
 import { LIMIT_CHOICES, LOCK_MS, nowMs, playActions, usePlaytime } from '../lib/playtime';
 import { actions, useData, type Settings } from '../lib/store';
+import { VOICE_ENABLED } from '../lib/speech';
 import { formatClock } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
@@ -195,23 +196,25 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
 
       <section className="card col" aria-label="Einstellungen">
         <h2>Einstellungen</h2>
-        <div className="field">
-          <span className="field-label">Vorlesen</span>
-          <div className="seg">
-            {(
-              [
-                ['auto', 'Automatisch', 'bis 7 Jahre'],
-                ['on', 'Immer', ''],
-                ['off', 'Aus', ''],
-              ] as const
-            ).map(([v, l, sub]) => (
-              <button key={v} type="button" aria-pressed={data.settings.speech === v} onClick={() => set({ speech: v })}>
-                {l}
-                {sub && <small>{sub}</small>}
-              </button>
-            ))}
+        {VOICE_ENABLED && (
+          <div className="field">
+            <span className="field-label">Vorlesen</span>
+            <div className="seg">
+              {(
+                [
+                  ['auto', 'Automatisch', 'bis 7 Jahre'],
+                  ['on', 'Immer', ''],
+                  ['off', 'Aus', ''],
+                ] as const
+              ).map(([v, l, sub]) => (
+                <button key={v} type="button" aria-pressed={data.settings.speech === v} onClick={() => set({ speech: v })}>
+                  {l}
+                  {sub && <small>{sub}</small>}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         <Switch label="Töne" on={data.settings.sound} onChange={(v) => set({ sound: v })} />
         <Switch label="Nur Namen vom Namens-Würfel erlauben" on={data.settings.onlyGeneratedNames} onChange={(v) => set({ onlyGeneratedNames: v })} />
       </section>

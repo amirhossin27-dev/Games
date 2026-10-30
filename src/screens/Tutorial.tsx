@@ -5,7 +5,7 @@ import { GAME_BY_ID, type GameId } from '../games/registry';
 import { AnswerGrid, TaskCard } from '../games/views/Quiz';
 import { nav, type Session } from '../lib/nav';
 import { finishTutorial } from '../lib/progress';
-import { speak, speakIfAuto, stopSpeaking } from '../lib/speech';
+import { speak, speakIfAuto, stopSpeaking, VOICE_ENABLED } from '../lib/speech';
 import { actions, useProfile } from '../lib/store';
 import { cls } from '../lib/util';
 import { GameArt } from '../ui/GameArt';
@@ -176,7 +176,7 @@ export function Tutorial({ game, start }: { game: GameId; start?: Omit<Session, 
         </div>
         <div className="joy-row">
           <Joy size={66} mood={solved ? 'cheer' : 'talk'} />
-          <div className="bubble with-speaker">
+          <div className={cls('bubble', VOICE_ENABLED && 'with-speaker')}>
             <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{say}</p>
             <SpeakButton text={say} />
           </div>
@@ -195,9 +195,11 @@ export function Tutorial({ game, start }: { game: GameId; start?: Omit<Session, 
             </button>
           )}
         </div>
-        <button type="button" className="btn ghost small" onClick={() => speak(say)}>
-          Nochmal vorlesen
-        </button>
+        {VOICE_ENABLED && (
+          <button type="button" className="btn ghost small" onClick={() => speak(say)}>
+            Nochmal vorlesen
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 import { useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 import { SEAT_COLORS, type SeatInfo } from '../engine/game';
-import { speak, speakIfAuto } from '../lib/speech';
+import { speak, speakIfAuto, VOICE_ENABLED } from '../lib/speech';
 import { cls } from '../lib/util';
 import { Avatar } from './Avatar';
 import { Icon, Star } from './Icon';
 import { Joy, type JoyMood } from './Joy';
 
 export function SpeakButton({ text, className }: { text: string; className?: string }) {
+  if (!VOICE_ENABLED) return null;
   return (
     <button type="button" className={cls('icon-btn soft speak', className)} aria-label="Vorlesen" onClick={() => speak(text)}>
       <Icon name="speaker" />
@@ -22,7 +23,7 @@ export function JoySays({ text, mood = 'talk', size = 64, children }: { text: st
   return (
     <div className="joy-row">
       <Joy size={size} mood={mood} />
-      <div className="bubble with-speaker">
+      <div className={cls('bubble', VOICE_ENABLED && 'with-speaker')}>
         <p>{text}</p>
         {children}
         <SpeakButton text={text} />
