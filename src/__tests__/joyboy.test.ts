@@ -6,14 +6,15 @@ import { mauDef, mauPlayable, type Card, type MauState } from '../games/rules/ma
 import { allSunk, battleDef, randomFleet, SEA_FOR, validFleet, type BattleState } from '../games/rules/schiffe';
 import { catPoints, slfDef, type SlfRound } from '../games/rules/slf';
 import { catScore, catsFor, total, wuerfelDef, wuerfelRobo, type WuerfelState } from '../games/rules/wuerfel';
-import { GAMES } from '../games/registry';
+import { GAME_BY_ID, GAMES } from '../games/registry';
 import { quizDef, quizPoints, type QuizState } from '../learn/quiz';
 import { clockTask, clockWords, letterTask, makeTask, mathTask } from '../learn/tasks';
 import { generatedName, isGeneratedName, nameProblem } from '../lib/names';
 import { addPlay, freshPlay, LOCK_MS, normalize, statusOf, unlocked, withBonus, withLimit } from '../lib/playtime';
 import { applyResult, levelOf, starsForPlace, starsForRatio, starsForScore } from '../lib/progress';
 import { newProfile, type Level } from '../lib/store';
-import { placesFromScores } from '../lib/util';
+import { arcadeAfter, ARCADE_AFTER_DEFAULT, isLearnGame, learnedToday, learnLeft } from '../lib/unlock';
+import { dayKey, placesFromScores } from '../lib/util';
 
 /** Reproduzierbarer Zufall */
 function seeded(seed: number) {
@@ -400,5 +401,44 @@ describe('Namen und Katalog', () => {
       for (const step of g.tutorial) expect(step.say.length, g.id).toBeGreaterThan(10);
       expect(g.players[0]).toBeLessThanOrEqual(g.players[1]);
     }
+  });
+});
+
+describe('Erst lernen, dann spielen', () => {
+  const settings = (arcadeAfter?: number) => ({ sound: true, speech: 'auto' as const, onlyGeneratedNames: false, arcadeAfter });
+  const play = (p: ReturnType<typeof newProfile>, game: keyof typeof GAME_BY_ID) =>
+    applyResult(p, { profileId: p.id, game, stars: 2, won: false, together: false, logic: false, learn: isLearnGame(GAME_BY_ID[game]) }).profile;
+
+  it('trennt Lern- und Brettspiele von Arcade- und Duell-Spielen', () => {
+    expect(GAMES.filter(isLearnGame)).toHaveLength(11);
+    expect(isLearnGame(GAME_BY_ID.rechnen)).toBe(true);
+    expect(isLearnGame(GAME_BY_ID.ludo)).toBe(true);
+    expect(isLearnGame(GAME_BY_ID.schlange)).toBe(false);
+    expect(isLearnGame(GAME_BY_ID.pong)).toBe(false);
+  });
+
+  it('schaltet Arcade-Spiele nach der eingestellten Zahl Lernspiele frei', () => {
+    let p = newProfile({ name: 'Flinker Fuchs', avatar: 'fuchs', color: '#F6D3B8', age: 1 });
+    const s = settings(2);
+    expect(learnLeft(GAME_BY_ID.schlange, p, s)).toBe(2);
+    expect(learnLeft(GAME_BY_ID.rechnen, p, s)).toBe(0);
+    p = play(p, 'schlange');
+    expect(learnedToday(p)).toBe(0);
+    p = play(p, 'rechnen');
+    expect(learnLeft(GAME_BY_ID.schlange, p, s)).toBe(1);
+    p = play(p, 'vier');
+    expect(learnLeft(GAME_BY_ID.schlange, p, s)).toBe(0);
+    expect(learnLeft(GAME_BY_ID.pong, p, s)).toBe(0);
+  });
+
+  it('zählt jeden Tag neu und lässt sich ausschalten', () => {
+    let p = newProfile({ name: 'Kluge Eule', avatar: 'eule', color: '#DCE9F3', age: 2 });
+    p = { ...p, learnDay: { date: '2020-01-01', count: 5 } };
+    expect(learnedToday(p)).toBe(0);
+    expect(learnLeft(GAME_BY_ID.g2048, p, settings(3))).toBe(3);
+    p = play(p, 'uhr');
+    expect(p.learnDay).toEqual({ date: dayKey(), count: 1 });
+    expect(learnLeft(GAME_BY_ID.g2048, p, settings(0))).toBe(0);
+    expect(arcadeAfter(settings())).toBe(ARCADE_AFTER_DEFAULT);
   });
 });

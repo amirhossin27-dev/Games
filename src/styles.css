@@ -971,6 +971,42 @@ p {
   padding: 0 4px;
 }
 
+/* Erst lernen, dann spielen: gesperrte Arcade-Spiele */
+.game-card-art {
+  position: relative;
+  display: block;
+}
+
+.game-card.locked .game-card-art > .game-art {
+  filter: grayscale(0.75);
+  opacity: 0.55;
+}
+
+.lock-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--butter);
+  border: 2px solid var(--ink);
+  box-shadow: 2px 3px 0 var(--ink);
+}
+
+.lock-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--terra-d);
+}
+
 .dots {
   display: flex;
   gap: 6px;

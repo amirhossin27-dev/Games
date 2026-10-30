@@ -106,6 +106,8 @@ export interface PlayResult {
   /** Richtige Antworten in Lernspielen */
   correct?: number;
   subject?: Subject;
+  /** Lernspiel – zählt fürs Freischalten der Arcade-Spiele */
+  learn?: boolean;
 }
 
 export interface RecordOutcome {
@@ -153,6 +155,9 @@ export function applyResult(p: Profile, r: PlayResult): { profile: Profile; out:
     dailyDone = true;
   }
 
+  const learnDay = p.learnDay.date === today ? { ...p.learnDay } : { date: today, count: 0 };
+  if (r.learn) learnDay.count++;
+
   const gained = r.stars + bonus;
   const week = p.week.id === weekKey() ? { ...p.week, stars: p.week.stars + gained } : { id: weekKey(), stars: gained };
   const next: Profile = {
@@ -160,6 +165,7 @@ export function applyResult(p: Profile, r: PlayResult): { profile: Profile; out:
     stars: p.stars + gained,
     week,
     daily,
+    learnDay,
     counters,
     games: { ...p.games, [r.game]: { played: stat.played + 1, won: stat.won + (r.won ? 1 : 0), best, stars: Math.max(stat.stars, r.stars) } },
   };

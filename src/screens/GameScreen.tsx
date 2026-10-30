@@ -5,8 +5,9 @@ import { GameView } from '../games/play';
 import { GAME_BY_ID, type GameMeta } from '../games/registry';
 import { nav, type Session } from '../lib/nav';
 import { levelOf, recordResults, starsForPlace, starsForRatio, starsForScore, type PlayResult, type RecordOutcome } from '../lib/progress';
-import { actions, useData, type Profile } from '../lib/store';
+import { actions, useData, type Profile, type Settings } from '../lib/store';
 import { speakIfAuto, stopSpeaking } from '../lib/speech';
+import { arcadeAfter, isLearnGame, learnedToday, learnText } from '../lib/unlock';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
@@ -69,6 +70,7 @@ export function GameScreen({ session, net, online }: { session: Session; net?: N
         lowerIsBetter: meta.lowerIsBetter,
         correct: o.correct?.[i],
         subject: meta.subject,
+        learn: isLearnGame(meta),
       });
     });
     const records = recordResults(results);
@@ -128,6 +130,7 @@ export function GameScreen({ session, net, online }: { session: Session; net?: N
           meta={meta}
           result={result}
           profiles={data.profiles}
+          settings={data.settings}
           onAgain={again}
           onClose={online ? (online.host ? online.lobby : online.leave) : close}
           best={best.current}
@@ -143,6 +146,7 @@ function ResultCard({
   meta,
   result,
   profiles,
+  settings,
   onAgain,
   onClose,
   best,
@@ -152,6 +156,7 @@ function ResultCard({
   meta: GameMeta;
   result: Result;
   profiles: Profile[];
+  settings: Settings;
   onAgain: () => void;
   onClose: () => void;
   best?: number;
@@ -185,6 +190,17 @@ function ResultCard({
     sayRef.current = true;
     window.setTimeout(() => speakIfAuto(title), 200);
   }
+
+  // Erst lernen, dann spielen: zeigen, wie weit es bis zu den Arcade-Spielen ist
+  const need = arcadeAfter(settings);
+  const unlockNote = (id: string) => {
+    const p = profiles.find((x) => x.id === id);
+    if (!need || !p || !isLearnGame(meta)) return null;
+    const done = learnedToday(p);
+    if (done === need) return <b>Arcade-Spiele freigeschaltet!</b>;
+    if (done < need) return `Arcade-Spiele: ${learnText(need - done)}`;
+    return null;
+  };
 
   const heights = [96, 72, 54, 40];
   const blockColor = ['#F2C94C', '#DCE9F3', '#F6E1D8', '#EFE6D4'];
@@ -238,6 +254,7 @@ function ResultCard({
                   {result.records[s.profileId]?.levelUp ? 'Neues Level! ' : ''}
                   {result.records[s.profileId]?.earned.map((b) => `Abzeichen: ${b.name}`).join(' · ')}
                 </div>
+                {unlockNote(s.profileId) && <div className="small">{unlockNote(s.profileId)}</div>}
               </div>
               <Stars n={stars[i]} size={22} />
             </div>

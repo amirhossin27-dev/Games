@@ -1,10 +1,12 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { SeatInfo } from '../engine/game';
 import { isOnlineGame } from '../games/defs';
 import { CATEGORY, GAME_BY_ID, playersText, type GameId, type GameMeta } from '../games/registry';
 import { ANIMALS } from '../lib/names';
 import { nav } from '../lib/nav';
+import { speakIfAuto } from '../lib/speech';
 import { LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
+import { arcadeAfter, learnedToday, learnLeft, learnText } from '../lib/unlock';
 import { pick } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
@@ -129,6 +131,12 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
   const stat = profile.games[id];
   const seen = profile.tutorials.includes(id) || profile.skipped.includes(id);
   const sub = LEVEL_SUB[id];
+  // Erst lernen, dann spielen
+  const left = learnLeft(meta, profile, data.settings);
+  const lockText = `${meta.name} ist frei, sobald du heute ${learnText(left)} gespielt hast.`;
+  useEffect(() => {
+    if (left > 0) speakIfAuto(`Erst lernen, dann spielen! ${lockText}`);
+  }, []);
 
   const start = (seats: SeatInfo[]) => {
     setSetup(null);
@@ -200,33 +208,49 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
         </div>
       )}
 
-      <div className="field">
-        <span className="field-label">Wie willst du spielen?</span>
-        <div className="mode-grid">
-          {canSolo && (
-            <ModeTile icon="user" title="Allein" sub={stat?.best !== undefined ? `Rekord: ${stat.best} ${meta.scoreLabel ?? ''}` : 'Übe in Ruhe'} main={!canRobo} onClick={() => start([seatOf(profile)])} />
-          )}
-          {canRobo && (
-            <ModeTile
-              icon="robot"
-              title="Gegen Robo"
-              sub={max > 2 ? 'Robo spielt mit – bis zu 3' : 'Robo passt sich an'}
-              main
-              onClick={() => (max > 2 ? setSetup('robo') : start([seatOf(profile), roboSeat(0)]))}
-            />
-          )}
-          {canTogether && <ModeTile icon="device" title="Zusammen" sub={`${Math.max(2, min)}–${max} Kinder an einem Gerät`} onClick={() => setSetup('together')} />}
-          {canTogether && (
-            <ModeTile
-              icon="globe"
-              title="Online"
-              sub={isOnlineGame(id) ? 'Jedes Kind am eigenen Gerät' : 'Für dieses Spiel noch nicht'}
-              disabled={!isOnlineGame(id)}
-              onClick={() => nav.go({ name: 'rooms', preset: id })}
-            />
-          )}
+      {left > 0 ? (
+        <div className="card stitched col" style={{ alignItems: 'center', textAlign: 'center' }} role="status">
+          <Joy size={70} mood="talk" />
+          <h2>Erst lernen, dann spielen!</h2>
+          <p>{lockText}</p>
+          <div className="dots" style={{ justifyContent: 'center' }} aria-label={`${learnedToday(profile)} von ${arcadeAfter(data.settings)} Lernspielen`}>
+            {Array.from({ length: Math.min(arcadeAfter(data.settings), 10) }, (_, i) => (
+              <span key={i} className={i < learnedToday(profile) ? 'on' : ''} />
+            ))}
+          </div>
+          <button type="button" className="btn primary block" onClick={() => nav.go({ name: 'home' })}>
+            Zu den Lernspielen
+          </button>
         </div>
-      </div>
+      ) : (
+        <div className="field">
+          <span className="field-label">Wie willst du spielen?</span>
+          <div className="mode-grid">
+            {canSolo && (
+              <ModeTile icon="user" title="Allein" sub={stat?.best !== undefined ? `Rekord: ${stat.best} ${meta.scoreLabel ?? ''}` : 'Übe in Ruhe'} main={!canRobo} onClick={() => start([seatOf(profile)])} />
+            )}
+            {canRobo && (
+              <ModeTile
+                icon="robot"
+                title="Gegen Robo"
+                sub={max > 2 ? 'Robo spielt mit – bis zu 3' : 'Robo passt sich an'}
+                main
+                onClick={() => (max > 2 ? setSetup('robo') : start([seatOf(profile), roboSeat(0)]))}
+              />
+            )}
+            {canTogether && <ModeTile icon="device" title="Zusammen" sub={`${Math.max(2, min)}–${max} Kinder an einem Gerät`} onClick={() => setSetup('together')} />}
+            {canTogether && (
+              <ModeTile
+                icon="globe"
+                title="Online"
+                sub={isOnlineGame(id) ? 'Jedes Kind am eigenen Gerät' : 'Für dieses Spiel noch nicht'}
+                disabled={!isOnlineGame(id)}
+                onClick={() => nav.go({ name: 'rooms', preset: id })}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       {setup && <SetupSheet meta={meta} me={profile} profiles={data.profiles} robosOnly={setup === 'robo'} onStart={start} onClose={() => setSetup(null)} />}
     </section>

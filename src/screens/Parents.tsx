@@ -3,6 +3,7 @@ import { nav } from '../lib/nav';
 import { checkParentPassword, checkRecoveryCode, PASSWORD_MIN, setParentPassword } from '../lib/parent';
 import { LIMIT_CHOICES, LOCK_MS, nowMs, playActions, usePlaytime } from '../lib/playtime';
 import { actions, useData, type Settings } from '../lib/store';
+import { ARCADE_AFTER_CHOICES, arcadeAfter, learnedToday } from '../lib/unlock';
 import { formatClock } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
@@ -191,6 +192,42 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <p className="small muted">Tipp: Lass Datum und Uhrzeit am Gerät automatisch einstellen. Joyboy gleicht die Zeit zusätzlich über das Internet ab.</p>
+      </section>
+
+      <section className="card col" aria-label="Erst lernen, dann spielen">
+        <div className="row">
+          <Icon name="lock" size={26} />
+          <h2 className="grow">Erst lernen, dann spielen</h2>
+        </div>
+        <p className="small">
+          Die Arcade-Spiele (Schlange, 2048, Pong-Duell und Co.) sind jeden Tag erst frei, wenn das Kind <b>so viele Lern- und Brettspiele</b> zu Ende gespielt hat. Um Mitternacht beginnt die Zählung neu.
+        </p>
+        <div className="limit-grid" role="group" aria-label="Lernspiele bis zu den Arcade-Spielen">
+          <button type="button" aria-pressed={arcadeAfter(data.settings) === 0} onClick={() => set({ arcadeAfter: 0 })}>
+            Aus
+          </button>
+          {ARCADE_AFTER_CHOICES.map((n) => (
+            <button key={n} type="button" aria-pressed={arcadeAfter(data.settings) === n} onClick={() => set({ arcadeAfter: n })}>
+              {n}
+              <small>{n === 1 ? 'Lernspiel' : 'Lernspiele'}</small>
+            </button>
+          ))}
+        </div>
+        {arcadeAfter(data.settings) > 0 && data.profiles.length > 0 && (
+          <div className="card stitched col" style={{ gap: 6, padding: 12 }}>
+            {data.profiles.map((p) => {
+              const done = learnedToday(p);
+              const need = arcadeAfter(data.settings);
+              return (
+                <div key={p.id} className="row">
+                  <Avatar kind={p.avatar} size={30} bg={p.color} />
+                  <span className="grow">{p.name}</span>
+                  <span className="small">{done >= need ? <b>frei</b> : `heute ${done} von ${need}`}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       <section className="card col" aria-label="Einstellungen">
