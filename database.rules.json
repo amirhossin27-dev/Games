@@ -1,0 +1,40 @@
+{
+  "rules": {
+    "profiles": {
+      "$uid": {
+        "public": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['name', 'avatar', 'at']) && newData.child('name').isString() && newData.child('name').val().length <= 16 && newData.child('avatar').isString() && newData.child('avatar').val().length <= 12"
+        },
+        "private": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.isString() && newData.val().length <= 100000"
+        },
+        "$other": { ".validate": false }
+      }
+    },
+    "rooms": {
+      "$code": {
+        ".read": "auth != null && $code.matches(/^[0-9a-f]{4}$/)",
+        ".write": "auth != null && $code.matches(/^[0-9a-f]{4}$/) && (!data.child('info').exists() || data.child('info/at').val() < now - 7200000)",
+        "info": {
+          ".write": "auth != null && data.exists() && (data.child('host').val() === auth.uid || (root.child('rooms/' + $code + '/seats/' + auth.uid).exists() && (!root.child('rooms/' + $code + '/seats/' + data.child('host').val()).exists() || root.child('rooms/' + $code + '/seats/' + data.child('host').val() + '/at').val() < now - 20000)))",
+          ".validate": "newData.hasChildren(['host', 'game', 'status', 'at']) && newData.child('host').val() === auth.uid && newData.child('at').val() <= now"
+        },
+        "seats": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/' + $code + '/info').exists()",
+            ".validate": "newData.hasChildren(['name', 'avatar', 'at']) && newData.child('name').isString() && newData.child('name').val().length <= 16 && newData.child('at').val() <= now"
+          }
+        },
+        "state": {
+          ".write": "auth != null && root.child('rooms/' + $code + '/info/host').val() === auth.uid",
+          ".validate": "newData.hasChildren(['seq', 'st']) && newData.child('seq').isNumber() && newData.child('st').isString() && newData.child('st').val().length <= 65536"
+        },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

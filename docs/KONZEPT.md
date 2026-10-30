@@ -290,5 +290,5 @@ Jede Phase endet mit Tests und einer veröffentlichten Version, die du auf dem H
 
 ## 10. Was noch offen ist
 
-1. **Firebase für Phase 3:** Für Online-Spielzimmer und Cloud-Spielstände braucht Joyboy ein eigenes, kostenloses Firebase-Projekt (Realtime Database + anonyme Anmeldung). Danach brauche ich nur die Datenbank-Adresse und den Web-API-Key.
+1. **Firebase für Phase 3:** Für Online-Spielzimmer und Cloud-Spielstände braucht Joyboy ein eigenes, kostenloses Firebase-Projekt (Realtime Database + anonyme Anmeldung). Anleitung: [`FIREBASE.md`](FIREBASE.md), Regeln: [`database.rules.json`](../database.rules.json). Danach brauche ich nur die Datenbank-Adresse und den Web-API-Key.
 2. **Main-Branch:** Die App wird aktuell vom Entwicklungs-Branch veröffentlicht. Sobald es einen `main`-Branch gibt (z. B. per Pull Request), veröffentlicht der Workflow auch von dort.
