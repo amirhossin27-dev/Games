@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 /** Illustrationen der Spiele im Papierwelt-Stil. Arcade-Spiele bekommen ein großes Bild-Symbol. */
-export type ArtKind = 'rechnen' | 'buchstaben' | 'uhr' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'slf' | { emoji: string; bg: string };
+export type ArtKind = 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'slf' | { emoji: string; bg: string };
 
 const C = { sky: '#6FA8D6', plum: '#8E6BA8', terra: '#D9774F', butter: '#F2C94C', sage: '#5E9C6B', peach: '#E58F7A', ink: '#2D3A31', paper: '#FFFDF8' };
 
@@ -9,6 +9,9 @@ const BG: Record<string, string> = {
   rechnen: '#DCE9F3',
   buchstaben: '#DDEBDD',
   uhr: '#F3E4D3',
+  welt: '#DCE9F3',
+  woerter: '#F7EDC8',
+  englisch: '#E9E1F0',
   paare: '#F6E1D8',
   vier: '#E9E1F0',
   ttt: '#DCE9F3',
@@ -66,6 +69,35 @@ function art(kind: Exclude<ArtKind, object>): ReactNode {
           <path d="M80 55 H100" fill="none" stroke={C.plum} strokeWidth="6" strokeLinecap="round" />
           <path d="M80 55 V27" fill="none" stroke={C.sky} strokeWidth="4" strokeLinecap="round" />
           <circle cx="80" cy="55" r="5" fill={C.ink} />
+        </>
+      );
+    case 'welt':
+      return (
+        <>
+          <circle cx="76" cy="56" r="40" fill={C.sky} stroke={C.ink} strokeWidth="2.5" />
+          <path d="M50 34 Q62 26 70 36 T66 56 Q58 64 50 56 Q42 46 50 34 Z M84 26 Q100 30 104 44 Q96 50 88 44 Q80 38 84 26 Z M78 66 Q94 60 104 70 Q96 88 82 88 Q72 80 78 66 Z" fill={C.sage} stroke={C.ink} strokeWidth="1.5" />
+          <ellipse cx="76" cy="56" rx="54" ry="13" fill="none" stroke={C.butter} strokeWidth="4" transform="rotate(-18 76 56)" />
+          <polygon points={STAR} transform="translate(24 22)" fill={C.butter} stroke={C.ink} strokeWidth="1.2" />
+        </>
+      );
+    case 'woerter':
+      return (
+        <>
+          <Tile x={14} y={60} w={32} h={34} fill={C.terra} text="W" size={22} />
+          <Tile x={50} y={60} w={32} h={34} fill={C.sky} text="O" size={22} />
+          <Tile x={86} y={60} w={32} h={34} fill={C.sage} text="R" size={22} />
+          <rect x="122" y="60" width="32" height="34" rx="9" fill="none" stroke={C.ink} strokeWidth="2" strokeDasharray="5 4" />
+          <Tile x={92} y={8} w={32} h={34} fill={C.plum} text="T" size={22} rotate={-12} />
+          <path d="M124 30 Q138 32 138 52" fill="none" stroke={C.ink} strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M133 47 L138 54 L143 47" fill="none" stroke={C.ink} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      );
+    case 'englisch':
+      return (
+        <>
+          <path d="M22 18 H118 Q128 18 128 28 V66 Q128 76 118 76 H62 L44 92 L48 76 H32 Q22 76 22 66 V28 Q22 18 32 18 Z" fill={C.paper} stroke={C.ink} strokeWidth="2.5" strokeLinejoin="round" />
+          <text x="75" y="58" textAnchor="middle" fontSize="30" fontWeight="800" fontFamily={FONT} fill={C.plum}>Hello!</text>
+          <Tile x={118} y={66} w={34} h={34} fill={C.terra} text="en" size={18} rotate={8} />
         </>
       );
     case 'paare':

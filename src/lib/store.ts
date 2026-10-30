@@ -32,6 +32,9 @@ export interface Counters {
   math: number;
   letters: number;
   clock: number;
+  world: number;
+  words: number;
+  english: number;
   /** Spiele mit anderen Kindern */
   together: number;
   /** Siege in Logik-Spielen */
@@ -101,7 +104,7 @@ export interface AppData {
 
 const KEY = 'joyboy:data:v1';
 
-export const emptyCounters = (): Counters => ({ math: 0, letters: 0, clock: 0, together: 0, logicWins: 0, records: 0, dailyDone: 0 });
+export const emptyCounters = (): Counters => ({ math: 0, letters: 0, clock: 0, world: 0, words: 0, english: 0, together: 0, logicWins: 0, records: 0, dailyDone: 0 });
 
 export function newProfile(p: Pick<Profile, 'name' | 'avatar' | 'color' | 'age'>): Profile {
   return {

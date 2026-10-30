@@ -25,7 +25,7 @@ export function levelOf(stars: number): LevelInfo {
 
 // ───── Abzeichen ─────
 
-export type BadgeIcon = 'math' | 'letters' | 'clock' | 'cards' | 'book' | 'users' | 'star' | 'trophy' | 'flame';
+export type BadgeIcon = 'math' | 'letters' | 'clock' | 'globe' | 'pencil' | 'sparkle' | 'cards' | 'book' | 'users' | 'star' | 'trophy' | 'flame';
 
 export interface Badge {
   id: string;
@@ -41,6 +41,9 @@ export const BADGES: Badge[] = [
   { id: 'rechen-profi', name: 'Rechen-Profi', text: '50 Rechenaufgaben richtig', icon: 'math', color: '#2F6E9E', need: 50, have: (p) => p.counters.math },
   { id: 'wort-zauberer', name: 'Wort-Zauberer', text: '40 Buchstaben-Aufgaben richtig', icon: 'letters', color: '#8A2F5A', need: 40, have: (p) => p.counters.letters },
   { id: 'uhr-meister', name: 'Uhr-Meister', text: '30 Uhrzeiten richtig gelesen', icon: 'clock', color: '#B5532E', need: 30, have: (p) => p.counters.clock },
+  { id: 'welt-entdecker', name: 'Welt-Entdecker', text: '40 Fragen im Welt-Quiz richtig', icon: 'globe', color: '#6B5410', need: 40, have: (p) => p.counters.world },
+  { id: 'wort-architekt', name: 'Wort-Architekt', text: '40 Wörter richtig gebaut', icon: 'pencil', color: '#8F3E1F', need: 40, have: (p) => p.counters.words },
+  { id: 'english-star', name: 'English Star', text: '40 englische Wörter richtig', icon: 'sparkle', color: '#2F5F86', need: 40, have: (p) => p.counters.english },
   { id: 'gedaechtnis-ass', name: 'Gedächtnis-Ass', text: '10-mal Paare finden gespielt', icon: 'cards', color: '#417A4D', need: 10, have: (p) => p.games.paare?.played ?? 0 },
   { id: 'regel-kenner', name: 'Regel-Kenner', text: '5 Spielregeln gelernt', icon: 'book', color: '#6B5410', need: 5, have: (p) => p.tutorials.length },
   { id: 'teamplayer', name: 'Teamplayer', text: '10 Spiele mit anderen Kindern', icon: 'users', color: '#6E4C86', need: 10, have: (p) => p.counters.together },
@@ -89,7 +92,7 @@ export function dailyOf(p: Profile): { task: DailyTask; progress: number; done: 
 
 // ───── Ergebnis eintragen ─────
 
-export type Subject = 'math' | 'letters' | 'clock';
+export type Subject = 'math' | 'letters' | 'clock' | 'world' | 'words' | 'english';
 
 export interface PlayResult {
   profileId: string;

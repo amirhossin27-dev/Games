@@ -1,7 +1,11 @@
 import type { Level } from '../lib/store';
 import { pick, shuffle, type Rnd } from '../lib/util';
+import { int, withOptions } from './choice';
+import { englishTask } from './english';
+import { wordTask } from './words';
+import { worldTask } from './world';
 
-/** Eine Aufgabe mit vier Antworten – für Rechen-Rallye, Buchstaben-Jagd und Uhr-Profi. */
+/** Eine Aufgabe mit vier Antworten – für alle Lernspiele. */
 export interface Task {
   /** Großer Text der Aufgabe, z. B. „8 + 5 = ?“ */
   prompt: string;
@@ -14,22 +18,18 @@ export interface Task {
   explain?: string;
   /** Antworten sind Bilder (groß darstellen) */
   pictures?: boolean;
+  /** Kleine Anleitung über der Aufgabe, z. B. „Welche Silbe fehlt?“ */
+  hint?: string;
 }
 
 export type Visual =
   | { k: 'tenframe'; a: number; b: number; minus: boolean }
   | { k: 'picture'; e: string; word?: string }
-  | { k: 'clock'; h: number; m: number };
+  | { k: 'clock'; h: number; m: number }
+  /** Buchstaben oder Silben als Kärtchen, die zum Wort geordnet werden */
+  | { k: 'tiles'; parts: string[]; e?: string };
 
-export type Subject = 'rechnen' | 'buchstaben' | 'uhr';
-
-function withOptions(correct: string, distractors: string[], rnd: Rnd) {
-  const unique = [...new Set(distractors.filter((d) => d !== correct))].slice(0, 3);
-  const options = shuffle([correct, ...unique], rnd);
-  return { options, correct: options.indexOf(correct) };
-}
-
-const int = (min: number, max: number, rnd: Rnd) => min + Math.floor(rnd() * (max - min + 1));
+export type Subject = 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch';
 
 // ───── Rechnen ─────
 
@@ -213,6 +213,15 @@ export function clockTask(level: Level, rnd: Rnd = Math.random): Task {
   };
 }
 
+const MAKERS: Record<Subject, (level: Level, rnd: Rnd) => Task> = {
+  rechnen: mathTask,
+  buchstaben: letterTask,
+  uhr: clockTask,
+  welt: worldTask,
+  woerter: wordTask,
+  englisch: englishTask,
+};
+
 export function makeTask(subject: Subject, level: Level, rnd: Rnd = Math.random): Task {
-  return subject === 'rechnen' ? mathTask(level, rnd) : subject === 'buchstaben' ? letterTask(level, rnd) : clockTask(level, rnd);
+  return MAKERS[subject](level, rnd);
 }

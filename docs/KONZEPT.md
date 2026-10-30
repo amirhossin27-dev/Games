@@ -1,6 +1,6 @@
 # Joyboy – Konzept & Umsetzungsplan
 
-> **Status:** Freigegeben. Phase 1, 2 und 3 sind umgesetzt (siehe Abschnitt 9). Als Nächstes: Phase 4 (Ausbau).
+> **Status:** Freigegeben. Phase 1, 2 und 3 sind umgesetzt (siehe Abschnitt 9). Phase 4 (Ausbau) läuft: Die drei neuen Lernspiele sind fertig.
 > **Designvorschläge:** [Design-Leinwand „Joyboy Designkonzepte“](https://claude.ai/artifact/VLqZ1nyDz3JxvtXe7zGeB6) – gewählt wurde **Richtung C „Papierwelt“**.
 
 ## Entscheidungen (Freigabe)
@@ -282,7 +282,7 @@ Ein Hook `useGame(def, …)` macht daraus – wie `useTurnGame` in Arta – auto
 | **1 – Fundament** ✅ | PWA-Gerüst, Veröffentlichung über GitHub Pages, Design-System „Papierwelt“, Willkommen (Name, Avatar, Alter), „Wer spielt?“, Start, Spiel-Seite, Ich-Seite, Tutorial-Engine, Vorlesen, Elternbereich mit Spielzeit-Limit | App lässt sich auf iPhone und Android installieren |
 | **2 – Spiele offline** ✅ | Engine für 1–4 Spieler, Robo, Aufgaben-Engine. Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken, Stadt-Land-Fluss und 15 Arcade-Spiele – jeweils mit Tutorial | Spielbar allein, gegen Robo und an einem Gerät |
 | **3 – Online** ✅ | Firebase-Anbindung, Spielzimmer mit Tier-Code, Klingel, Live-Sync für 4 Plätze, Herzschlag, Robo-Einspringen, Gastgeber-Wechsel, Fortsetzen, Cloud-Profile, Spielerpass, Rangliste mit Spielfreunden | 4 Kinder spielen live zusammen |
-| **4 – Ausbau** | Weitere Spiele aus Arta (Schach, Dame, Mühle, Wer ist es?, Farbwechsel, Bewegungs-Würfel), Wettkampf-Modus für die Arcade-Spiele, Welt-Quiz, Wort-Baumeister, English Words | Voller Katalog |
+| **4 – Ausbau** | ✅ Welt-Quiz, Wort-Baumeister, English Words. Offen: Mühle und Dame, später Schach (dazu Wer ist es?, Farbwechsel, Bewegungs-Würfel), Wettkampf-Modus für die Arcade-Spiele | Voller Katalog |
 
 Jede Phase endet mit Tests und einer veröffentlichten Version, die du auf dem Handy ausprobieren kannst.
 

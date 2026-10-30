@@ -58,6 +58,9 @@ export function GameView({ id, props }: { id: GameId; props: PlayProps }) {
     case 'rechnen':
     case 'buchstaben':
     case 'uhr':
+    case 'welt':
+    case 'woerter':
+    case 'englisch':
       return <Quiz {...props} subject={id} />;
     case 'paare':
       return <Memory {...props} />;

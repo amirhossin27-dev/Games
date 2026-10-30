@@ -1,0 +1,132 @@
+import type { Level } from '../lib/store';
+import { pick, shuffle, type Rnd } from '../lib/util';
+import { withOptions, type BankItem } from './choice';
+import type { Task } from './tasks';
+
+/**
+ * Welt-Quiz: Tiere, Natur, Körper, Länder, Flaggen und Weltall.
+ * Leicht wird mit Bildern geantwortet, Mittel und Schwer mit Wörtern.
+ */
+
+/** Leicht: Antworten sind Bilder */
+export const WORLD_EASY: BankItem[] = [
+  { q: 'Welches Tier macht Muh?', a: '🐮', w: ['🐶', '🐷', '🐑'], x: 'Die Kuh macht Muh.' },
+  { q: 'Welches Tier bellt?', a: '🐶', w: ['🐱', '🐮', '🐔'], x: 'Der Hund bellt: Wau wau!' },
+  { q: 'Welches Tier miaut?', a: '🐱', w: ['🐶', '🐷', '🐸'], x: 'Die Katze macht Miau.' },
+  { q: 'Welches Tier kann fliegen?', a: '🐦', w: ['🐟', '🐢', '🐘'], x: 'Vögel haben Flügel und können fliegen.' },
+  { q: 'Wer lebt im Wasser?', a: '🐟', w: ['🐄', '🦒', '🐿️'], x: 'Fische leben im Wasser und atmen mit Kiemen.' },
+  { q: 'Welches Tier hat einen Rüssel?', a: '🐘', w: ['🦒', '🦓', '🐻'], x: 'Der Elefant hat einen langen Rüssel.' },
+  { q: 'Welches Tier hat einen langen Hals?', a: '🦒', w: ['🐷', '🐻', '🐸'], x: 'Die Giraffe hat den längsten Hals.' },
+  { q: 'Welches Tier hat Streifen?', a: '🦓', w: ['🐘', '🐻', '🐷'], x: 'Das Zebra hat schwarze und weiße Streifen.' },
+  { q: 'Welches Tier legt Eier?', a: '🐔', w: ['🐶', '🐱', '🐮'], x: 'Das Huhn legt Eier.' },
+  { q: 'Wer gibt uns Wolle?', a: '🐑', w: ['🐷', '🐔', '🐟'], x: 'Aus dem Fell vom Schaf macht man Wolle.' },
+  { q: 'Wer wohnt im Bienenstock?', a: '🐝', w: ['🐞', '🦋', '🐜'], x: 'Bienen wohnen im Bienenstock und machen Honig.' },
+  { q: 'Welches Tier ist am größten?', a: '🐘', w: ['🐭', '🐱', '🐰'], x: 'Der Elefant ist viel größer als Maus, Katze und Hase.' },
+  { q: 'Welches Tier ist sehr langsam?', a: '🐌', w: ['🐆', '🐇', '🐎'], x: 'Die Schnecke kriecht ganz langsam.' },
+  { q: 'Welches Tier hat acht Arme?', a: '🐙', w: ['🐟', '🐬', '🐳'], x: 'Der Krake hat acht Arme.' },
+  { q: 'Welches Tier hat einen Panzer?', a: '🐢', w: ['🐍', '🐸', '🐇'], x: 'Die Schildkröte trägt ihren Panzer immer mit.' },
+  { q: 'Wer baut ein Netz?', a: '🕷️', w: ['🐝', '🐞', '🐛'], x: 'Die Spinne baut ein Netz und fängt damit Fliegen.' },
+  { q: 'Woraus wird ein Schmetterling?', a: '🐛', w: ['🐟', '🐣', '🐸'], x: 'Aus der Raupe wird ein Schmetterling.' },
+  { q: 'Was ist ein Gemüse?', a: '🥕', w: ['🍌', '🍓', '🍰'], x: 'Die Möhre ist ein Gemüse.' },
+  { q: 'Was ist ein Obst?', a: '🍌', w: ['🥕', '🥦', '🧀'], x: 'Die Banane ist ein Obst.' },
+  { q: 'Was wächst an einem Baum?', a: '🍎', w: ['🥕', '🥔', '🧅'], x: 'Äpfel wachsen am Apfelbaum.' },
+  { q: 'Was ist kalt?', a: '🧊', w: ['🔥', '☀️', '☕'], x: 'Eis ist kalt.' },
+  { q: 'Was brauchst du bei Regen?', a: '☂️', w: ['🕶️', '🩴', '🪁'], x: 'Der Regenschirm hält dich trocken.' },
+  { q: 'Was trägst du im Winter?', a: '🧤', w: ['🩳', '👙', '🩴'], x: 'Handschuhe halten im Winter die Hände warm.' },
+  { q: 'Was fällt im Winter vom Himmel?', a: '❄️', w: ['🍂', '🌸', '☀️'], x: 'Im Winter schneit es.' },
+  { q: 'Was leuchtet nachts am Himmel?', a: '🌙', w: ['☀️', '🌈', '☁️'], x: 'Nachts siehst du den Mond und die Sterne.' },
+  { q: 'Was siehst du nach dem Regen, wenn die Sonne scheint?', a: '🌈', w: ['⛄', '🌙', '⚡'], x: 'Regen und Sonne zusammen machen einen Regenbogen.' },
+  { q: 'Was braucht eine Pflanze zum Leben?', a: '💧', w: ['🍫', '🧸', '📱'], x: 'Pflanzen brauchen Wasser, Licht und Erde.' },
+  { q: 'Womit siehst du?', a: '👀', w: ['👂', '👃', '👄'], x: 'Mit den Augen siehst du.' },
+  { q: 'Womit hörst du?', a: '👂', w: ['👀', '👃', '✋'], x: 'Mit den Ohren hörst du.' },
+  { q: 'Womit riechst du?', a: '👃', w: ['👂', '👀', '🦶'], x: 'Mit der Nase riechst du.' },
+  { q: 'Womit schmeckst du?', a: '👅', w: ['👂', '👀', '✋'], x: 'Mit der Zunge schmeckst du süß, sauer und salzig.' },
+];
+
+/** Mittel: Tiere, Natur, Körper */
+export const WORLD_MEDIUM: BankItem[] = [
+  { q: 'Wie viele Beine hat eine Spinne?', e: '🕷️', a: '8', w: ['6', '4', '10'], x: 'Spinnen haben 8 Beine, Insekten nur 6.' },
+  { q: 'Wie viele Beine hat ein Käfer?', e: '🐞', a: '6', w: ['8', '4', '2'], x: 'Käfer sind Insekten. Insekten haben 6 Beine.' },
+  { q: 'Wie viele Beine hat ein Vogel?', e: '🐦', a: '2', w: ['4', '6', '8'], x: 'Vögel stehen auf 2 Beinen.' },
+  { q: 'Was ist ein Wal?', e: '🐳', a: 'Säugetier', w: ['Fisch', 'Vogel', 'Reptil'], x: 'Wale atmen Luft und die Babys trinken Milch – wie bei uns.' },
+  { q: 'Welcher Vogel kann nicht fliegen?', e: '🐦', a: 'Pinguin', w: ['Adler', 'Spatz', 'Taube'], x: 'Pinguine können nicht fliegen, aber super schwimmen.' },
+  { q: 'Welches Tier ist das schnellste an Land?', e: '🏃', a: 'Gepard', w: ['Löwe', 'Pferd', 'Hase'], x: 'Der Gepard schafft über 100 Kilometer pro Stunde.' },
+  { q: 'Was macht der Igel im Winter?', e: '🦔', a: 'Winterschlaf', w: ['Urlaub', 'Schwimmen', 'Nester bauen'], x: 'Der Igel schläft im Winter unter Laub.' },
+  { q: 'Wie heißt ein Hunde-Baby?', e: '🐶', a: 'Welpe', w: ['Kalb', 'Fohlen', 'Küken'], x: 'Ein junger Hund heißt Welpe.' },
+  { q: 'Wie heißt ein Pferde-Baby?', e: '🐴', a: 'Fohlen', w: ['Welpe', 'Ferkel', 'Lamm'], x: 'Ein junges Pferd heißt Fohlen.' },
+  { q: 'Wie heißt ein Kuh-Baby?', e: '🐮', a: 'Kalb', w: ['Fohlen', 'Ferkel', 'Lamm'], x: 'Ein junges Rind heißt Kalb.' },
+  { q: 'Wie heißt ein Schweine-Baby?', e: '🐷', a: 'Ferkel', w: ['Kalb', 'Welpe', 'Küken'], x: 'Ein junges Schwein heißt Ferkel.' },
+  { q: 'Was fressen Kühe?', e: '🐮', a: 'Gras', w: ['Fleisch', 'Fisch', 'Nüsse'], x: 'Kühe sind Pflanzenfresser und fressen Gras und Heu.' },
+  { q: 'Was machen Bienen?', e: '🐝', a: 'Honig', w: ['Milch', 'Zucker', 'Saft'], x: 'Bienen sammeln Nektar aus Blüten und machen daraus Honig.' },
+  { q: 'Woraus wird ein Schmetterling?', e: '🦋', a: 'Raupe', w: ['Wurm', 'Käfer', 'Kaulquappe'], x: 'Die Raupe verpuppt sich und wird zum Schmetterling.' },
+  { q: 'Aus einer Kaulquappe wird ein …', e: '💧', a: 'Frosch', w: ['Fisch', 'Schmetterling', 'Vogel'], x: 'Kaulquappen wachsen Beine, dann werden sie Frösche.' },
+  { q: 'Wo legt der Frosch seine Eier ab?', e: '🐸', a: 'im Wasser', w: ['im Baum', 'in der Erde', 'im Nest'], x: 'Froschlaich schwimmt im Teich.' },
+  { q: 'Welche Farbe entsteht aus Blau und Gelb?', e: '🎨', a: 'Grün', w: ['Lila', 'Orange', 'Braun'], x: 'Blau und Gelb gemischt ergibt Grün.' },
+  { q: 'Welche Farbe entsteht aus Rot und Gelb?', e: '🎨', a: 'Orange', w: ['Grün', 'Lila', 'Rosa'], x: 'Rot und Gelb gemischt ergibt Orange.' },
+  { q: 'Wie viele Tage hat eine Woche?', e: '📅', a: '7', w: ['5', '6', '10'], x: 'Montag bis Sonntag sind 7 Tage.' },
+  { q: 'Wie viele Monate hat ein Jahr?', e: '📅', a: '12', w: ['10', '11', '24'], x: 'Januar bis Dezember sind 12 Monate.' },
+  { q: 'Welche Jahreszeit kommt nach dem Winter?', e: '🌷', a: 'Frühling', w: ['Sommer', 'Herbst', 'Winter'], x: 'Frühling, Sommer, Herbst, Winter – dann wieder Frühling.' },
+  { q: 'In welcher Jahreszeit fallen die Blätter?', e: '🍂', a: 'Herbst', w: ['Frühling', 'Sommer', 'Winter'], x: 'Im Herbst werden die Blätter bunt und fallen ab.' },
+  { q: 'Bei wie viel Grad gefriert Wasser?', e: '🧊', a: '0 Grad', w: ['10 Grad', '50 Grad', '100 Grad'], x: 'Bei 0 Grad wird Wasser zu Eis.' },
+  { q: 'Was braucht ein Feuer zum Brennen?', e: '🔥', a: 'Luft', w: ['Wasser', 'Sand', 'Eis'], x: 'Ohne Luft geht ein Feuer aus.' },
+  { q: 'Welche Form hat die Erde?', e: '🌍', a: 'eine Kugel', w: ['ein Würfel', 'eine Scheibe', 'ein Ring'], x: 'Die Erde ist rund wie ein Ball.' },
+  { q: 'Welcher Planet ist unser Zuhause?', e: '🌍', a: 'Erde', w: ['Mars', 'Mond', 'Sonne'], x: 'Wir leben auf dem Planeten Erde.' },
+  { q: 'Was ist die Sonne?', e: '☀️', a: 'ein Stern', w: ['ein Planet', 'ein Mond', 'eine Lampe'], x: 'Die Sonne ist ein Stern – der uns am nächsten ist.' },
+  { q: 'Was pumpt das Blut durch den Körper?', e: '🩸', a: 'das Herz', w: ['die Lunge', 'der Magen', 'die Nase'], x: 'Das Herz pumpt den ganzen Tag Blut durch den Körper.' },
+  { q: 'Womit atmest du?', e: '🌬️', a: 'mit der Lunge', w: ['mit dem Magen', 'mit dem Herz', 'mit der Leber'], x: 'Die Lunge holt Luft in den Körper.' },
+  { q: 'Wie viele Milchzähne hat ein Kind?', e: '🦷', a: '20', w: ['10', '32', '50'], x: 'Kinder haben 20 Milchzähne, Erwachsene später 32 Zähne.' },
+  { q: 'Wie viele Finger hast du an beiden Händen?', e: '🖐️', a: '10', w: ['8', '5', '12'], x: '5 Finger an jeder Hand, zusammen 10.' },
+  { q: 'Womit denkst du?', e: '🧠', a: 'mit dem Gehirn', w: ['mit dem Herz', 'mit dem Bauch', 'mit den Haaren'], x: 'Das Gehirn im Kopf denkt, lernt und erinnert sich.' },
+];
+
+/** Schwer: Länder, Flaggen, Erde und Weltall */
+export const WORLD_HARD: BankItem[] = [
+  { q: 'Was ist die Hauptstadt von Deutschland?', e: '🇩🇪', a: 'Berlin', w: ['München', 'Hamburg', 'Köln'] },
+  { q: 'Was ist die Hauptstadt von Frankreich?', e: '🇫🇷', a: 'Paris', w: ['Lyon', 'Marseille', 'Nizza'] },
+  { q: 'Was ist die Hauptstadt von Italien?', e: '🇮🇹', a: 'Rom', w: ['Mailand', 'Venedig', 'Neapel'] },
+  { q: 'Was ist die Hauptstadt von Spanien?', e: '🇪🇸', a: 'Madrid', w: ['Barcelona', 'Sevilla', 'Valencia'] },
+  { q: 'Was ist die Hauptstadt von Österreich?', e: '🇦🇹', a: 'Wien', w: ['Salzburg', 'Graz', 'Innsbruck'] },
+  { q: 'Was ist die Hauptstadt der Schweiz?', e: '🇨🇭', a: 'Bern', w: ['Zürich', 'Genf', 'Basel'] },
+  { q: 'Was ist die Hauptstadt von England?', e: '💂', a: 'London', w: ['Manchester', 'Liverpool', 'Dublin'] },
+  { q: 'Was ist die Hauptstadt von Japan?', e: '🇯🇵', a: 'Tokio', w: ['Osaka', 'Kyoto', 'Peking'] },
+  { q: 'Was ist die Hauptstadt der Türkei?', e: '🇹🇷', a: 'Ankara', w: ['Istanbul', 'Izmir', 'Antalya'], x: 'Istanbul ist die größte Stadt, aber Ankara ist die Hauptstadt.' },
+  { q: 'Was ist die Hauptstadt vom Iran?', e: '🇮🇷', a: 'Teheran', w: ['Isfahan', 'Schiras', 'Täbris'] },
+  { q: 'Welches Land hat diese Flagge?', e: '🇧🇷', a: 'Brasilien', w: ['Argentinien', 'Mexiko', 'Portugal'] },
+  { q: 'Welches Land hat diese Flagge?', e: '🇨🇦', a: 'Kanada', w: ['USA', 'Schweden', 'Norwegen'], x: 'Auf der Flagge von Kanada ist ein Ahornblatt.' },
+  { q: 'Welches Land hat diese Flagge?', e: '🇸🇪', a: 'Schweden', w: ['Norwegen', 'Dänemark', 'Finnland'] },
+  { q: 'Welches Land hat diese Flagge?', e: '🇬🇷', a: 'Griechenland', w: ['Italien', 'Zypern', 'Türkei'] },
+  { q: 'Welches Land hat diese Flagge?', e: '🇳🇱', a: 'Niederlande', w: ['Frankreich', 'Russland', 'Belgien'] },
+  { q: 'Welche Sprache spricht man in Brasilien?', e: '🇧🇷', a: 'Portugiesisch', w: ['Spanisch', 'Brasilianisch', 'Englisch'] },
+  { q: 'Auf welchem Kontinent liegt Ägypten?', e: '🐪', a: 'Afrika', w: ['Asien', 'Europa', 'Australien'] },
+  { q: 'Wo leben Kängurus in freier Natur?', e: '🦘', a: 'Australien', w: ['Afrika', 'Südamerika', 'Asien'] },
+  { q: 'In welchem Land stehen die Pyramiden von Gizeh?', e: '🔺', a: 'Ägypten', w: ['Mexiko', 'Italien', 'Indien'] },
+  { q: 'Wo ist das meiste Eis der Welt?', e: '🐧', a: 'Antarktis', w: ['Europa', 'Asien', 'Afrika'], x: 'Die Antarktis am Südpol ist fast ganz mit Eis bedeckt.' },
+  { q: 'Welcher ist der größte Ozean?', e: '🌊', a: 'Pazifik', w: ['Atlantik', 'Indischer Ozean', 'Nordsee'] },
+  { q: 'Wie heißt der längste Fluss in Deutschland?', e: '🏞️', a: 'Rhein', w: ['Elbe', 'Main', 'Weser'] },
+  { q: 'Wie heißt der höchste Berg Deutschlands?', e: '🏔️', a: 'Zugspitze', w: ['Brocken', 'Feldberg', 'Watzmann'] },
+  { q: 'Wie heißt der höchste Berg der Welt?', e: '🏔️', a: 'Mount Everest', w: ['Zugspitze', 'Mont Blanc', 'Kilimandscharo'] },
+  { q: 'Wie viele Bundesländer hat Deutschland?', e: '🇩🇪', a: '16', w: ['12', '10', '20'] },
+  { q: 'Wie viele Planeten hat unser Sonnensystem?', e: '🪐', a: '8', w: ['9', '7', '12'], x: 'Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun.' },
+  { q: 'Welcher Planet ist der Sonne am nächsten?', e: '☀️', a: 'Merkur', w: ['Venus', 'Mars', 'Erde'] },
+  { q: 'Welcher ist der größte Planet?', e: '🪐', a: 'Jupiter', w: ['Saturn', 'Erde', 'Mars'] },
+  { q: 'Welcher Planet heißt „der Rote Planet“?', e: '🔴', a: 'Mars', w: ['Venus', 'Jupiter', 'Merkur'] },
+  { q: 'Wie lange braucht die Erde einmal um die Sonne?', e: '🌍', a: 'ein Jahr', w: ['einen Tag', 'einen Monat', 'eine Woche'], x: 'Einmal um die Sonne dauert ein Jahr, einmal um sich selbst einen Tag.' },
+  { q: 'Welches ist das größte Tier der Welt?', e: '🌊', a: 'Blauwal', w: ['Elefant', 'Giraffe', 'Weißer Hai'], x: 'Der Blauwal wird bis zu 30 Meter lang.' },
+  { q: 'Wie viele Knochen hat ein Erwachsener ungefähr?', e: '🦴', a: '206', w: ['50', '100', '1000'] },
+  { q: 'Welches ist das größte Organ des Menschen?', e: '🧍', a: 'die Haut', w: ['das Herz', 'die Lunge', 'das Gehirn'], x: 'Die Haut bedeckt den ganzen Körper.' },
+  { q: 'Was geben Pflanzen tagsüber an die Luft ab?', e: '🌿', a: 'Sauerstoff', w: ['Rauch', 'Wasserstoff', 'Staub'], x: 'Pflanzen machen aus Licht, Wasser und Luft Zucker – und geben Sauerstoff ab.' },
+];
+
+const BANKS: Record<Level, BankItem[]> = { 0: WORLD_EASY, 1: WORLD_MEDIUM, 2: WORLD_HARD };
+
+export function worldTask(level: Level, rnd: Rnd = Math.random): Task {
+  const it = pick(BANKS[level], rnd);
+  return {
+    prompt: it.q,
+    say: it.q,
+    ...withOptions(it.a, shuffle(it.w, rnd), rnd),
+    visual: it.e ? { k: 'picture', e: it.e } : undefined,
+    pictures: level === 0,
+    explain: it.x,
+  };
+}
