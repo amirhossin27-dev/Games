@@ -3,8 +3,9 @@ import { ONLINE_GAMES } from '../games/defs';
 import { GAME_BY_ID, playersText, type GameId } from '../games/registry';
 import { CODE_ANIMALS, CODE_LEN, codeAnimals, codeFromIndexes, codeWords, roomLink } from '../net/codes';
 import { onlineConfigured } from '../net/config';
-import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
-import { isAway, knocking, maxPlayers, members, ROBO_NAMES, taken, type ReactionId } from '../net/roomLogic';
+import { pingNow, refreshFriends, useFriends, type FriendView } from '../net/friends';
+import { admit, backToLobby, createRoom, deny, forgetRoom, inviteFriend, joinRoom, leaveRoom, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
+import { INVITE_MS, isAway, knocking, maxPlayers, members, ROBO_NAMES, taken, type ReactionId } from '../net/roomLogic';
 import { nav, useNav } from '../lib/nav';
 import { speak, speakIfAuto } from '../lib/speech';
 import { LEVEL_LABEL, levelForAge, type Level, type Profile } from '../lib/store';
@@ -13,6 +14,8 @@ import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
 import { Icon, type IconName } from '../ui/Icon';
 import { JoySays, Sheet, toast } from '../ui/parts';
+import { ChatCard } from './Chat';
+import { FriendsCard, friendStatus } from './Friends';
 
 export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: string }[] = [
   { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: '#2F5F86' },
@@ -85,6 +88,62 @@ function GamePicker({ profile, title, initial, onPick, onClose }: { profile: Pro
   );
 }
 
+/** Gastgeber: Freunde, die gerade online sind, mit einem Tipp einladen */
+function InviteFriends({ profile }: { profile: Profile }) {
+  const room = useRoom();
+  const friends = useFriends();
+  const info = room.info!;
+  const inside = new Set(members(info, room.seats).map((m) => m.uid));
+  const list = (friends.profileId === profile.id ? friends.list : []).filter((f) => f.online && !inside.has(f.uid));
+  useEffect(() => {
+    void refreshFriends();
+  }, []);
+  if (!Object.keys(profile.friends).length) return null;
+  const now = serverNow();
+  return (
+    <section className="col" aria-label="Freunde einladen">
+      <h2>Freunde einladen</h2>
+      {!list.length ? (
+        <p className="small muted">Gerade ist keiner deiner Freunde online.</p>
+      ) : (
+        <div className="seat-list">
+          {list.map((f) => {
+            const sent = info.invited?.[f.uid] && now - info.invited[f.uid].at < INVITE_MS;
+            return (
+              <div key={f.uid} className="seat-row friend-row">
+                <span className="friend-avatar">
+                  <Avatar kind={f.avatar} size={42} bg={f.color} />
+                  <span className="online-dot" aria-hidden="true" />
+                </span>
+                <span className="grow">
+                  <b className="display">{f.name}</b>
+                  <br />
+                  <span className="small muted">{sent ? 'ist eingeladen …' : friendStatus(f)}</span>
+                </span>
+                <button
+                  type="button"
+                  className="btn small secondary"
+                  disabled={!!sent}
+                  onClick={() =>
+                    void inviteFriend(f.uid)
+                      .then(() => {
+                        pingNow();
+                        toast(`${f.name} ist eingeladen!`);
+                      })
+                      .catch(() => toast('Das hat nicht geklappt. Ist das Internet an?'))
+                  }
+                >
+                  {sent ? 'Eingeladen' : 'Einladen'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
 /** Tier-Tastatur für den Zimmer-Code */
 function JoinSheet({ profile, initial, onClose }: { profile: Profile; initial?: string; onClose: () => void }) {
   const [picked, setPicked] = useState<number[]>(() => (initial ? [...initial].map((c) => parseInt(c, 16)) : []));
@@ -99,7 +158,6 @@ function JoinSheet({ profile, initial, onClose }: { profile: Profile; initial?: 
       onClose();
     } catch (e) {
       setError((e as Error).message);
-      speakIfAuto((e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -162,14 +220,14 @@ function Lobby({ profile }: { profile: Profile }) {
         <div className="topbar">
           <h1>Spielzimmer</h1>
         </div>
-        {error ? <JoySays text={error} mood="happy" /> : <JoySays text="Ich verbinde mich mit dem Spielzimmer …" mood="talk" />}
+        {error ? <JoySays quiet text={error} mood="happy" /> : <JoySays quiet text="Ich verbinde mich mit dem Spielzimmer …" mood="talk" />}
         {error && (
           <button type="button" className="btn primary block" onClick={forgetRoom}>
             Okay
           </button>
         )}
         {!error && (
-          <button type="button" className="btn secondary block" onClick={() => void leaveRoom()}>
+          <button type="button" className="btn secondary block" onClick={() => void leaveRoom().then(pingNow)}>
             Abbrechen
           </button>
         )}
@@ -218,9 +276,9 @@ function Lobby({ profile }: { profile: Profile }) {
 
       {!admitted ? (
         <>
-          <JoySays text={denied ? `${hostName} hat gerade keinen Platz frei.` : `Du hast geklingelt! Warte, bis ${hostName} dich reinlässt.`} mood={denied ? 'happy' : 'talk'} />
+          <JoySays quiet text={denied ? `${hostName} hat gerade keinen Platz frei.` : `Du hast geklingelt! Warte, bis ${hostName} dich reinlässt.`} mood={denied ? 'happy' : 'talk'} />
           <CodeAnimals code={code} size={38} />
-          <button type="button" className="btn secondary block" onClick={() => void leaveRoom()}>
+          <button type="button" className="btn secondary block" onClick={() => void leaveRoom().then(pingNow)}>
             {denied ? 'Okay' : 'Doch nicht'}
           </button>
         </>
@@ -333,6 +391,10 @@ function Lobby({ profile }: { profile: Profile }) {
             </div>
           </section>
 
+          <ChatCard />
+
+          {isHost && info.status === 'lobby' && count < max && <InviteFriends profile={profile} />}
+
           <div className="row between" aria-label="Sag was">
             <span className="label">Sag was:</span>
             {REACTIONS.map((r) => (
@@ -368,7 +430,7 @@ function Lobby({ profile }: { profile: Profile }) {
               Runde beenden
             </button>
           )}
-          <button type="button" className="btn ghost block" onClick={() => void leaveRoom()}>
+          <button type="button" className="btn ghost block" onClick={() => void leaveRoom().then(pingNow)}>
             <Icon name="door" /> Zimmer {isHost ? 'schließen' : 'verlassen'}
           </button>
         </>
@@ -382,19 +444,30 @@ function Lobby({ profile }: { profile: Profile }) {
 export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; joinCode?: string; preset?: GameId }) {
   const room = useRoom();
   const [sheet, setSheet] = useState<'create' | 'join' | null>(joinCode ? 'join' : preset ? 'create' : null);
+  const [inviteFor, setInviteFor] = useState<FriendView | null>(null);
+
+  useEffect(() => {
+    void refreshFriends();
+  }, []);
 
   if (room.code && room.profileId === profile.id) return <Lobby profile={profile} />;
+
+  const joinFriend = (f: FriendView) =>
+    void joinRoom(profile, f.room!)
+      .then(pingNow)
+      .catch((e: Error) => toast(e.message));
 
   return (
     <section className="screen">
       <div className="topbar">
         <h1>Spielzimmer</h1>
       </div>
-      <JoySays text="Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!" mood="happy" size={72} />
+      <JoySays quiet text="Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!" mood="happy" size={72} />
       {!onlineConfigured() ? (
         <p className="card">Online-Spielen ist noch nicht eingerichtet.</p>
       ) : (
         <>
+          <FriendsCard profile={profile} onInvite={setInviteFor} onJoin={joinFriend} />
           <section className="card tape col" style={{ gap: 12 }}>
             <h2>Zimmer öffnen</h2>
             <p className="muted">Du suchst ein Spiel aus und bekommst einen Code aus vier Tieren. Den sagst du den anderen.</p>
@@ -409,7 +482,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
               <Icon name="grid" /> Code eingeben
             </button>
           </section>
-          <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Es gibt keinen Chat – nur lustige Reaktionen.</p>
+          <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Freunde und Eingeladene kommen direkt rein.</p>
         </>
       )}
       {sheet === 'create' && (
@@ -419,11 +492,25 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
           initial={preset}
           onPick={async (g, l) => {
             await createRoom(profile, g, l);
+            pingNow();
           }}
           onClose={() => setSheet(null)}
         />
       )}
       {sheet === 'join' && <JoinSheet profile={profile} initial={joinCode} onClose={() => setSheet(null)} />}
+      {inviteFor && (
+        <GamePicker
+          profile={profile}
+          title={`Was spielst du mit ${inviteFor.name}?`}
+          onPick={async (g, l) => {
+            await createRoom(profile, g, l);
+            await inviteFriend(inviteFor.uid);
+            pingNow();
+            toast(`${inviteFor.name} ist eingeladen!`);
+          }}
+          onClose={() => setInviteFor(null)}
+        />
+      )}
     </section>
   );
 }

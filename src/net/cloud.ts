@@ -39,7 +39,8 @@ let syncing = false;
 async function pushProfile(p: Profile) {
   const acc = await ensureAuth(p.id);
   const token = acc.token!;
-  await dbRequest('PUT', `profiles/${acc.uid}/public`, token, publicOf(p));
+  // PATCH statt PUT: „on“/„room“ (Anwesenheit für Freunde) bleiben stehen
+  await dbRequest('PATCH', `profiles/${acc.uid}/public`, token, publicOf(p));
   await dbRequest('PUT', `profiles/${acc.uid}/private`, token, JSON.stringify(p));
   pushed.set(p.id, p.updatedAt);
 }
@@ -84,6 +85,9 @@ async function pullNewer() {
     }
   }
 }
+
+/** Liegt das öffentliche Profil schon in der Cloud? (vorher kann sich das Kind nicht als „online“ melden) */
+export const isPublished = (profileId: string) => (pushed.get(profileId) ?? -1) > 0;
 
 let started = false;
 

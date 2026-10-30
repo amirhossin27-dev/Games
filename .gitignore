@@ -2,3 +2,7 @@ node_modules
 dist
 *.log
 .DS_Store
+
+# Joys Stimme: wird beim Bauen erzeugt bzw. geladen (scripts/voices.mjs)
+public/voice/ort/
+public/voice/models/

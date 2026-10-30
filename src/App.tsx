@@ -5,20 +5,27 @@ import { speakIfAuto } from './lib/speech';
 import { activeProfile, getData, useData } from './lib/store';
 import { cls } from './lib/util';
 import { redeemPass, startCloudSync } from './net/cloud';
+import { dismissInvite, startFriends, useFriends, type Invite } from './net/friends';
+import { chatProblem } from './lib/chat';
 import { isCode } from './net/codes';
-import { leaveRoom, resumeRoom, useRoom } from './net/room';
+import { joinRoom, leaveRoom, resumeRoom, useRoom } from './net/room';
+import { chatFeed } from './net/roomLogic';
+import { InviteBanner } from './screens/Friends';
 import { GameDetail } from './screens/GameDetail';
 import { GameScreen } from './screens/GameScreen';
 import { Home, TabBar } from './screens/Home';
 import { Me } from './screens/Me';
 import { OnlineGame } from './screens/OnlineGame';
 import { LockScreen, Parents } from './screens/Parents';
+import { chatOpen } from './screens/Chat';
 import { REACTIONS, RoomScreen } from './screens/Room';
 import { Tutorial } from './screens/Tutorial';
 import { Welcome } from './screens/Welcome';
 import { Who } from './screens/Who';
 import { Avatar } from './ui/Avatar';
 import { Icon } from './ui/Icon';
+import { Joy } from './ui/Joy';
+import { onVoiceEvent } from './voice/joyVoice';
 import { toast, ToastHost } from './ui/parts';
 
 /** Gezählt wird überall außer im Elternbereich – und nur, wenn schon ein Kind eingerichtet ist. */
@@ -58,6 +65,28 @@ function useReactions() {
   }, [room.seats]);
 }
 
+/** Neue Chat-Nachrichten der anderen als Hinweis zeigen, wenn der Chat gerade zu ist */
+function useChatToasts() {
+  const room = useRoom();
+  const seen = useRef<{ code: string | null; keys: Set<string> }>({ code: null, keys: new Set() });
+  useEffect(() => {
+    const { info, seats, uid, code } = room;
+    if (!info || !uid || getData().settings.chat === 'off') return;
+    const feed = chatFeed(info, seats);
+    // Beim Betreten eines Zimmers alte Nachrichten nicht nochmal zeigen
+    if (seen.current.code !== code) {
+      seen.current = { code, keys: new Set(feed.map((m) => m.key)) };
+      return;
+    }
+    for (const m of feed) {
+      if (seen.current.keys.has(m.key)) continue;
+      seen.current.keys.add(m.key);
+      if (m.uid === uid || chatOpen() || chatProblem(m.t)) continue;
+      toast(`${m.name}: ${m.t}`, <Avatar kind={m.avatar} size={30} bg={m.color} />, 3500);
+    }
+  }, [room.seats, room.code]);
+}
+
 export function App() {
   const data = useData();
   const state = useNav();
@@ -70,10 +99,13 @@ export function App() {
   if (hash.current === null) hash.current = typeof location === 'undefined' ? {} : readHash();
 
   useReactions();
+  useChatToasts();
+  const friends = useFriends();
 
   useEffect(() => {
     startPlaytime(counting);
     startCloudSync();
+    startFriends();
     const redeem = (pass: string) =>
       redeemPass(pass)
         .then((p) => {
@@ -97,9 +129,15 @@ export function App() {
       toast(text, <Icon name="hourglass" size={28} />, 5000);
       speakIfAuto(text);
     });
+    const stopVoice = onVoiceEvent((e) => {
+      if (e === 'download') toast('Joys Stimme wird geladen – nur beim ersten Mal …', <Joy size={34} mood="talk" />, 5000);
+      else if (e === 'ready') toast('Joys Stimme ist bereit!', <Joy size={34} mood="happy" />);
+      else toast('Joys Stimme konnte nicht geladen werden. Ist das Internet an?');
+    });
     return () => {
       window.removeEventListener('hashchange', onHash);
       stopWarn();
+      stopVoice();
     };
   }, []);
 
@@ -138,6 +176,15 @@ export function App() {
   const tabName = route.name === 'home' || route.name === 'rooms' || route.name === 'me' ? route.name : null;
   const tabs = !!profile && !!tabName && data.profiles.length > 0;
   const inRoom = !!profile && room.profileId === profile.id && !!room.code;
+  const invite = !locked && profile && !inRoom && friends.profileId === profile.id ? friends.invites[0] : undefined;
+  const accept = (inv: Invite) => {
+    dismissInvite(inv);
+    nav.closeGame();
+    nav.closeTutorial();
+    joinRoom(profile!, inv.code)
+      .then(() => nav.go({ name: 'rooms' }))
+      .catch((e: Error) => toast(e.message));
+  };
 
   return (
     <div className={cls('app', tabs && 'with-tabs')}>
@@ -147,6 +194,7 @@ export function App() {
       {!locked && inRoom && <OnlineGame profileId={profile!.id} />}
       {!locked && state.tutorial && <Tutorial key={`tut-${state.tutorial.game}`} game={state.tutorial.game} start={state.tutorial.start} />}
       {locked && <LockScreen />}
+      {invite && <InviteBanner key={`${invite.code}:${invite.at}`} invite={invite} onAccept={accept} />}
       <ToastHost />
     </div>
   );

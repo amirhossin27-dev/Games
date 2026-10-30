@@ -1,11 +1,11 @@
 import { useSyncExternalStore } from 'react';
 import { defFor } from '../games/defs';
 import { GAME_BY_ID, type GameId } from '../games/registry';
-import type { Level, Profile } from '../lib/store';
+import { getData, type Level, type Profile } from '../lib/store';
 import { ensureAuth } from './auth';
 import { isCode, randomCode } from './codes';
 import { DbError, dbRequest, openStream, SERVER_TIME } from './db';
-import { buildSeats, nextSlot, parseActs, type NetSeat, type ReactionId, type RoomInfo, type SeatDoc, type StateDoc } from './roomLogic';
+import { autoAdmits, buildSeats, nextSlot, parseActs, parseChat, type ChatMsg, type NetSeat, type ReactionId, type RoomInfo, type SeatDoc, type StateDoc } from './roomLogic';
 
 /**
  * Online-Spielzimmer: Alle Geräte hören live auf rooms/<Code>. Jedes Kind schreibt nur seinen
@@ -91,8 +91,13 @@ let heartbeat: number | undefined;
 let retry: number | undefined;
 let lastStateRaw = '';
 let myActs: { n: number; r: number; a: unknown }[] = [];
+let myChat: ChatMsg[] | null = null;
 
-const token = async (force = false) => (await ensureAuth(view.profileId!, force)).token!;
+const token = async (force = false) => {
+  // Nie ein Konto für „kein Kind“ anlegen (z. B. wenn ein Zug noch unterwegs ist und das Zimmer schon zu)
+  if (!view.profileId) throw new Error('kein Kind im Zimmer');
+  return (await ensureAuth(view.profileId, force)).token!;
+};
 
 function onTree(tree: Record<string, unknown> | null) {
   if (!tree || !tree.info) {
@@ -125,6 +130,30 @@ function onTree(tree: Record<string, unknown> | null) {
     }
   }
   set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats, game });
+  if (info.host === view.uid && info.status !== 'closed') void admitFriends();
+}
+
+// Gastgeber: Freunde und Eingeladene kommen ohne Klingeln rein
+const admitting = new Set<string>();
+async function admitFriends() {
+  const { info, seats, profileId } = view;
+  if (!info) return;
+  const friends = getData().profiles.find((p) => p.id === profileId)?.friends ?? {};
+  const todo = autoAdmits(info, seats, friends, serverNow()).filter((uid) => !admitting.has(uid));
+  if (!todo.length) return;
+  // Plätze hier nacheinander vergeben – der neue Stand vom Server kommt erst später
+  const allowed = { ...info.allowed };
+  const changes: Record<string, unknown> = {};
+  for (const uid of todo) {
+    const slot = nextSlot({ ...info, allowed });
+    if (slot === null) break;
+    allowed[uid] = slot;
+    changes[`allowed/${uid}`] = slot;
+    changes[`denied/${uid}`] = null;
+    admitting.add(uid);
+    window.setTimeout(() => admitting.delete(uid), 4000);
+  }
+  if (Object.keys(changes).length) await patchInfo(changes).catch(() => undefined);
 }
 
 async function connect(force = false) {
@@ -206,6 +235,7 @@ function stopAll() {
   window.clearTimeout(retry);
   lastStateRaw = '';
   myActs = [];
+  myChat = null;
 }
 
 if (typeof document !== 'undefined') {
@@ -293,13 +323,14 @@ export async function resumeRoom(profile: Profile) {
 }
 
 export async function leaveRoom() {
-  const { code, uid, info } = view;
+  const { code, uid, info, profileId } = view;
   stopAll();
   set(EMPTY);
   saveResume();
-  if (!code || !uid) return;
+  if (!code || !uid || !profileId) return;
   try {
-    const t = await token().catch(() => null);
+    // Konto des Kindes von vorhin – `view` ist hier schon leer
+    const t = (await ensureAuth(profileId).catch(() => null))?.token;
     if (!t) return;
     if (info?.host === uid) await dbRequest('PATCH', `rooms/${code}/info`, t, { status: 'closed', at: SERVER_TIME });
     else await dbRequest('DELETE', `rooms/${code}/seats/${uid}`, t);
@@ -332,6 +363,12 @@ export async function admit(uid: string) {
 }
 
 export const deny = (uid: string) => patchInfo({ [`denied/${uid}`]: true });
+
+/** Freund einladen: Er sieht die Einladung in seiner App und kommt ohne Klingeln rein. */
+export function inviteFriend(uid: string) {
+  const name = view.uid ? (view.seats[view.uid]?.name ?? '') : '';
+  return patchInfo({ [`invited/${uid}`]: { at: SERVER_TIME, n: name.slice(0, 16) }, [`denied/${uid}`]: null });
+}
 
 export const setRobos = (robos: number) => patchInfo({ robos });
 
@@ -421,6 +458,18 @@ async function patchSeat(changes: Record<string, unknown>) {
 }
 
 export const react = (e: ReactionId) => patchSeat({ react: { e, at: SERVER_TIME } });
+
+/** Chat-Nachricht senden (die letzten 12 eigenen bleiben im eigenen Platz) */
+export async function sendChat(text: string) {
+  if (!view.uid) return;
+  myChat ??= parseChat(view.seats[view.uid]);
+  const i = (myChat[myChat.length - 1]?.i ?? 0) + 1;
+  myChat = [...myChat.slice(-11), { i, t: text, at: serverNow() }];
+  const mine = { ...view.seats[view.uid], chat: JSON.stringify(myChat) };
+  // Sofort selbst sehen, nicht erst nach der Antwort vom Server
+  set({ seats: { ...view.seats, [view.uid]: mine } });
+  await patchSeat({ chat: mine.chat });
+}
 
 export const setLearning = (on: boolean) => patchSeat({ tut: on });
 

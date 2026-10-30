@@ -1,10 +1,12 @@
+import { DEFAULT_OWN_VOICE, isOwnVoice } from '../voice/catalog';
+import { ownVoiceSupported, say as joySay, stop as joyStop } from '../voice/joyVoice';
 import { activeProfile, getData } from './store';
 
 /**
- * Joy liest vor – über die Sprachausgabe des Geräts. Geräte bringen sehr unterschiedliche Stimmen mit:
- * von roboterhaft (eSpeak, alte Windows-Stimmen, Apple-„Eloquence“) bis fast menschlich
- * (Apple Premium, Edge „Natural“, Google). Joyboy bewertet alle deutschen Stimmen und nimmt die
- * natürlichste – Eltern können im Elternbereich auch selbst eine wählen.
+ * Joy liest vor – standardmäßig mit Joys eigener, neuronaler Stimme (src/voice), die auf dem Gerät
+ * rechnet. Eltern können stattdessen eine Stimme vom Gerät wählen. Die bringen sehr unterschiedliche
+ * Qualität mit: von roboterhaft (eSpeak, alte Windows-Stimmen, Apple-„Eloquence“) bis fast menschlich
+ * (Apple Premium, Edge „Natural“, Google) – deshalb werden sie bewertet und sortiert.
  */
 
 export type VoiceQuality = 'natural' | 'good' | 'basic';
@@ -88,11 +90,14 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 
 export const speechAvailable = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
 
-/** Gewählte Stimme aus dem Elternbereich, sonst die natürlichste */
+/** Gewählte Stimme aus dem Elternbereich – „joy:…“ oder eine Gerätestimme */
+export const selectedSpeaker = (): string => getData().settings.speaker ?? DEFAULT_OWN_VOICE;
+
+/** Gewählte Gerätestimme, sonst die natürlichste vom Gerät */
 export function currentVoice(): VoiceInfo | null {
   const list = germanVoices();
-  const want = getData().settings.voice;
-  return (want && list.find((v) => v.id === want)) || list[0] || null;
+  const want = selectedSpeaker();
+  return (!isOwnVoice(want) && list.find((v) => v.id === want)) || list[0] || null;
 }
 
 /** Satzweise vorlesen: klingt natürlicher und umgeht Abbrüche bei langen Texten (Chrome). */
@@ -107,11 +112,19 @@ export function sentences(text: string): string[] {
 }
 
 export function speak(text: string, voiceId?: string) {
-  if (!speechAvailable() || !text) return;
+  if (!text) return;
+  const id = voiceId ?? selectedSpeaker();
+  if (isOwnVoice(id) && ownVoiceSupported()) {
+    stopDevice();
+    joySay(sentences(text), id);
+    return;
+  }
+  joyStop();
+  if (!speechAvailable()) return;
   try {
     const synth = window.speechSynthesis;
     synth.cancel();
-    const v = voiceId ? germanVoices().find((x) => x.id === voiceId) ?? currentVoice() : currentVoice();
+    const v = germanVoices().find((x) => x.id === id) ?? currentVoice();
     for (const part of sentences(text)) {
       const u = new SpeechSynthesisUtterance(part);
       u.lang = v?.voice.lang ?? 'de-DE';
@@ -126,12 +139,17 @@ export function speak(text: string, voiceId?: string) {
   }
 }
 
-export function stopSpeaking() {
+function stopDevice() {
   try {
     window.speechSynthesis?.cancel();
   } catch {
     // ignorieren
   }
+}
+
+export function stopSpeaking() {
+  joyStop();
+  stopDevice();
 }
 
 /** Soll Joy von selbst vorlesen? (Einstellung im Elternbereich, „auto“ = für 4–7-Jährige.) */

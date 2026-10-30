@@ -9,11 +9,15 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "predev": "node scripts/voices.mjs ort",
+    "prebuild": "node scripts/voices.mjs ort",
+    "voices": "node scripts/voices.mjs all"
   },
   "dependencies": {
     "@fontsource-variable/grandstander": "^5.3.0",
     "@fontsource/andika": "^5.3.0",
+    "onnxruntime-web": "^1.22.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

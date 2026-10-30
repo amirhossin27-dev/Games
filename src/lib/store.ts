@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { AvatarKind } from './names';
+import { upgradeAnimal, upgradeColor, type AvatarKind } from './names';
 import { dayKey, randomId, weekKey } from './util';
 
 /**
@@ -77,8 +77,10 @@ export interface Settings {
   speech: 'auto' | 'on' | 'off';
   /** Nur Namen aus dem Namens-Würfel erlauben */
   onlyGeneratedNames: boolean;
-  /** Vorlese-Stimme (voiceURI) – leer = automatisch die natürlichste */
-  voice?: string;
+  /** Chat im Online-Spielzimmer: frei schreiben, nur fertige Sätze oder aus */
+  chat: 'free' | 'phrases' | 'off';
+  /** Vorlese-Stimme: „joy:…“ = Joys eigene Stimme, sonst eine Stimme vom Gerät (voiceURI). Leer = Joys Stimme Kerstin. */
+  speaker?: string;
 }
 
 export interface ParentLock {
@@ -121,12 +123,16 @@ export function newProfile(p: Pick<Profile, 'name' | 'avatar' | 'color' | 'age'>
 }
 
 function defaults(): AppData {
-  return { v: 1, profiles: [], active: null, settings: { sound: true, speech: 'auto', onlyGeneratedNames: false }, parent: null };
+  return { v: 1, profiles: [], active: null, settings: { sound: true, speech: 'auto', onlyGeneratedNames: false, chat: 'free' }, parent: null };
 }
 
 function fixProfile(p: Profile): Profile {
+  const animal = upgradeAnimal(p.avatar, p.name);
   return {
     ...p,
+    name: animal.name,
+    avatar: animal.kind,
+    color: upgradeColor(p.color),
     games: p.games ?? {},
     counters: { ...emptyCounters(), ...p.counters },
     tutorials: p.tutorials ?? [],

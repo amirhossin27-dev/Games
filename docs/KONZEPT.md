@@ -295,3 +295,11 @@ Jede Phase endet mit Tests und einer veröffentlichten Version, die du auf dem H
 - **Zimmer-Code** aus 16 Tieren (65.536 Codes); ein Zimmer kann nur neu vergeben werden, wenn es 2 Stunden unbenutzt war.
 - **Abwesenheit:** Herzschlag alle 5 s; nach 20 s ohne Herzschlag springt Robo ein bzw. übernimmt das nächste Kind den Gastgeber.
 - **Cloud-Spielstände:** jedes Profil bekommt automatisch ein anonymes Konto; abgeglichen wird nach Zeitstempel (neuer gewinnt).
+
+## 11. Umsetzungsnotizen nach Phase 3
+
+- **Keine Herzen mehr:** Die Romantik-Herzen aus Arta sind in allen Spielen durch passende Symbole ersetzt (Äpfel, Münzen, Sterne, Blitz, Formen …), die Kartenfarbe Herz ist ein roter Stern.
+- **Joys eigene Stimme:** Piper-Stimmen (Kerstin, Thorsten; CC0) rechnen im Browser in einem Worker – eSpeak NG (nur deutsche Daten, 0,7 MB) für die Lautschrift, onnxruntime-web (Wasm, ein Thread) für das Modell. Modelle (je 63 MB) werden einmal geladen und im Cache `joyboy-voice-v1` gespeichert; Sätze werden einzeln berechnet und gemerkt. Gerätestimmen bleiben als Alternative.
+- **Freunde:** Wer zusammen gespielt hat, ist Freund. Anwesenheit (`on`, `room`, `game`) steht im öffentlichen Profil, Einladungen in `rooms/<Code>/info/invited`. Der Gastgeber lässt Freunde und Eingeladene automatisch rein. Die bestehenden Datenbank-Regeln reichen dafür aus.
+- **Chat:** Nachrichten liegen im eigenen Platz (`seats/<Kind>/chat`, die letzten 12), nur ab zwei echten Kindern im Zimmer. Filter beim Senden und Empfangen; Eltern wählen frei, nur fertige Sätze oder aus.
+- **Profile:** Der Dino wurde durch einen Bär ersetzt (bestehende Profile werden umgestellt), die Lieblingsfarben sind kräftiger (8 statt 6).

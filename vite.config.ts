@@ -7,6 +7,9 @@ export default defineConfig({
   plugins: [react()],
   // Alle Spiele stecken in einem Paket, damit Joyboy nach dem ersten Laden auch offline komplett ist.
   build: { chunkSizeWarningLimit: 800 },
+  // Joys Stimme rechnet in einem Worker (ES-Modul, lädt onnxruntime-web und dessen Wasm zur Laufzeit)
+  worker: { format: 'es' },
+  optimizeDeps: { exclude: ['onnxruntime-web'] },
   test: {
     environment: 'node',
   },

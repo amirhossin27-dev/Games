@@ -18,6 +18,16 @@ export interface SeatDoc {
   /** Züge als JSON-Text: [{ n, r, a }] */
   acts?: string;
   react?: { e: ReactionId; at: number };
+  /** Eigene Chat-Nachrichten als JSON-Text: [{ i, t, at }] (die letzten paar) */
+  chat?: string;
+}
+
+export interface ChatMsg {
+  /** laufende Nummer pro Kind */
+  i: number;
+  t: string;
+  /** Serverzeit (geschätzt) */
+  at: number;
 }
 
 export interface RoomInfo {
@@ -28,6 +38,8 @@ export interface RoomInfo {
   /** Reingelassene Kinder → Platznummer 1–3 */
   allowed?: Record<string, number>;
   denied?: Record<string, boolean>;
+  /** Vom Gastgeber eingeladene Freunde: kommen ohne Klingeln rein */
+  invited?: Record<string, { at: number; n: string }>;
   robos?: number;
   round?: number;
   at: number;
@@ -117,4 +129,46 @@ export function guestActs(players: NetSeat[], seats: Record<string, SeatDoc>, ho
 /** Plätze, deren Gerät gerade weg ist (für sie springt Robo ein). */
 export function absentSeats(players: NetSeat[], seats: Record<string, SeatDoc>, now: number, me: number): number[] {
   return players.map((p, i) => (i !== me && p.uid && isAway(seats[p.uid], now) ? i : -1)).filter((i) => i >= 0);
+}
+
+export const INVITE_MS = 15 * 60_000;
+
+/** Wer klingelt und darf ohne Nachfrage rein? Eingeladene und Freunde des Gastgebers. */
+export function autoAdmits(info: RoomInfo, seats: Record<string, SeatDoc>, friends: Record<string, unknown>, now: number): string[] {
+  return knocking(info, seats)
+    .map((k) => k.uid)
+    .filter((uid) => friends[uid] !== undefined || (info.invited?.[uid] && now - info.invited[uid].at < INVITE_MS));
+}
+
+/** Echte Kinder im Zimmer (ohne Robo) – Chat gibt es erst ab zwei. */
+export const humanCount = (info: RoomInfo, seats: Record<string, SeatDoc>) => members(info, seats).filter((m) => m.doc).length;
+
+export function parseChat(doc: SeatDoc | undefined): ChatMsg[] {
+  if (!doc?.chat) return [];
+  try {
+    const list = JSON.parse(doc.chat) as ChatMsg[];
+    return Array.isArray(list) ? list.filter((m) => typeof m.t === 'string' && typeof m.at === 'number') : [];
+  } catch {
+    return [];
+  }
+}
+
+export interface FeedItem {
+  key: string;
+  uid: string;
+  name: string;
+  avatar: AvatarKind;
+  color: string;
+  t: string;
+  at: number;
+}
+
+/** Alle Nachrichten der Kinder im Zimmer, nach Zeit sortiert (Klingelnde zählen nicht). */
+export function chatFeed(info: RoomInfo, seats: Record<string, SeatDoc>): FeedItem[] {
+  const out: FeedItem[] = [];
+  for (const { uid, doc } of members(info, seats)) {
+    if (!doc) continue;
+    for (const m of parseChat(doc)) out.push({ key: `${uid}:${m.i}`, uid, name: doc.name, avatar: doc.avatar, color: doc.color, t: m.t, at: m.at });
+  }
+  return out.sort((a, b) => a.at - b.at || a.key.localeCompare(b.key));
 }

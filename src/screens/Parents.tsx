@@ -3,7 +3,9 @@ import { nav } from '../lib/nav';
 import { checkParentPassword, checkRecoveryCode, PASSWORD_MIN, setParentPassword } from '../lib/parent';
 import { LIMIT_CHOICES, LOCK_MS, nowMs, playActions, usePlaytime } from '../lib/playtime';
 import { actions, useData, type Settings } from '../lib/store';
-import { germanVoices, onVoicesChanged, platform, speak, speechAvailable, type VoiceInfo } from '../lib/speech';
+import { germanVoices, onVoicesChanged, platform, speak, speechAvailable, stopSpeaking, type VoiceInfo } from '../lib/speech';
+import { DEFAULT_OWN_VOICE, isOwnVoice, OWN_VOICES } from '../voice/catalog';
+import { isDownloaded, ownVoiceSupported, useJoyVoice } from '../voice/joyVoice';
 import { formatClock } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
@@ -22,6 +24,18 @@ function PasswordSetup({ onDone, title }: { onDone: () => void; title: string })
         <h2>Notfall-Code</h2>
         <p>Falls du das Passwort vergisst, kannst du es mit diesem Code zurücksetzen. Schreib ihn dir auf – er wird nur jetzt angezeigt.</p>
         <div className="code-box">{code}</div>
+        <button
+          type="button"
+          className="btn secondary small"
+          onClick={() =>
+            navigator.clipboard
+              ?.writeText(code)
+              .then(() => toast('Notfall-Code kopiert.'))
+              .catch(() => toast('Kopieren ging nicht – bitte abschreiben.'))
+          }
+        >
+          Kopieren
+        </button>
         <button type="button" className="btn primary block" onClick={onDone}>
           Aufgeschrieben – weiter
         </button>
@@ -135,8 +149,8 @@ const VOICE_TIP: Record<ReturnType<typeof platform>, string> = {
   other: 'Am natürlichsten klingen die Stimmen in Google Chrome und Microsoft Edge.',
 };
 
-/** Stimmen-Auswahl: die natürlichste ist vorgewählt, jede Zeile spielt eine Hörprobe. */
-function VoicePicker({ chosen, onChoose }: { chosen?: string; onChoose: (id: string | undefined) => void }) {
+/** Stimmen vom Gerät: die natürlichste zuerst, jede Zeile spielt eine Hörprobe. */
+function DeviceVoices({ chosen, onChoose }: { chosen: string; onChoose: (id: string) => void }) {
   const [voices, setVoices] = useState<VoiceInfo[]>(() => germanVoices());
   const [all, setAll] = useState(false);
   useEffect(() => {
@@ -149,46 +163,28 @@ function VoicePicker({ chosen, onChoose }: { chosen?: string; onChoose: (id: str
       t.forEach((x) => window.clearTimeout(x));
     };
   }, []);
-  if (!speechAvailable()) return <p className="small muted">Dieser Browser kann leider nicht vorlesen.</p>;
+  if (!speechAvailable()) return <p className="small muted">Dieser Browser hat keine eigenen Stimmen.</p>;
   if (!voices.length) return <p className="small muted">Auf diesem Gerät ist keine deutsche Stimme zu finden. {VOICE_TIP[platform()]}</p>;
 
-  const best = voices[0];
-  const active = (chosen && voices.find((v) => v.id === chosen)) || null;
   const good = voices.filter((v) => v.quality !== 'basic');
   const shown = all || !good.length ? voices : good;
   const hidden = voices.length - shown.length;
-  const pick = (v: VoiceInfo | null) => {
-    onChoose(v?.id);
-    speak(VOICE_SAMPLE, (v ?? best).id);
+  const pick = (v: VoiceInfo) => {
+    onChoose(v.id);
+    speak(VOICE_SAMPLE, v.id);
   };
-  const tags = (v: VoiceInfo) => (
-    <span className="voice-tags">
-      {v.quality === 'natural' && (
-        <span className="tag" style={{ '--tag-bg': 'var(--sage-soft)', '--tag-fg': 'var(--sage)' } as CSSProperties}>
-          natürlich
-        </span>
-      )}
-      {v.quality === 'basic' && <span className="tag">klingt künstlich</span>}
-      {v.online && <span className="tag">über Internet</span>}
-    </span>
-  );
-
   return (
-    <div className="voice-list">
-      <button type="button" className="voice-row" aria-pressed={!active} onClick={() => pick(null)}>
-        <Icon name="sparkle" size={20} />
-        <span className="grow">
-          <b>Automatisch</b>
-          <small>{best.name}</small>
-          {tags(best)}
-        </span>
-      </button>
+    <>
       {shown.map((v) => (
-        <button key={v.id} type="button" className="voice-row" aria-pressed={active?.id === v.id} onClick={() => pick(v)}>
+        <button key={v.id} type="button" className="voice-row" aria-pressed={chosen === v.id} onClick={() => pick(v)}>
           <Icon name="speaker" size={20} />
           <span className="grow">
             <b>{v.name}</b>
-            {tags(v)}
+            <span className="voice-tags">
+              {v.quality === 'natural' && <span className="tag">natürlich</span>}
+              {v.quality === 'basic' && <span className="tag">klingt künstlich</span>}
+              {v.online && <span className="tag">über Internet</span>}
+            </span>
           </span>
         </button>
       ))}
@@ -197,8 +193,82 @@ function VoicePicker({ chosen, onChoose }: { chosen?: string; onChoose: (id: str
           {hidden === 1 ? '1 weitere Stimme' : `${hidden} weitere Stimmen`}
         </button>
       )}
-      {best.quality !== 'natural' && <p className="small muted">{VOICE_TIP[platform()]}</p>}
+      {voices[0].quality !== 'natural' && <p className="small muted">{VOICE_TIP[platform()]}</p>}
       {voices.some((v) => v.online) && <p className="small muted">„Über Internet“: Diese Stimmen erzeugt Google bzw. Microsoft auf ihren Servern. Der vorgelesene Text geht dafür dorthin.</p>}
+    </>
+  );
+}
+
+/** Stimmen-Auswahl: Joys eigene Stimmen (mit Hörprobe ohne Download), darunter die Stimmen vom Gerät. */
+function VoicePicker({ chosen, onChoose }: { chosen: string; onChoose: (id: string) => void }) {
+  const voice = useJoyVoice();
+  const [have, setHave] = useState<Record<string, boolean>>({});
+  const [device, setDevice] = useState(!isOwnVoice(chosen));
+  const [sample, setSample] = useState<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    void Promise.all(OWN_VOICES.map(async (v) => [v.id, await isDownloaded(v.id)] as const)).then((list) => setHave(Object.fromEntries(list)));
+  }, [voice.status]);
+  useEffect(() => () => sample?.pause(), [sample]);
+
+  const preview = (id: string) => {
+    stopSpeaking();
+    sample?.pause();
+    const a = new Audio(`voice/samples/${id.slice(4)}.mp3`);
+    void a.play().catch(() => toast('Die Hörprobe ließ sich nicht abspielen.'));
+    setSample(a);
+  };
+  const choose = (id: string) => {
+    sample?.pause();
+    onChoose(id);
+    // Lädt die Stimme (falls nötig) und spricht dann die Probe
+    speak(VOICE_SAMPLE, id);
+  };
+
+  return (
+    <div className="voice-list">
+      {ownVoiceSupported() ? (
+        OWN_VOICES.map((v) => {
+          const busy = voice.voice === v.id && voice.status === 'loading';
+          return (
+            <div key={v.id} className="voice-item">
+              <button type="button" className="voice-row" aria-pressed={chosen === v.id} onClick={() => choose(v.id)}>
+                <Joy size={30} mood="talk" />
+                <span className="grow">
+                  <b>{v.name}</b>
+                  <small>Joys Stimme · {v.desc}</small>
+                  <span className="voice-tags">
+                    {have[v.id] ? (
+                      <span className="tag" style={{ '--tag-bg': 'var(--sage-soft)', '--tag-fg': 'var(--sage)' } as CSSProperties}>
+                        auf dem Gerät
+                      </span>
+                    ) : busy && voice.downloading ? (
+                      <span className="tag">lädt … {Math.round(voice.progress * 100)} %</span>
+                    ) : (
+                      <span className="tag">{v.mb} MB, einmal laden</span>
+                    )}
+                  </span>
+                  {busy && voice.downloading && (
+                    <span className="bar" aria-hidden="true">
+                      <i style={{ width: `${voice.progress * 100}%` }} />
+                    </span>
+                  )}
+                </span>
+              </button>
+              <button type="button" className="icon-btn soft" aria-label={`Hörprobe ${v.name}`} onClick={() => preview(v.id)}>
+                <Icon name="play" size={20} />
+              </button>
+            </div>
+          );
+        })
+      ) : (
+        <p className="small muted">Dieser Browser kann Joys eigene Stimme nicht abspielen. Wähle eine Stimme vom Gerät.</p>
+      )}
+      {voice.status === 'error' && <p className="small muted">Joys Stimme konnte nicht geladen werden. Ist das Internet an? Tippe die Stimme nochmal an.</p>}
+      <p className="small muted">Joys Stimme rechnet direkt auf dem Gerät – was vorgelesen wird, bleibt dort. Sie wird einmal geladen (am besten im WLAN) und funktioniert danach auch offline.</p>
+      <button type="button" className="btn ghost small" aria-expanded={device} onClick={() => setDevice(!device)}>
+        {device ? 'Stimmen vom Gerät ausblenden' : 'Stimmen vom Gerät zeigen'}
+      </button>
+      {device && <DeviceVoices chosen={chosen} onChoose={onChoose} />}
     </div>
   );
 }
@@ -294,9 +364,27 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
         {data.settings.speech !== 'off' && (
           <div className="field">
             <span className="field-label">Stimme</span>
-            <VoicePicker chosen={data.settings.voice} onChoose={(voice) => set({ voice })} />
+            <VoicePicker chosen={data.settings.speaker ?? DEFAULT_OWN_VOICE} onChoose={(speaker) => set({ speaker })} />
           </div>
         )}
+        <div className="field">
+          <span className="field-label">Chat im Spielzimmer</span>
+          <div className="seg">
+            {(
+              [
+                ['free', 'Schreiben', 'mit Filter'],
+                ['phrases', 'Nur Sätze', 'fertige'],
+                ['off', 'Aus', ''],
+              ] as const
+            ).map(([v, l, sub]) => (
+              <button key={v} type="button" aria-pressed={data.settings.chat === v} onClick={() => set({ chat: v })}>
+                {l}
+                {sub && <small>{sub}</small>}
+              </button>
+            ))}
+          </div>
+          <p className="small muted">Den Chat gibt es nur online mit anderen Kindern. Ein Filter blockt Schimpfwörter, Telefonnummern, Adressen und Links.</p>
+        </div>
         <Switch label="Töne" on={data.settings.sound} onChange={(v) => set({ sound: v })} />
         <Switch label="Nur Namen vom Namens-Würfel erlauben" on={data.settings.onlyGeneratedNames} onChange={(v) => set({ onlyGeneratedNames: v })} />
       </section>

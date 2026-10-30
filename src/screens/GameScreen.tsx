@@ -7,6 +7,7 @@ import { nav, type Session } from '../lib/nav';
 import { levelOf, recordResults, starsForPlace, starsForRatio, starsForScore, type PlayResult, type RecordOutcome } from '../lib/progress';
 import { actions, useData, type Profile } from '../lib/store';
 import { speakIfAuto, stopSpeaking } from '../lib/speech';
+import { ChatButton } from './Chat';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
@@ -108,6 +109,7 @@ export function GameScreen({ session, net, online }: { session: Session; net?: N
           <h1>{meta.name}</h1>
           <TimePill className="sm" />
         </div>
+        {online && <ChatButton />}
         <button type="button" className="icon-btn" onClick={() => nav.tutorial(meta.id)} aria-label="Spielregeln ansehen">
           <Icon name="help" />
         </button>
