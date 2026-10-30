@@ -3,7 +3,9 @@ import { CATEGORY, CATEGORY_ORDER, GAMES, playersText, type Category, type GameM
 import { nav } from '../lib/nav';
 import { useRoom } from '../net/room';
 import { DAILY_REWARD, dailyOf, levelOf } from '../lib/progress';
-import type { Profile } from '../lib/store';
+import { useData, type Profile } from '../lib/store';
+import { arcadeAfter, learnedToday, learnLeft, learnText } from '../lib/unlock';
+import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
 import { Icon, type IconName } from '../ui/Icon';
@@ -32,12 +34,19 @@ export function TabBar({ active }: { active: 'home' | 'rooms' | 'me' }) {
   );
 }
 
-export function GameCard({ game, profile }: { game: GameMeta; profile: Profile }) {
+export function GameCard({ game, profile, left = 0 }: { game: GameMeta; profile: Profile; left?: number }) {
   const cat = CATEGORY[game.category];
   const stars = profile.games[game.id]?.stars ?? 0;
   return (
-    <button type="button" className="game-card" onClick={() => nav.go({ name: 'game', id: game.id })}>
-      <GameArt kind={game.art} height={90} />
+    <button type="button" className={cls('game-card', left > 0 && 'locked')} onClick={() => nav.go({ name: 'game', id: game.id })}>
+      <span className="game-card-art">
+        <GameArt kind={game.art} height={90} />
+        {left > 0 && (
+          <span className="lock-badge" aria-hidden="true">
+            <Icon name="lock" size={22} />
+          </span>
+        )}
+      </span>
       <b>{game.name}</b>
       <span className="meta">
         <span className="tag" style={{ '--tag-bg': cat.bg, '--tag-fg': cat.fg } as CSSProperties}>
@@ -48,7 +57,14 @@ export function GameCard({ game, profile }: { game: GameMeta; profile: Profile }
           {playersText(game)}
         </span>
       </span>
-      <Stars n={stars} size={16} />
+      {left > 0 ? (
+        <span className="lock-note">
+          <Icon name="lock" size={14} stroke={2.6} />
+          Frei nach {left} {left === 1 ? 'Lernspiel' : 'Lernspielen'}
+        </span>
+      ) : (
+        <Stars n={stars} size={16} />
+      )}
     </button>
   );
 }
@@ -58,12 +74,17 @@ type Tab = 'alle' | 'zusammen' | Category;
 export function Home({ profile, tab: initial }: { profile: Profile; tab?: string }) {
   const [tab, setTab] = useState<Tab>((initial as Tab) ?? 'alle');
   const room = useRoom();
+  const { settings } = useData();
   const lvl = levelOf(profile.stars);
   const daily = dailyOf(profile);
   const games = GAMES.filter((g) => (tab === 'alle' ? true : tab === 'zusammen' ? g.players[1] > 1 : g.category === tab));
   // Altersgerechte Spiele zuerst
   const age = [4, 6, 8, 10][profile.age];
-  const sorted = [...games].sort((a, b) => Number(a.minAge > age + 1) - Number(b.minAge > age + 1));
+  // Gesperrte Arcade-Spiele ans Ende
+  const left = (g: GameMeta) => learnLeft(g, profile, settings);
+  const sorted = [...games].sort((a, b) => Number(left(a) > 0) - Number(left(b) > 0) || Number(a.minAge > age + 1) - Number(b.minAge > age + 1));
+  const need = arcadeAfter(settings);
+  const learned = Math.min(need, learnedToday(profile));
   const tabs: { id: Tab; label: string }[] = [
     { id: 'alle', label: 'Alle' },
     { id: 'zusammen', label: 'Zusammen' },
@@ -143,6 +164,21 @@ export function Home({ profile, tab: initial }: { profile: Profile; tab?: string
         </div>
       </section>
 
+      {learned < need && (
+        <section className="card stitched row" aria-label="Erst lernen, dann spielen">
+          <Icon name="lock" size={28} />
+          <div className="grow col" style={{ gap: 6 }}>
+            <b className="display">Erst lernen, dann spielen!</b>
+            <span className="small">Spiele heute {learnText(need - learned)}, dann sind die Arcade-Spiele frei.</span>
+            <div className="dots" aria-label={`${learned} von ${need} Lernspielen`}>
+              {Array.from({ length: Math.min(need, 10) }, (_, i) => (
+                <span key={i} className={i < learned ? 'on' : ''} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section aria-label="Spiele">
         <div className="folder-tabs" role="toolbar" aria-label="Spiele filtern">
           {tabs.map((t) => (
@@ -153,7 +189,7 @@ export function Home({ profile, tab: initial }: { profile: Profile; tab?: string
         </div>
         <div className="games-panel">
           {sorted.map((g) => (
-            <GameCard key={g.id} game={g} profile={profile} />
+            <GameCard key={g.id} game={g} profile={profile} left={left(g)} />
           ))}
         </div>
       </section>

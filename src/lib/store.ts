@@ -61,6 +61,8 @@ export interface Profile {
   week: { id: string; stars: number };
   /** Kinder, mit denen schon online gespielt wurde (Cloud-ID → Anzeige) */
   friends: Record<string, Friend>;
+  /** Heute gespielte Lernspiele – schalten die Arcade-Spiele frei (unlock.ts) */
+  learnDay: { date: string; count: number };
   /** Letzte Änderung – entscheidet beim Abgleich mit der Cloud */
   updatedAt: number;
 }
@@ -77,6 +79,8 @@ export interface Settings {
   speech: 'auto' | 'on' | 'off';
   /** Nur Namen aus dem Namens-Würfel erlauben */
   onlyGeneratedNames: boolean;
+  /** Arcade-Spiele erst nach so vielen Lernspielen am Tag (0 = aus, fehlt = Standard aus unlock.ts) */
+  arcadeAfter?: number;
 }
 
 export interface ParentLock {
@@ -114,6 +118,7 @@ export function newProfile(p: Pick<Profile, 'name' | 'avatar' | 'color' | 'age'>
     daily: { date: dayKey(), progress: 0, done: false },
     week: { id: weekKey(), stars: 0 },
     friends: {},
+    learnDay: { date: dayKey(), count: 0 },
     updatedAt: Date.now(),
   };
 }
@@ -133,6 +138,7 @@ function fixProfile(p: Profile): Profile {
     daily: p.daily ?? { date: dayKey(), progress: 0, done: false },
     week: p.week ?? { id: weekKey(), stars: 0 },
     friends: p.friends ?? {},
+    learnDay: p.learnDay ?? { date: dayKey(), count: 0 },
     updatedAt: p.updatedAt ?? p.createdAt ?? 0,
   };
 }

@@ -12,6 +12,7 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
 - **Belohnungen:** Sterne (0–3 pro Spiel), Level, 9 Abzeichen, Rekorde, eine Tagesaufgabe und eine Wochen-Rangliste der Kinder auf dem Gerät.
 - **Spielzeit-Limit für Eltern:** siehe unten.
+- **Erst lernen, dann spielen:** Die Arcade-Spiele sind jeden Tag erst nach ein paar Lernspielen frei. Die Anzahl stellen die Eltern ein, siehe unten.
 - **Online-Spielzimmer** für bis zu 4 Kinder, siehe unten.
 - **Spielstände dauerhaft gesichert:** auf dem Gerät und zusätzlich in der Cloud. Mit dem **Spielerpass** (Elternbereich) nimmt ein Kind seinen Spielstand auf ein neues Gerät mit.
 - **Kindersicher:** kein Chat (nur 5 feste Reaktionen), keine Werbung, keine Käufe, keine Tracker. Schriften werden mit der App ausgeliefert, kein Abruf bei Google. In der Cloud liegen nur Spitzname, Tier, Sterne und Spielstand.
@@ -60,6 +61,16 @@ Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK)
 Gezählt wird, solange Joyboy sichtbar geöffnet ist (nicht im Elternbereich). Das Kontingent gilt für 12 Stunden ab dem ersten Spielen. Damit das Verstellen der Geräte-Uhr nicht hilft, gleicht Joyboy die Zeit mit dem Server ab, sobald Internet da ist. Das Passwort wird nur als Hash gespeichert (PBKDF2).
 
 > Grenzen: Das Limit gilt pro Gerät. Löscht jemand die Website-Daten im Browser, ist es weg (die Spielstände lassen sich über den Spielerpass zurückholen). Am sichersten ist es zusätzlich, die Bildschirmzeit-Funktionen von iOS bzw. Android zu nutzen.
+
+## Erst lernen, dann spielen (für Eltern)
+
+Die 15 Arcade- und Duell-Spiele (Schlange, 2048, Pong-Duell und Co.) schalten sich jeden Tag erst frei, wenn ein Kind eine bestimmte Anzahl an Lern- und Brettspielen zu Ende gespielt hat. Standard sind **2 Lernspiele**.
+
+1. **Ich → Für Eltern** öffnen.
+2. Unter **Erst lernen, dann spielen** die Anzahl wählen (1 bis 8) oder **Aus**. Darunter steht, wie viele Lernspiele jedes Kind heute schon gespielt hat.
+3. Gesperrte Spiele zeigen ein Schloss und „Frei nach … Lernspielen“. Auf der Startseite und nach jedem Lernspiel sieht das Kind, wie viele noch fehlen.
+
+Gezählt wird pro Kind, auch im Spielzimmer und beim Spielen mit anderen. Um Mitternacht beginnt die Zählung neu.
 
 ## Auf dem Handy installieren
 
