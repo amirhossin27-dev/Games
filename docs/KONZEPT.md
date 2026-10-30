@@ -1,6 +1,6 @@
 # Joyboy – Konzept & Umsetzungsplan
 
-> **Status:** Freigegeben. Phase 1 und 2 sind umgesetzt (siehe Abschnitt 9). Als Nächstes: Phase 3 (Online).
+> **Status:** Freigegeben. Phase 1, 2 und 3 sind umgesetzt (siehe Abschnitt 9). Als Nächstes: Phase 4 (Ausbau).
 > **Designvorschläge:** [Design-Leinwand „Joyboy Designkonzepte“](https://claude.ai/artifact/VLqZ1nyDz3JxvtXe7zGeB6) – gewählt wurde **Richtung C „Papierwelt“**.
 
 ## Entscheidungen (Freigabe)
@@ -281,14 +281,17 @@ Ein Hook `useGame(def, …)` macht daraus – wie `useTurnGame` in Arta – auto
 | **0 – Konzept** | Dieses Dokument + Designvorschläge | Deine Freigabe |
 | **1 – Fundament** ✅ | PWA-Gerüst, Veröffentlichung über GitHub Pages, Design-System „Papierwelt“, Willkommen (Name, Avatar, Alter), „Wer spielt?“, Start, Spiel-Seite, Ich-Seite, Tutorial-Engine, Vorlesen, Elternbereich mit Spielzeit-Limit | App lässt sich auf iPhone und Android installieren |
 | **2 – Spiele offline** ✅ | Engine für 1–4 Spieler, Robo, Aufgaben-Engine. Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken, Stadt-Land-Fluss und 15 Arcade-Spiele – jeweils mit Tutorial | Spielbar allein, gegen Robo und an einem Gerät |
-| **3 – Online** | Firebase-Anbindung, Spielzimmer mit Tier-Code, Klingel, Live-Sync für 4 Plätze, Herzschlag, Robo-Einspringen, Gastgeber-Wechsel, Fortsetzen, Cloud-Profile, Spielerpass, Rangliste | 4 Kinder spielen live zusammen |
+| **3 – Online** ✅ | Firebase-Anbindung, Spielzimmer mit Tier-Code, Klingel, Live-Sync für 4 Plätze, Herzschlag, Robo-Einspringen, Gastgeber-Wechsel, Fortsetzen, Cloud-Profile, Spielerpass, Rangliste mit Spielfreunden | 4 Kinder spielen live zusammen |
 | **4 – Ausbau** | Weitere Spiele aus Arta (Schach, Dame, Mühle, Wer ist es?, Farbwechsel, Bewegungs-Würfel), Wettkampf-Modus für die Arcade-Spiele, Welt-Quiz, Wort-Baumeister, English Words | Voller Katalog |
 
 Jede Phase endet mit Tests und einer veröffentlichten Version, die du auf dem Handy ausprobieren kannst.
 
 ---
 
-## 10. Was noch offen ist
+## 10. Umsetzungsnotizen Phase 3
 
-1. **Firebase für Phase 3:** Für Online-Spielzimmer und Cloud-Spielstände braucht Joyboy ein eigenes, kostenloses Firebase-Projekt (Realtime Database + anonyme Anmeldung). Anleitung: [`FIREBASE.md`](FIREBASE.md), Regeln: [`database.rules.json`](../database.rules.json). Danach brauche ich nur die Datenbank-Adresse und den Web-API-Key.
-2. **Main-Branch:** Die App wird aktuell vom Entwicklungs-Branch veröffentlicht. Sobald es einen `main`-Branch gibt (z. B. per Pull Request), veröffentlicht der Workflow auch von dort.
+- **Firebase-Projekt** `joyboy-916f0` (Realtime Database in Belgien, anonyme Anmeldung). Die Regeln aus `database.rules.json` sind mit Testkonten gegen die echte Datenbank geprüft (Profile schützen, Zimmer anlegen, Klingel, Gastgeber-Wechsel, fremdes Überschreiben verhindert).
+- **Online-Spiele:** alle Regel-Spiele für mehrere (11 Spiele). Lernspiele und Stadt-Land-Fluss laufen online gleichzeitig, sonst reihum. Arcade-Spiele bleiben vorerst an einem Gerät (Wettkampf-Modus ist Phase 4).
+- **Zimmer-Code** aus 16 Tieren (65.536 Codes); ein Zimmer kann nur neu vergeben werden, wenn es 2 Stunden unbenutzt war.
+- **Abwesenheit:** Herzschlag alle 5 s; nach 20 s ohne Herzschlag springt Robo ein bzw. übernimmt das nächste Kind den Gastgeber.
+- **Cloud-Spielstände:** jedes Profil bekommt automatisch ein anonymes Konto; abgeglichen wird nach Zeitstempel (neuer gewinnt).

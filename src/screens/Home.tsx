@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { CATEGORY, CATEGORY_ORDER, GAMES, playersText, type Category, type GameMeta } from '../games/registry';
 import { nav } from '../lib/nav';
+import { useRoom } from '../net/room';
 import { DAILY_REWARD, dailyOf, levelOf } from '../lib/progress';
 import type { Profile } from '../lib/store';
 import { Avatar } from '../ui/Avatar';
@@ -56,6 +57,7 @@ type Tab = 'alle' | 'zusammen' | Category;
 
 export function Home({ profile, tab: initial }: { profile: Profile; tab?: string }) {
   const [tab, setTab] = useState<Tab>((initial as Tab) ?? 'alle');
+  const room = useRoom();
   const lvl = levelOf(profile.stars);
   const daily = dailyOf(profile);
   const games = GAMES.filter((g) => (tab === 'alle' ? true : tab === 'zusammen' ? g.players[1] > 1 : g.category === tab));
@@ -97,12 +99,20 @@ export function Home({ profile, tab: initial }: { profile: Profile; tab?: string
         <TimePill />
       </header>
 
+      {room.code && room.profileId === profile.id && (
+        <button type="button" className="room-banner" onClick={() => nav.go({ name: 'rooms' })}>
+          <Icon name="users" size={26} />
+          <span className="grow">Du bist in einem Spielzimmer – zurück zu den anderen</span>
+          <Icon name="arrow" />
+        </button>
+      )}
+
       <section className="card tape" aria-label="Zusammen spielen">
         <div className="col" style={{ gap: 12 }}>
           <div className="row between">
             <div>
               <h2>Zusammen spielen</h2>
-              <p style={{ color: '#3B4A3F' }}>Bis zu 4 Kinder an einem Gerät – mit Robo als Mitspieler.</p>
+              <p style={{ color: '#3B4A3F' }}>Bis zu 4 Kinder – an einem Gerät oder online, jedes am eigenen.</p>
             </div>
           </div>
           <div className="row" style={{ gap: 12 }}>

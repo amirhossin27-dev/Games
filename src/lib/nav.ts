@@ -7,7 +7,7 @@ import type { Level } from './store';
 
 export type Route =
   | { name: 'home'; tab?: string }
-  | { name: 'rooms' }
+  | { name: 'rooms'; join?: string; preset?: GameId }
   | { name: 'me' }
   | { name: 'game'; id: GameId }
   | { name: 'parents' }

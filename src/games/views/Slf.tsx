@@ -90,15 +90,16 @@ export function Slf(props: PlayProps) {
   });
 
   if (s.phase === 'write') {
-    const writer = s.writer;
-    const humanWriting = g.myTurn && g.isHuman(writer);
+    // An einem Gerät schreibt einer nach dem anderen, sonst alle gleichzeitig.
+    const writer = s.sequential ? s.writer : g.view;
+    const humanWriting = g.myTurn && g.isHuman(writer) && !s.answers[writer];
     return (
       <div className="g-col">
-        <SeatStrip seats={seats} active={writer} scores={totals} done={s.answers.map(Boolean)} />
+        <SeatStrip seats={seats} active={s.sequential ? writer : 'all'} scores={totals} done={s.answers.map(Boolean)} />
         {humanWriting ? (
           <WriteForm key={`${s.round}-${writer}`} s={s} level={level} onSubmit={(answers) => g.act({ t: 'submit', answers }, writer)} />
         ) : (
-          <p className="game-hint big">{turnHint(g, seats, `${nameOf(seats, writer)} schreibt …`)}</p>
+          <p className="game-hint big">{s.sequential ? turnHint(g, seats, `${nameOf(seats, writer)} schreibt …`) : 'Fertig! Warte auf die anderen …'}</p>
         )}
         {g.curtain !== null && <Curtain seat={seats[g.curtain]} note={`Gleich kommt der Buchstabe für Runde ${s.round + 1}.`} onReveal={g.reveal} />}
       </div>

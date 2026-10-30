@@ -1,5 +1,7 @@
 # Firebase für Joyboy einrichten (ca. 10 Minuten)
 
+> **Erledigt:** Joyboy nutzt das Projekt `joyboy-916f0`. Adresse und API-Key stehen in `src/net/config.ts`. Diese Anleitung bleibt für ein neues Projekt oder eine eigene Kopie der App.
+
 Für die Online-Spielzimmer (bis zu 4 Kinder, jedes am eigenen Gerät) und die Spielstände in der Cloud braucht Joyboy ein eigenes, kostenloses Firebase-Projekt. Der kostenlose Tarif „Spark“ reicht, eine Kreditkarte ist nicht nötig.
 
 ## 1. Projekt anlegen

@@ -90,6 +90,8 @@ export interface SlfState {
   letters: string[];
   round: number;
   phase: 'write' | 'review' | 'done';
+  /** An einem Gerät schreibt einer nach dem anderen, online alle gleichzeitig. */
+  sequential: boolean;
   writer: number;
   first: number;
   answers: (string[] | null)[];
@@ -151,7 +153,7 @@ function pickLetters(rnd: Rnd): string[] {
 
 export function slfDef(robos: boolean[]): GameDef<SlfState, SlfAction> {
   return {
-    init({ n, starter, level, rnd }) {
+    init({ n, starter, level, shared, rnd }) {
       const cats = CATS_FOR[level];
       const letters = pickLetters(rnd);
       return {
@@ -160,6 +162,7 @@ export function slfDef(robos: boolean[]): GameDef<SlfState, SlfAction> {
         letters,
         round: 0,
         phase: 'write',
+        sequential: shared,
         writer: starter % n,
         first: starter % n,
         answers: Array(n).fill(null),
@@ -169,16 +172,17 @@ export function slfDef(robos: boolean[]): GameDef<SlfState, SlfAction> {
     },
     turn(s) {
       if (s.phase === 'done') return null;
-      return s.phase === 'write' ? s.writer : 'all';
+      if (s.phase === 'write') return s.sequential ? s.writer : 'all';
+      return 'all';
     },
     apply(s, a, by) {
       if (a.t === 'submit') {
-        if (s.phase !== 'write' || s.writer !== by || s.answers[by]) return null;
+        if (s.phase !== 'write' || s.answers[by] || (s.sequential && s.writer !== by)) return null;
         const mine = s.cats.map((_, k) => String(a.answers[k] ?? '').trim().slice(0, MAX_LEN));
         const answers = s.answers.map((x, i) => (i === by ? mine : x));
         for (let k = 1; k <= s.n; k++) {
           const w = (by + k) % s.n;
-          if (!answers[w]) return { ...s, answers, writer: w };
+          if (!answers[w]) return { ...s, answers, writer: s.sequential ? w : s.writer };
         }
         const done = answers as string[][];
         return {
@@ -206,11 +210,13 @@ export function slfDef(robos: boolean[]): GameDef<SlfState, SlfAction> {
       return { places: placesFromScores(scores), scores };
     },
     robo(s, seat) {
-      if (s.phase !== 'write' || s.writer !== seat) return null;
-      return { t: 'submit', answers: s.robo[s.round][seat] };
+      if (s.phase !== 'write' || s.answers[seat] || (s.sequential && s.writer !== seat)) return null;
+      return { t: 'submit', answers: s.robo[s.round][seat] ?? [] };
     },
+    // Robos Antworten bleiben bis zur Auswertung verdeckt – er darf also gleich abgeben.
     roboDelay: () => 1500,
-    viewer: (s) => (s.phase === 'write' ? s.writer : null),
+    phaseKey: (s) => `${s.round}:${s.phase}`,
+    viewer: (s) => (s.phase === 'write' && s.sequential ? s.writer : null),
     endDelay: 400,
   };
 }

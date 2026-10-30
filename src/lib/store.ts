@@ -59,6 +59,16 @@ export interface Profile {
   badges: string[];
   daily: { date: string; progress: number; done: boolean };
   week: { id: string; stars: number };
+  /** Kinder, mit denen schon online gespielt wurde (Cloud-ID → Anzeige) */
+  friends: Record<string, Friend>;
+  /** Letzte Änderung – entscheidet beim Abgleich mit der Cloud */
+  updatedAt: number;
+}
+
+export interface Friend {
+  name: string;
+  avatar: AvatarKind;
+  color: string;
 }
 
 export interface Settings {
@@ -103,6 +113,8 @@ export function newProfile(p: Pick<Profile, 'name' | 'avatar' | 'color' | 'age'>
     badges: [],
     daily: { date: dayKey(), progress: 0, done: false },
     week: { id: weekKey(), stars: 0 },
+    friends: {},
+    updatedAt: Date.now(),
   };
 }
 
@@ -120,8 +132,12 @@ function fixProfile(p: Profile): Profile {
     badges: p.badges ?? [],
     daily: p.daily ?? { date: dayKey(), progress: 0, done: false },
     week: p.week ?? { id: weekKey(), stars: 0 },
+    friends: p.friends ?? {},
+    updatedAt: p.updatedAt ?? p.createdAt ?? 0,
   };
 }
+
+export const normalizeProfile = fixProfile;
 
 function load(): AppData {
   try {
@@ -157,7 +173,16 @@ export function getData(): AppData {
   return data;
 }
 
-export function setData(next: AppData) {
+/**
+ * Neuen Stand übernehmen. Geänderte Profile bekommen einen neuen Zeitstempel – außer beim
+ * Übernehmen aus der Cloud (`keepStamps`), da gilt der Zeitstempel von dort.
+ */
+export function setData(next: AppData, keepStamps = false) {
+  if (!keepStamps) {
+    const before = new Map(data.profiles.map((p) => [p.id, p]));
+    const now = Date.now();
+    next = { ...next, profiles: next.profiles.map((p) => (before.get(p.id) === p ? p : { ...p, updatedAt: Math.max(now, (before.get(p.id)?.updatedAt ?? 0) + 1) })) };
+  }
   data = next;
   save();
   listeners.forEach((l) => l());

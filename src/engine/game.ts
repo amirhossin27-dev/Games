@@ -26,6 +26,8 @@ export interface InitCtx {
   level: Level;
   /** Wie viele echte Kinder spielen mit (der Rest ist Robo)? */
   humans: number;
+  /** Teilen sich mehrere Kinder dieses eine Gerät? (Online: nein – jedes hat sein eigenes.) */
+  shared: boolean;
   rnd: Rnd;
 }
 
@@ -70,6 +72,33 @@ export interface PlayProps {
   /** Bisheriger Rekord (Solo) */
   best?: number;
   onEnd(o: Outcome): void;
+  /** Nur im Online-Spielzimmer */
+  net?: NetLink;
+}
+
+/** Neuester Stand, den der Gastgeber veröffentlicht hat */
+export interface NetShared {
+  seq: number;
+  st: unknown;
+  /** Je Platz: bis zu welchem Zug der Gastgeber übernommen hat */
+  ack: Record<string, number>;
+}
+
+/**
+ * Verbindung eines Spiels zum Online-Spielzimmer: Der Gastgeber rechnet mit den Regel-Funktionen
+ * und veröffentlicht jeden neuen Stand; die Gäste schicken nur ihre Züge.
+ */
+export interface NetLink {
+  /** Platz dieses Geräts */
+  me: number;
+  host: boolean;
+  shared: NetShared;
+  /** Züge der Gäste (für den Gastgeber) */
+  acts: { seat: number; n: number; a: unknown }[];
+  /** Plätze, deren Gerät gerade nicht erreichbar ist – für sie springt Robo ein */
+  absent: number[];
+  publish(seq: number, s: unknown, ack: Record<string, number>): void;
+  push(a: unknown): void;
 }
 
 /** Feste Spielfarben je Platz – gut unterscheidbar, auch für Farbenschwache (dazu kommen Avatare). */

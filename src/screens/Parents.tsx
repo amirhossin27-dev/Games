@@ -7,6 +7,8 @@ import { formatClock } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
 import { Joy } from '../ui/Joy';
+import { toast } from '../ui/parts';
+import { deleteCloudProfile, makePass } from '../net/cloud';
 
 function PasswordSetup({ onDone, title }: { onDone: () => void; title: string }) {
   const [a, setA] = useState('');
@@ -128,6 +130,14 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
   const [confirm, setConfirm] = useState<string | null>(null);
   const [newPw, setNewPw] = useState(false);
   const usedMin = Math.floor(status.usedSec / 60);
+  const [pass, setPass] = useState<{ name: string; url: string } | null>(null);
+  const showPass = async (id: string, name: string) => {
+    try {
+      setPass({ name, url: await makePass(id) });
+    } catch {
+      toast('Dafür braucht Joyboy kurz Internet.');
+    }
+  };
   const set = (s: Partial<Settings>) => actions.settings(s);
 
   if (newPw) return <PasswordSetup title="Passwort ändern" onDone={() => setNewPw(false)} />;
@@ -217,6 +227,7 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
                 type="button"
                 className="btn small warm"
                 onClick={() => {
+                  void deleteCloudProfile(p.id);
                   actions.removeProfile(p.id);
                   setConfirm(null);
                 }}
@@ -224,13 +235,48 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
                 Wirklich löschen
               </button>
             ) : (
-              <button type="button" className="icon-btn soft" aria-label={`${p.name} löschen`} onClick={() => setConfirm(p.id)}>
-                <Icon name="trash" size={20} />
-              </button>
+              <>
+                <button type="button" className="icon-btn soft" aria-label={`Spielerpass für ${p.name}`} onClick={() => void showPass(p.id, p.name)}>
+                  <Icon name="key" size={20} />
+                </button>
+                <button type="button" className="icon-btn soft" aria-label={`${p.name} löschen`} onClick={() => setConfirm(p.id)}>
+                  <Icon name="trash" size={20} />
+                </button>
+              </>
             )}
           </div>
         ))}
-        <p className="small muted">Alle Spielstände liegen nur auf diesem Gerät. Joyboy hat keine Werbung, keine Käufe und keinen Chat.</p>
+        {pass && (
+          <div className="card stitched col" style={{ padding: 12 }}>
+            <b className="display">Spielerpass für {pass.name}</b>
+            <p className="small">Öffne diesen Link auf dem neuen Gerät – dann ist der Spielstand von {pass.name} dort. Behandle ihn wie einen Schlüssel und gib ihn nicht weiter.</p>
+            <div className="row wrap">
+              <button
+                type="button"
+                className="btn small primary"
+                onClick={async () => {
+                  try {
+                    if (navigator.share) await navigator.share({ title: `Joyboy-Spielerpass für ${pass.name}`, url: pass.url });
+                    else {
+                      await navigator.clipboard.writeText(pass.url);
+                      toast('Link kopiert!');
+                    }
+                  } catch {
+                    // abgebrochen
+                  }
+                }}
+              >
+                <Icon name="share" size={18} /> Teilen
+              </button>
+              <button type="button" className="btn small secondary" onClick={() => setPass(null)}>
+                Schließen
+              </button>
+            </div>
+          </div>
+        )}
+        <p className="small muted">
+          Die Spielstände liegen auf diesem Gerät und – sobald Internet da ist – zusätzlich gesichert in der Cloud (nur Spitzname, Tier, Sterne und Spielstand). Mit dem Spielerpass nehmt ihr sie auf ein neues Gerät mit. Joyboy hat keine Werbung, keine Käufe und keinen Chat.
+        </p>
       </section>
 
       <button type="button" className="btn secondary block" onClick={() => setNewPw(true)}>

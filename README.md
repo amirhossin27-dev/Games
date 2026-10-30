@@ -1,6 +1,6 @@
 # Joyboy 🎮
 
-Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die Uhr lernen, merken und knobeln. Allein, gegen den Computer-Freund **Robo** oder mit bis zu 4 Kindern zusammen an einem Gerät. Joyboy läuft als Web-App im Browser und lässt sich auf iPhone, iPad und Android wie eine normale App auf den Home-Bildschirm legen.
+Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die Uhr lernen, merken und knobeln. Allein, gegen den Computer-Freund **Robo**, mit bis zu 4 Kindern an einem Gerät – oder **online im Spielzimmer, jedes Kind an seinem eigenen Gerät, live synchron**. Joyboy läuft als Web-App im Browser und lässt sich auf iPhone, iPad und Android wie eine normale App auf den Home-Bildschirm legen.
 
 **App öffnen:** https://amirhossin27-dev.github.io/Games/
 
@@ -12,7 +12,9 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
 - **Belohnungen:** Sterne (0–3 pro Spiel), Level, 9 Abzeichen, Rekorde, eine Tagesaufgabe und eine Wochen-Rangliste der Kinder auf dem Gerät.
 - **Spielzeit-Limit für Eltern:** siehe unten.
-- **Kindersicher:** kein Chat, keine Werbung, keine Käufe, keine Tracker. Schriften werden mit der App ausgeliefert, kein Abruf bei Google. Alle Daten bleiben auf dem Gerät.
+- **Online-Spielzimmer** für bis zu 4 Kinder, siehe unten.
+- **Spielstände dauerhaft gesichert:** auf dem Gerät und zusätzlich in der Cloud. Mit dem **Spielerpass** (Elternbereich) nimmt ein Kind seinen Spielstand auf ein neues Gerät mit.
+- **Kindersicher:** kein Chat (nur 5 feste Reaktionen), keine Werbung, keine Käufe, keine Tracker. Schriften werden mit der App ausgeliefert, kein Abruf bei Google. In der Cloud liegen nur Spitzname, Tier, Sterne und Spielstand.
 
 ## Die Spiele
 
@@ -33,6 +35,20 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 
 Gegen Robo antworten in den Lernspielen alle gleichzeitig. Teilen sich mehrere Kinder ein Gerät, geht es reihum. Bei Spielen mit Geheimnissen (Mau-Mau, Schiffe versenken, Stadt-Land-Fluss) erscheint zwischen den Zügen ein Sichtschutz: „Gib das Gerät weiter – nicht spicken!“
 
+## Online-Spielzimmer
+
+1. Ein Kind tippt **Zimmer → Zimmer öffnen** (oder auf einer Spielseite „Online“) und wählt ein Spiel.
+2. Es bekommt einen **Zimmer-Code aus vier Tieren**, z. B. „Fuchs, Panda, Schildkröte, Löwe“. Den sagt es laut oder teilt den Link.
+3. Die anderen tippen **Zimmer → Code eingeben** und die vier Tiere – oder öffnen den Link – und **klingeln**.
+4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen.
+5. Der Gastgeber startet, alle spielen auf ihrem Gerät. „Nochmal“ startet die nächste Runde für alle.
+
+Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
+
+**Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus, übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
+
+Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK) und anonyme Anmeldung pro Kind. Der Gastgeber rechnet mit denselben Regel-Funktionen wie offline und veröffentlicht jeden Stand; die anderen schicken nur ihre Züge. Regeln: [`database.rules.json`](database.rules.json), Einrichtung: [`docs/FIREBASE.md`](docs/FIREBASE.md).
+
 ## Spielzeit-Limit (für Eltern)
 
 1. In der App auf **Ich → Für Eltern** tippen und beim ersten Mal ein Passwort festlegen. Dabei zeigt Joyboy einmalig einen **Notfall-Code**, falls das Passwort vergessen wird.
@@ -43,7 +59,7 @@ Gegen Robo antworten in den Lernspielen alle gleichzeitig. Teilen sich mehrere K
 
 Gezählt wird, solange Joyboy sichtbar geöffnet ist (nicht im Elternbereich). Das Kontingent gilt für 12 Stunden ab dem ersten Spielen. Damit das Verstellen der Geräte-Uhr nicht hilft, gleicht Joyboy die Zeit mit dem Server ab, sobald Internet da ist. Das Passwort wird nur als Hash gespeichert (PBKDF2).
 
-> Grenzen: Löscht jemand die Website-Daten im Browser, sind auch Limit und Profile weg. Am sichersten ist es zusätzlich, die Bildschirmzeit-Funktionen von iOS bzw. Android zu nutzen.
+> Grenzen: Das Limit gilt pro Gerät. Löscht jemand die Website-Daten im Browser, ist es weg (die Spielstände lassen sich über den Spielerpass zurückholen). Am sichersten ist es zusätzlich, die Bildschirmzeit-Funktionen von iOS bzw. Android zu nutzen.
 
 ## Auf dem Handy installieren
 
@@ -73,7 +89,8 @@ Jeder Push auf `main` oder den Entwicklungs-Branch testet, baut und veröffentli
 
 ```
 src/
-  engine/   Spiele-Engine für 1–4 Plätze (useGame), Robo, Tutorial-Typen
+  engine/   Spiele-Engine für 1–4 Plätze (useGame, auch online), Robo, Tutorial-Typen
+  net/      Firebase: Anmeldung, REST/Live-Stream, Cloud-Spielstände, Spielzimmer
   learn/    Aufgaben-Generatoren und Lernspiel-Engine
   games/    Spielekatalog, Regeln (rules/) und Ansichten (views/)
   arcade/   Arcade-Spiele aus Arta (fast unverändert übernommen)
@@ -86,4 +103,4 @@ Konzept und Plan: [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
 ## Wie geht es weiter?
 
-Als Nächstes kommen die **Online-Spielzimmer** (Phase 3): bis zu 4 Kinder, jedes am eigenen Gerät, live synchron über Firebase, mit Zimmer-Code aus vier Tieren und Spielständen in der Cloud. Dafür braucht es ein kostenloses Firebase-Projekt (Anleitung folgt).
+Phase 4 (Ideen aus dem Konzept): weitere Spiele aus Arta (Schach, Dame, Mühle, Wer ist es?, Bewegungs-Würfel), ein Wettkampf-Modus für die Arcade-Spiele im Spielzimmer und neue Lernspiele (Welt-Quiz, Wort-Baumeister, English Words).

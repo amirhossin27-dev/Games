@@ -1115,6 +1115,178 @@ p {
   box-shadow: 2px 3px 0 var(--ink);
 }
 
+.seat-row.empty {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+/* ───────────── Spielzimmer ───────────── */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 2px dashed var(--sage);
+  color: #33673e;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.live-badge .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sage);
+}
+
+.live-badge.off {
+  border-color: var(--terra-d);
+  color: var(--terra-d);
+}
+
+.live-badge.off .dot {
+  background: var(--terra-d);
+}
+
+.code-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.code-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  border: 2px dashed var(--ink);
+  border-radius: 8px;
+  background: var(--paper);
+  line-height: 1;
+}
+
+.code-stamp small {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.code-slots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-slot {
+  flex: 1;
+  aspect-ratio: 1;
+  max-width: 64px;
+  border-radius: 12px;
+  border: 2px dashed var(--stitch);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.code-slot.on {
+  border: 2px solid var(--ink);
+  background: var(--card);
+  font-size: 2rem;
+}
+
+.animal-pad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.animal-pad button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 2px 6px;
+  border-radius: 14px;
+  border: 2px solid var(--ink);
+  background: var(--card);
+  box-shadow: 2px 3px 0 var(--ink);
+  line-height: 1;
+}
+
+.animal-pad button span {
+  font-size: 2rem;
+}
+
+.animal-pad button small {
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.animal-pad button:active:not(:disabled) {
+  transform: translate(1px, 2px);
+  box-shadow: none;
+}
+
+.animal-pad button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.pick-games {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pick-game {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 2px dashed var(--stitch);
+  background: var(--card);
+  text-align: left;
+  line-height: 1.15;
+}
+
+.pick-game b {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+}
+
+.pick-game[aria-pressed='true'] {
+  border: 2px solid var(--ink);
+  box-shadow: 2px 3px 0 var(--ink);
+}
+
+.room-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 2px solid var(--ink);
+  background: var(--sage-soft);
+  box-shadow: 2px 3px 0 var(--ink);
+  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.seat-chip.away {
+  opacity: 0.5;
+}
+
 /* ───────────── Ich ───────────── */
 .stats3 {
   display: grid;

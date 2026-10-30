@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 import type { SeatInfo } from '../engine/game';
+import { isOnlineGame } from '../games/defs';
 import { CATEGORY, GAME_BY_ID, playersText, type GameId, type GameMeta } from '../games/registry';
 import { ANIMALS } from '../lib/names';
 import { nav } from '../lib/nav';
@@ -215,7 +216,15 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
             />
           )}
           {canTogether && <ModeTile icon="device" title="Zusammen" sub={`${Math.max(2, min)}–${max} Kinder an einem Gerät`} onClick={() => setSetup('together')} />}
-          {canTogether && <ModeTile icon="globe" title="Online" sub="Bald: jedes Kind am eigenen Gerät" disabled />}
+          {canTogether && (
+            <ModeTile
+              icon="globe"
+              title="Online"
+              sub={isOnlineGame(id) ? 'Jedes Kind am eigenen Gerät' : 'Für dieses Spiel noch nicht'}
+              disabled={!isOnlineGame(id)}
+              onClick={() => nav.go({ name: 'rooms', preset: id })}
+            />
+          )}
         </div>
       </div>
 

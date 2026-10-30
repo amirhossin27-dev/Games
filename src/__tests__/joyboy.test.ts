@@ -27,7 +27,7 @@ function seeded(seed: number) {
   };
 }
 
-const ctx = (n: number, extra: Partial<InitCtx> = {}): InitCtx => ({ n, starter: 0, level: 1, humans: 1, rnd: seeded(7), ...extra });
+const ctx = (n: number, extra: Partial<InitCtx> = {}): InitCtx => ({ n, starter: 0, level: 1, humans: 1, shared: false, rnd: seeded(7), ...extra });
 
 /** Lässt ein Spiel komplett von Robo spielen – endet es sauber? */
 function playOut<S, A>(def: GameDef<S, A>, c: InitCtx, max = 5000): { s: S; steps: number } {
@@ -190,7 +190,7 @@ describe('Lernspiele', () => {
     expect(together.order).toBe('together');
     const a = def.apply(together, { t: 'answer', i: 0, ms: 3000 }, 1, Math.random)!;
     expect(a.phase).toBe('ask');
-    const turns = def.init(ctx(3, { humans: 2 }));
+    const turns = def.init(ctx(3, { humans: 2, shared: true }));
     expect(turns.order).toBe('turns');
     expect(turns.tasks).toHaveLength(15);
     expect(def.turn(turns)).toBe(0);
@@ -334,7 +334,7 @@ describe('Stadt-Land-Fluss für mehrere', () => {
 
   it('an einem Gerät schreibt einer nach dem anderen', () => {
     const def = slfDef([false, true, false]);
-    let s = def.init(ctx(3, { humans: 2 }));
+    let s = def.init(ctx(3, { humans: 2, shared: true }));
     expect(def.turn(s)).toBe(0);
     s = def.apply(s, { t: 'submit', answers: ['Bär', 'Ben', 'Berlin', 'Bonn'] }, 0, Math.random)!;
     expect(def.turn(s)).toBe(1);

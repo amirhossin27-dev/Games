@@ -55,8 +55,8 @@ const ROBO_SKILL: Record<Level, number> = { 0: 0.6, 1: 0.72, 2: 0.84 };
 
 export function quizDef(subject: Subject): GameDef<QuizState, QuizAction> {
   return {
-    init({ n, level, humans, rnd }) {
-      const order = humans > 1 ? 'turns' : 'together';
+    init({ n, level, shared, rnd }) {
+      const order = shared ? 'turns' : 'together';
       const count = order === 'turns' ? QUIZ_EACH * n : QUIZ_SOLO;
       const tasks: Task[] = [];
       // Keine Aufgabe doppelt hintereinander

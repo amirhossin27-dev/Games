@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { sfx, unlockAudio, useTouchLock } from '../arcade/engine';
-import type { Outcome } from '../engine/game';
+import type { NetLink, Outcome } from '../engine/game';
 import { GameView } from '../games/play';
 import { GAME_BY_ID, type GameMeta } from '../games/registry';
 import { nav, type Session } from '../lib/nav';
@@ -30,7 +30,16 @@ function starsFor(meta: GameMeta, o: Outcome, n: number, best: number | undefine
   });
 }
 
-export function GameScreen({ session }: { session: Session }) {
+/** Steuerung im Online-Spielzimmer */
+export interface OnlineControls {
+  host: boolean;
+  hostName: string;
+  again(): void;
+  lobby(): void;
+  leave(): void;
+}
+
+export function GameScreen({ session, net, online }: { session: Session; net?: NetLink; online?: OnlineControls }) {
   const meta = GAME_BY_ID[session.game];
   const data = useData();
   const ref = useRef<HTMLDivElement>(null);
@@ -69,15 +78,24 @@ export function GameScreen({ session }: { session: Session }) {
     setResult({ outcome: o, stars, records });
   };
 
-  const again = () => {
+  // Neue Runde (auch wenn der Gastgeber online „Nochmal“ tippt)
+  useEffect(() => {
     best.current = data.profiles.find((p) => p.id === first.profileId)?.games[meta.id]?.best;
     setResult(null);
-    nav.again();
+  }, [session.round]);
+
+  const again = () => {
+    if (online) online.again();
+    else nav.again();
   };
 
   const close = () => {
     stopSpeaking();
-    nav.closeGame();
+    if (!online) return nav.closeGame();
+    if (online.host ? window.confirm('Runde für alle beenden und zurück ins Spielzimmer?') : window.confirm('Spielzimmer verlassen? Robo spielt dann für dich weiter.')) {
+      if (online.host) online.lobby();
+      else online.leave();
+    }
   };
 
   return (
@@ -101,15 +119,44 @@ export function GameScreen({ session }: { session: Session }) {
         <GameView
           key={session.round}
           id={meta.id}
-          props={{ seats: session.seats, level: session.level, starter: session.round % session.seats.length, best: best.current, onEnd }}
+          props={{ seats: session.seats, level: session.level, starter: session.round % session.seats.length, best: best.current, onEnd, net }}
         />
       </div>
-      {result && <ResultCard session={session} meta={meta} result={result} profiles={data.profiles} onAgain={again} onClose={close} best={best.current} />}
+      {result && (
+        <ResultCard
+          session={session}
+          meta={meta}
+          result={result}
+          profiles={data.profiles}
+          onAgain={again}
+          onClose={online ? (online.host ? online.lobby : online.leave) : close}
+          best={best.current}
+          online={online}
+        />
+      )}
     </div>
   );
 }
 
-function ResultCard({ session, meta, result, profiles, onAgain, onClose, best }: { session: Session; meta: GameMeta; result: Result; profiles: Profile[]; onAgain: () => void; onClose: () => void; best?: number }) {
+function ResultCard({
+  session,
+  meta,
+  result,
+  profiles,
+  onAgain,
+  onClose,
+  best,
+  online,
+}: {
+  session: Session;
+  meta: GameMeta;
+  result: Result;
+  profiles: Profile[];
+  onAgain: () => void;
+  onClose: () => void;
+  best?: number;
+  online?: OnlineControls;
+}) {
   const { outcome, stars } = result;
   const seats = session.seats;
   const n = seats.length;
@@ -211,11 +258,17 @@ function ResultCard({ session, meta, result, profiles, onAgain, onClose, best }:
           </div>
         )}
 
-        <button type="button" className="btn primary big block" onClick={onAgain}>
-          <Icon name="refresh" /> Nochmal spielen
-        </button>
+        {online && !online.host ? (
+          <p className="card center display" role="status">
+            Warte, bis {online.hostName} „Nochmal“ tippt …
+          </p>
+        ) : (
+          <button type="button" className="btn primary big block" onClick={onAgain}>
+            <Icon name="refresh" /> Nochmal spielen
+          </button>
+        )}
         <button type="button" className="btn secondary block" onClick={onClose}>
-          Anderes Spiel
+          {online ? (online.host ? 'Zurück ins Spielzimmer' : 'Zimmer verlassen') : 'Anderes Spiel'}
         </button>
       </div>
     </div>
