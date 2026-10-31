@@ -6,6 +6,10 @@ import '@fontsource/andika/700.css';
 import './styles.css';
 import './arcade/arcade.css';
 import { App } from './App';
+import { startAutoTheme } from './lib/theme';
+
+const stopAutoTheme = startAutoTheme();
+if (import.meta.hot) import.meta.hot.dispose(stopAutoTheme);
 
 // Wie eine App: langes Drücken öffnet kein Browser-Menü (außer in Eingabefeldern)
 document.addEventListener('contextmenu', (e) => {

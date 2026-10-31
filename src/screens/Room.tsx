@@ -25,11 +25,11 @@ import { CallFriends, FriendRooms, InviteFriends } from './Friends';
 const codeOpen = new Set<string>();
 
 export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: string }[] = [
-  { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: '#2F5F86' },
-  { id: 'smile', icon: 'smile', label: 'Lachen', color: '#6B5410' },
-  { id: 'wow', icon: 'wow', label: 'Staunen', color: '#5E4277' },
-  { id: 'party', icon: 'party', label: 'Juhu', color: '#8F3E1F' },
-  { id: 'star', icon: 'sparkle', label: 'Super', color: '#33673E' },
+  { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: 'var(--reaction-sky, #2F5F86)' },
+  { id: 'smile', icon: 'smile', label: 'Lachen', color: 'var(--reaction-butter, #6B5410)' },
+  { id: 'wow', icon: 'wow', label: 'Staunen', color: 'var(--reaction-plum, #5E4277)' },
+  { id: 'party', icon: 'party', label: 'Juhu', color: 'var(--terra-ink)' },
+  { id: 'star', icon: 'sparkle', label: 'Super', color: 'var(--sage-ink)' },
 ];
 
 function CodeAnimals({ code, size = 46 }: { code: string; size?: number }) {
@@ -490,17 +490,17 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
                     </span>
                   </span>
                   {doc?.tut ? (
-                    <span className="tag" style={{ '--tag-bg': '#F7EDC8', '--tag-fg': '#6B5410' } as CSSProperties}>
+                    <span className="tag" style={{ '--tag-bg': 'var(--butter-soft)', '--tag-fg': 'var(--reaction-butter, #6B5410)' } as CSSProperties}>
                       lernt die Regeln
                     </span>
                   ) : doc?.solo && !isAway(doc, now) ? (
-                    <span className="tag" style={{ '--tag-bg': '#DCE9F3', '--tag-fg': '#2F5F86' } as CSSProperties}>
+                    <span className="tag" style={{ '--tag-bg': 'var(--sky-soft)', '--tag-fg': 'var(--reaction-sky, #2F5F86)' } as CSSProperties}>
                       spielt kurz allein
                     </span>
                   ) : isAway(doc, now) ? (
                     <span className="tag">ist kurz weg</span>
                   ) : (
-                    <span className="tag" style={{ '--tag-bg': '#DDEBDD', '--tag-fg': '#33673E' } as CSSProperties}>
+                    <span className="tag" style={{ '--tag-bg': 'var(--sage-soft)', '--tag-fg': 'var(--sage-ink)' } as CSSProperties}>
                       da
                     </span>
                   )}
