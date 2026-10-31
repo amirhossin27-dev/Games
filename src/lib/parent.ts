@@ -47,15 +47,36 @@ export async function setParentPassword(password: string): Promise<string> {
   return code;
 }
 
+/**
+ * Power-Passwort für den Notfall: Es öffnet den Elternbereich auf jedem Gerät, auch wenn Passwort und
+ * Notfall-Code vergessen sind (danach unter „Passwort ändern“ ein neues festlegen). Im Code steht nur
+ * sein Hash, nicht das Passwort selbst. Groß-/Kleinschreibung und Leerzeichen am Rand zählen nicht.
+ * Ändern: neues Salz + Hashes mit derive() erzeugen (einmal mit WebCrypto, einmal mit dem fnv-Ersatz).
+ */
+const POWER = {
+  salt: '17T2/eUD51qWBIrGKt/0mA==',
+  hash: 'a3PqY5QBQYtAuNVWzBhJibTmfWvrI8W4OhwWmSs8MbY=',
+  /** Ersatz-Hash für Geräte ohne WebCrypto (siehe derive) */
+  fnv: 'fnv:38090fd4',
+};
+
+export async function isPowerPassword(input: string): Promise<boolean> {
+  const h = await derive(input.trim().toLowerCase(), unb64(POWER.salt));
+  return h === POWER.hash || h === POWER.fnv;
+}
+
 export async function checkParentPassword(password: string): Promise<boolean> {
   const lock = getData().parent;
   if (!lock) return false;
+  if (await isPowerPassword(password)) return true;
   return (await derive(password, unb64(lock.salt))) === lock.hash;
 }
 
+/** Nimmt auch das Power-Passwort an – dann geht es wie mit dem Notfall-Code zum neuen Passwort. */
 export async function checkRecoveryCode(code: string): Promise<boolean> {
   const lock = getData().parent;
   if (!lock) return false;
+  if (await isPowerPassword(code)) return true;
   return (await derive(cleanCode(code), unb64(lock.rsalt))) === lock.rhash;
 }
 
