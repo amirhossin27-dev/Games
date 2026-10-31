@@ -37,6 +37,9 @@ export interface Badge {
   have: (p: Profile) => number;
 }
 
+/** Wie oft das Kind insgesamt gespielt hat (alle Spiele zusammen). */
+export const playedTotal = (p: Profile): number => Object.values(p.games).reduce((sum, g) => sum + g.played, 0);
+
 export const BADGES: Badge[] = [
   { id: 'rechen-profi', name: 'Rechen-Profi', text: '50 Rechenaufgaben richtig', icon: 'math', color: '#2F6E9E', need: 50, have: (p) => p.counters.math },
   { id: 'wort-zauberer', name: 'Wort-Zauberer', text: '40 Buchstaben-Aufgaben richtig', icon: 'letters', color: '#8A2F5A', need: 40, have: (p) => p.counters.letters },
@@ -49,45 +52,14 @@ export const BADGES: Badge[] = [
   { id: 'teamplayer', name: 'Teamplayer', text: '10 Spiele mit anderen Kindern', icon: 'users', color: '#6E4C86', need: 10, have: (p) => p.counters.together },
   { id: 'strategie-stern', name: 'Strategie-Stern', text: '10 Siege in Logik-Spielen', icon: 'star', color: '#5E4277', need: 10, have: (p) => p.counters.logicWins },
   { id: 'arcade-ass', name: 'Arcade-Ass', text: '5 neue Rekorde', icon: 'trophy', color: '#3D4A66', need: 5, have: (p) => p.counters.records },
-  { id: 'tages-held', name: 'Tages-Held', text: '5 Tagesaufgaben geschafft', icon: 'flame', color: '#B5532E', need: 5, have: (p) => p.counters.dailyDone },
+  // Die Kennung stammt noch vom früheren Abzeichen für Tagesaufgaben, damit es niemand verliert, der es schon hat.
+  { id: 'tages-held', name: 'Dranbleiber', text: '50 Spiele gespielt', icon: 'flame', color: '#B5532E', need: 50, have: (p) => playedTotal(p) },
 ];
 
 export function withBadges(p: Profile): { profile: Profile; earned: Badge[] } {
   const earned = BADGES.filter((b) => !p.badges.includes(b.id) && b.have(p) >= b.need);
   if (!earned.length) return { profile: p, earned };
   return { profile: { ...p, badges: [...p.badges, ...earned.map((b) => b.id)] }, earned };
-}
-
-// ───── Tagesaufgabe ─────
-
-export type DailyKind = 'math' | 'letters' | 'clock' | 'games' | 'stars' | 'together';
-
-export interface DailyTask {
-  kind: DailyKind;
-  target: number;
-  text: string;
-}
-
-const DAILY: DailyTask[] = [
-  { kind: 'math', target: 10, text: 'Löse 10 Rechenaufgaben' },
-  { kind: 'games', target: 3, text: 'Spiele 3 Spiele' },
-  { kind: 'letters', target: 8, text: 'Finde 8 Buchstaben' },
-  { kind: 'stars', target: 6, text: 'Sammle 6 Sterne' },
-  { kind: 'clock', target: 6, text: 'Lies 6 Uhrzeiten richtig' },
-  { kind: 'together', target: 1, text: 'Spiel einmal mit anderen' },
-];
-
-export const DAILY_REWARD = 3;
-
-export function dailyTask(date = new Date()): DailyTask {
-  const days = Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000);
-  return DAILY[days % DAILY.length];
-}
-
-export function dailyOf(p: Profile): { task: DailyTask; progress: number; done: boolean } {
-  const today = dayKey();
-  const fresh = p.daily.date !== today;
-  return { task: dailyTask(), progress: fresh ? 0 : p.daily.progress, done: fresh ? false : p.daily.done };
 }
 
 // ───── Ergebnis eintragen ─────
@@ -116,7 +88,6 @@ export interface PlayResult {
 export interface RecordOutcome {
   newRecord: boolean;
   earned: Badge[];
-  dailyDone: boolean;
   starsGained: number;
   levelUp: boolean;
 }
@@ -136,44 +107,22 @@ export function applyResult(p: Profile, r: PlayResult): { profile: Profile; out:
   if (r.logic && r.won) counters.logicWins++;
   if (newRecord) counters.records++;
 
-  // Tagesaufgabe
   const today = dayKey();
-  let daily = p.daily.date === today ? { ...p.daily } : { date: today, progress: 0, done: false };
-  const task = dailyTask();
-  const add: Record<DailyKind, number> = {
-    math: r.subject === 'math' ? (r.correct ?? 0) : 0,
-    letters: r.subject === 'letters' ? (r.correct ?? 0) : 0,
-    clock: r.subject === 'clock' ? (r.correct ?? 0) : 0,
-    games: 1,
-    stars: r.stars,
-    together: r.together ? 1 : 0,
-  };
-  daily.progress = Math.min(task.target, daily.progress + add[task.kind]);
-  let bonus = 0;
-  let dailyDone = false;
-  if (!daily.done && daily.progress >= task.target) {
-    daily = { ...daily, done: true };
-    bonus = DAILY_REWARD;
-    counters.dailyDone++;
-    dailyDone = true;
-  }
-
   const learnDay = p.learnDay.date === today ? { ...p.learnDay } : { date: today, count: 0 };
   if (r.learn) learnDay.count++;
 
-  const gained = r.stars + bonus;
+  const gained = r.stars;
   const week = p.week.id === weekKey() ? { ...p.week, stars: p.week.stars + gained } : { id: weekKey(), stars: gained };
   const next: Profile = {
     ...p,
     stars: p.stars + gained,
     week,
-    daily,
     learnDay,
     counters,
     games: { ...p.games, [r.game]: { played: stat.played + 1, won: stat.won + (r.won ? 1 : 0), best, stars: Math.max(stat.stars, r.stars) } },
   };
   const { profile, earned } = withBadges(next);
-  return { profile, out: { newRecord, earned, dailyDone, starsGained: gained, levelUp: levelOf(profile.stars).level > levelOf(p.stars).level } };
+  return { profile, out: { newRecord, earned, starsGained: gained, levelUp: levelOf(profile.stars).level > levelOf(p.stars).level } };
 }
 
 /** Ergebnisse mehrerer Kinder (an einem Gerät) eintragen. */

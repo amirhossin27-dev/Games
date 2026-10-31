@@ -41,8 +41,6 @@ export interface Counters {
   logicWins: number;
   /** Neue Rekorde */
   records: number;
-  /** Geschaffte Tagesaufgaben */
-  dailyDone: number;
 }
 
 export interface Profile {
@@ -60,7 +58,6 @@ export interface Profile {
   /** Übersprungene Tutorials – damit sie nicht jedes Mal von selbst kommen */
   skipped: string[];
   badges: string[];
-  daily: { date: string; progress: number; done: boolean };
   week: { id: string; stars: number };
   /** Kinder, mit denen schon online gespielt wurde (Cloud-ID → Anzeige) */
   friends: Record<string, Friend>;
@@ -104,7 +101,7 @@ export interface AppData {
 
 const KEY = 'joyboy:data:v1';
 
-export const emptyCounters = (): Counters => ({ math: 0, letters: 0, clock: 0, world: 0, words: 0, english: 0, together: 0, logicWins: 0, records: 0, dailyDone: 0 });
+export const emptyCounters = (): Counters => ({ math: 0, letters: 0, clock: 0, world: 0, words: 0, english: 0, together: 0, logicWins: 0, records: 0 });
 
 export function newProfile(p: Pick<Profile, 'name' | 'avatar' | 'color' | 'age'>): Profile {
   return {
@@ -118,7 +115,6 @@ export function newProfile(p: Pick<Profile, 'name' | 'avatar' | 'color' | 'age'>
     tutorials: [],
     skipped: [],
     badges: [],
-    daily: { date: dayKey(), progress: 0, done: false },
     week: { id: weekKey(), stars: 0 },
     friends: {},
     learnDay: { date: dayKey(), count: 0 },
@@ -138,7 +134,6 @@ function fixProfile(p: Profile): Profile {
     tutorials: p.tutorials ?? [],
     skipped: p.skipped ?? [],
     badges: p.badges ?? [],
-    daily: p.daily ?? { date: dayKey(), progress: 0, done: false },
     week: p.week ?? { id: weekKey(), stars: 0 },
     friends: p.friends ?? {},
     learnDay: p.learnDay ?? { date: dayKey(), count: 0 },
