@@ -54,9 +54,12 @@
   border-radius: 6px;
   box-shadow: 0 0 0 8px #3b3b4d, 0 0 0 11px #24242f, 0 20px 50px rgba(0, 0, 0, 0.5);
 }
+.snake-screen {
+  position: relative;
+}
 .snake-start {
   place-items: start center;
-  padding-top: 18%;
+  padding-top: 14%;
 }
 .lcd-text {
   padding: 6px 10px;
@@ -73,30 +76,86 @@
   background: #0f380f;
   color: #9bbc0f;
 }
-.dpad {
+.snake-pad {
   flex: none;
   display: grid;
-  grid-template-columns: repeat(3, 60px);
-  grid-template-rows: repeat(3, 48px);
-  gap: 5px;
-  justify-content: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+  padding-bottom: 5px;
 }
-.dpad-btn {
+/* Große Game-Boy-Knöpfe: hell = drückbar, dunkel = da fährt die Schlange gerade hin, blass = geht nicht (umdrehen). */
+.snake-btn {
+  height: 72px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--gtext);
-  font-size: 1.1rem;
+  border-radius: 20px;
+  background: #9bbc0f;
+  color: #0f380f;
+  box-shadow: 0 5px 0 #306230;
   touch-action: none;
+  transition: transform 0.06s, box-shadow 0.06s, background 0.12s, color 0.12s, opacity 0.15s;
 }
-.dpad-btn:active {
-  background: color-mix(in srgb, var(--g2) 65%, transparent);
+.snake-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #306230;
+}
+.snake-btn.on {
+  background: #0f380f;
+  color: #9bbc0f;
+  box-shadow: 0 5px 0 #071c07, 0 0 0 3px #9bbc0f;
+}
+.snake-btn.on:active {
+  box-shadow: 0 1px 0 #071c07, 0 0 0 3px #9bbc0f;
+}
+.snake-btn.off {
+  opacity: 0.35;
+}
+/* Vor dem Start hüpfen die Pfeile nacheinander leicht – „hier tippen!“ */
+.snake-pad.wait .snake-btn {
+  animation: snake-nudge 1.6s ease-in-out infinite;
+}
+.snake-pad.wait .snake-btn:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.snake-pad.wait .snake-btn:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.snake-pad.wait .snake-btn:nth-child(4) {
+  animation-delay: 0.45s;
+}
+@keyframes snake-nudge {
+  0%,
+  40%,
+  100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: 0 -6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .snake-pad.wait .snake-btn {
+    animation: none;
+  }
+}
+.snake-arrow {
+  width: 40px;
+  height: 40px;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linejoin: round;
 }
 @media (max-height: 700px) {
-  .dpad {
-    grid-template-columns: repeat(3, 52px);
-    grid-template-rows: repeat(3, 40px);
+  .snake-btn {
+    height: 60px;
+    border-radius: 18px;
+  }
+  .snake-arrow {
+    width: 34px;
+    height: 34px;
   }
 }
 .rx {

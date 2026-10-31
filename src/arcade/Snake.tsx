@@ -65,6 +65,8 @@ export function Snake({ best, onEnd }: GameProps) {
   const s = useRef<SnakeState>(fresh());
   const [score, setScore] = useState(0);
   const [started, setStarted] = useState(false);
+  /** Wohin die Schlange gerade will – leuchtet unten als Knopf auf. */
+  const [heading, setHeading] = useState<Dir>('right');
   const swipe = useRef<{ x: number; y: number; id: number } | null>(null);
 
   const { wrapRef, canvasRef, paint } = useFitCanvas(W, H, (ctx) => {
@@ -102,12 +104,18 @@ export function Snake({ best, onEnd }: GameProps) {
     const st = s.current;
     if (!st.alive) return;
     if (!st.started) {
+      // Der erste Pfeil gilt immer – auch nach links: dann dreht sich die Schlange einfach um.
+      if (d === OPPOSITE[st.dir]) st.snake.reverse();
+      st.dir = d;
       st.started = true;
       setStarted(true);
+      setHeading(d);
+      return;
     }
     const last = st.queue[st.queue.length - 1] ?? st.dir;
     if (d === last || d === OPPOSITE[last] || st.queue.length >= 2) return;
     st.queue.push(d);
+    setHeading(d);
   };
 
   useEffect(() => {
@@ -179,18 +187,25 @@ export function Snake({ best, onEnd }: GameProps) {
     swipe.current = null;
   };
 
-  const pad = (d: Dir, label: string, symbol: string) => (
-    <button
-      className={`dpad-btn dpad-${d}`}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        turn(d);
-      }}
-      aria-label={label}
-    >
-      {symbol}
-    </button>
-  );
+  const pad = (d: Dir, label: string) => {
+    const on = started && heading === d;
+    const off = started && heading === OPPOSITE[d];
+    return (
+      <button
+        type="button"
+        className={`snake-btn${on ? ' on' : ''}${off ? ' off' : ''}`}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          buzz(10);
+          turn(d);
+        }}
+        aria-label={label}
+        aria-pressed={on}
+      >
+        <Arrow dir={d} />
+      </button>
+    );
+  };
 
   return (
     <div className="g-col fill">
@@ -199,19 +214,34 @@ export function Snake({ best, onEnd }: GameProps) {
         <span>🏆 {best !== undefined ? String(best).padStart(3, '0') : '---'}</span>
       </div>
       <div className="canvas-wrap lcd-frame" ref={wrapRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
-        <canvas ref={canvasRef} className="game-canvas" />
-        {!started && (
-          <div className="canvas-overlay snake-start">
-            <span className="lcd-text">Wische oder tippe einen Pfeil ▶</span>
-          </div>
-        )}
+        {/* So groß wie das Spielfeld, damit der Start-Hinweis immer auf dem Bildschirm liegt. */}
+        <div className="snake-screen">
+          <canvas ref={canvasRef} className="game-canvas" />
+          {!started && (
+            <div className="canvas-overlay snake-start">
+              <span className="lcd-text">Tippe unten auf einen Pfeil ↓</span>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="dpad">
-        {pad('up', 'Hoch', '▲')}
-        {pad('left', 'Links', '◀')}
-        {pad('right', 'Rechts', '▶')}
-        {pad('down', 'Runter', '▼')}
+      {/* Alle vier Pfeile in einer Reihe, so wie sie auf dem Bildschirm liegen: links ganz links, rechts ganz rechts. */}
+      <div className={`snake-pad${started ? '' : ' wait'}`}>
+        {pad('left', 'Links')}
+        {pad('up', 'Hoch')}
+        {pad('down', 'Runter')}
+        {pad('right', 'Rechts')}
       </div>
     </div>
+  );
+}
+
+const ROTATE: Record<Dir, number> = { up: 0, right: 90, down: 180, left: 270 };
+
+/** Dicker, runder Pfeil als Bild – Zeichen wie ▶ werden auf manchen Handys zu bunten Emojis. */
+function Arrow({ dir }: { dir: Dir }) {
+  return (
+    <svg className="snake-arrow" viewBox="0 0 24 24" aria-hidden="true" style={{ transform: `rotate(${ROTATE[dir]}deg)` }}>
+      <path d="M12 5 L20 17 H4 Z" />
+    </svg>
   );
 }
