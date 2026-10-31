@@ -119,7 +119,7 @@ let myActs: { n: number; r: number; a: unknown }[] = [];
 
 const token = async (force = false) => {
   // Nie ein Konto für „kein Kind“ anlegen (z. B. wenn ein Zug noch unterwegs ist und das Zimmer schon zu)
-  if (!view.profileId) throw new Error('kein Kind im Zimmer');
+  if (!view.profileId) throw new Error('kein Freund im Zimmer');
   return (await ensureAuth(view.profileId, force)).token!;
 };
 

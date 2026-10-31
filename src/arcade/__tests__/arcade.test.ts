@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { BZ_COLS, BZ_ROWS, bzEmpty, bzRow, bzShift } from '../Ballz';
 import { hopGenerate, type HopPlat } from '../Hopper';
 import { tapDir } from '../Snake';
-import { DX, DY, MAZE, MH, MW, START, canGo, chooseDir, countDots, dotGrid, ghostTarget, isWall, modeAt, opposite, type Dir } from '../muncher';
-import { autoStep, bestTarget, canAutoFinish, canTab, pickUp, solDeal, solDraw, solMove, solWon, type SCard, type SolState } from '../solitaire';
-import { HALF, TURN_WINDOW, makeSeg, newRun, runScore, runStep, segEnd, type RunState } from '../runner';
+import { DX, DY, MAZE, MH, MW, START, canGo, chooseDir, countDots, dotGrid, ghostTarget, isWall, modeAt, opposite, type Dir } from '../muncher-logic';
+import { autoStep, bestTarget, canAutoFinish, canTab, pickUp, solDeal, solDraw, solMove, solWon, type SCard, type SolState } from '../solitaire-logic';
+import { HALF, TURN_WINDOW, makeSeg, newRun, runScore, runStep, segEnd, type RunState } from '../runner-logic';
 
 function seeded(seed: number) {
   let s = seed >>> 0;

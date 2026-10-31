@@ -130,25 +130,6 @@ export function Home({ profile, tab: initial }: { profile: Profile; tab?: string
         </button>
       )}
 
-      <section className="card tape" aria-label="Zusammen spielen">
-        <div className="col" style={{ gap: 12 }}>
-          <div className="row between">
-            <div>
-              <h2>Zusammen spielen</h2>
-              <p style={{ color: '#3B4A3F' }}>Bis zu 4 Kinder – an einem Gerät oder online, jedes am eigenen.</p>
-            </div>
-          </div>
-          <div className="row" style={{ gap: 12 }}>
-            <button type="button" className="btn primary grow" onClick={() => setTab('zusammen')}>
-              Spiele für mehrere
-            </button>
-            <button type="button" className="btn secondary" onClick={() => nav.go({ name: 'rooms' })}>
-              Online
-            </button>
-          </div>
-        </div>
-      </section>
-
       <section className="sticky spruch" aria-label="Joys Spruch für dich">
         <Joy size={54} mood="cheer" />
         <div className="grow col" style={{ gap: 2 }}>
