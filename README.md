@@ -72,6 +72,8 @@ Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK)
 4. Ist die Zeit aufgebraucht, macht Joyboy **12 Stunden Pause**. Ein Countdown zeigt, wann es weitergeht.
 5. Eltern können mit dem Passwort jederzeit **15 Minuten schenken**, die **Sperre aufheben** oder das Limit ausschalten.
 
+> Vorerst ausgeschaltet: Der Elternbereich öffnet sich gerade **ohne Passwort**. Wieder an geht es mit `PARENT_PASSWORD_ENABLED = true` in [`src/lib/parent.ts`](src/lib/parent.ts); ein schon festgelegtes Passwort gilt dann wieder.
+
 Gezählt wird, solange Joyboy sichtbar geöffnet ist (nicht im Elternbereich), auch bei zwei offenen Tabs nur einmal. Das Kontingent gilt für 12 Stunden ab dem ersten Spielen. Damit das Verstellen der Geräte-Uhr nicht hilft, prüft Joyboy die Uhrzeit über das Internet: Eine Pause endet und ein neues Kontingent beginnt nur mit geprüfter Uhrzeit. Ohne Internet bleibt eine Pause deshalb, bis das Gerät wieder online ist oder die Eltern sie aufheben. Das Passwort wird nur als Hash gespeichert (PBKDF2).
 
 > Grenzen: Das Limit gilt pro Gerät, also für alle Kinder darauf zusammen. Löscht jemand die Website-Daten im Browser, ist es weg (die Spielstände lassen sich über den Spielerpass zurückholen). Am sichersten ist es zusätzlich, die Bildschirmzeit-Funktionen von iOS bzw. Android zu nutzen.
