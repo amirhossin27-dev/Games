@@ -25,7 +25,7 @@
 | **Sofort verstehen** | Jedes Spiel hat ein Tutorial mit 3–5 Schritten, Zeigehand und Probezug. |
 | **Kurze Runden** | 1–5 Minuten pro Spiel, jederzeit pausierbar, laufende Online-Spiele lassen sich fortsetzen. |
 | **Belohnen statt Druck** | Sterne, Level und Abzeichen. Keine Verlust-Bestrafung, Robo passt sich an. |
-| **Sicher** | Kein Chat, keine Werbung, keine Käufe, keine Tracker, nur Spitznamen. |
+| **Sicher** | Chat nur mit fertigen Sätzen und Wortfilter, keine Werbung, keine Käufe, keine Tracker, nur Spitznamen. |
 | **Große Ziele** | Tippflächen ≥ 48 px, hohe Kontraste (WCAG AA), Farbe nie allein als Unterscheidung (Antworten haben zusätzlich Formen). |
 
 ### Zielgruppe
@@ -178,6 +178,9 @@ Weil jeder Knoten genau einen Schreiber hat, gibt es keine Konflikte – das ist
 /rooms/<code>/info         Gastgeber, Spiel, Stufe, Status (Warten/Spielt/Fertig), reingelassene Kinder
 /rooms/<code>/seats/<uid>  Platz 0–3, Name, Avatar, bereit, Tutorial gesehen, Herzschlag, Züge, Reaktion
 /rooms/<code>/state        Spielstand, Nummer, bestätigte Züge je Kind
+/rooms/<code>/chat/<id>    Chat-Nachricht (Absender, Name, Tier, Text, Nummer des fertigen Satzes)
+/presence/<uid>            online?, Zimmer und Spiel – für den Online-Punkt bei Spielfreunden
+/invites/<uid>/<von>       Einladung eines Spielfreunds (Code, Spiel, Name, Tier)
 ```
 
 ### 5.6 Sicherheitsregeln (Skizze)
@@ -191,7 +194,7 @@ Weil jeder Knoten genau einen Schreiber hat, gibt es keine Konflikte – das ist
 
 ### 5.7 Mengen & Kosten
 
-Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindungen, 1 GB Speicher und 10 GB Download pro Monat. Joyboy öffnet einen Live-Stream **nur, solange ein Kind in einem Zimmer ist** – Profile werden ohne Dauerverbindung gespeichert. Damit reichen die Grenzen für rund 25 gleichzeitig laufende 4er-Zimmer. Wird es mehr, genügt der Wechsel auf den nutzungsbasierten Tarif.
+Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindungen, 1 GB Speicher und 10 GB Download pro Monat. Joyboy öffnet einen Live-Stream, solange ein Kind in einem Zimmer ist, und einen kleinen für Einladungen, solange Joyboy offen ist, das Kind Spielfreunde hat und in keinem Zimmer ist. Jedes Kind hat also höchstens eine Dauerverbindung. Profile und Online-Punkt werden ohne Dauerverbindung gespeichert und abgefragt. Damit reichen die Grenzen für rund 25 gleichzeitig laufende 4er-Zimmer. Wird es mehr, genügt der Wechsel auf den nutzungsbasierten Tarif.
 
 ---
 
@@ -209,7 +212,7 @@ Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindung
 
 ## 7. Kinderschutz & Datenschutz
 
-- **Kein freier Chat** – nur 5 feste Reaktionen (Daumen hoch, Lachen, Staunen, Herz, Super).
+- **Chat mit Wortfilter** – 5 feste Reaktionen, fertige Sätze zum Antippen und kurze eigene Nachrichten (max. 60 Zeichen). Schimpfwörter, Telefonnummern, E-Mails, Links und Fragen nach Adresse oder Nummer blockt die App und noch einmal die Datenbank. Im Elternbereich lässt sich das Selbstschreiben abschalten – dann sieht und schickt das Kind nur fertige Sätze.
 - **Spitznamen statt echter Namen:** Namensvorschläge per Würfel, Hinweis „Nimm einen Spitznamen“, Wortfilter, max. 16 Zeichen. Im Elternbereich lässt sich „nur Vorschlags-Namen“ einschalten.
 - **Klingel-Prinzip** im Spielzimmer, Zimmer schließen beim Spielstart.
 - **Elternbereich mit Passwort:** Spielzeit-Limit, Vorlesen, Ton, nur Vorschlags-Namen, Profile löschen, Online an/aus (Standard: aus) mit Löschen der Online-Daten, Spielerpass.

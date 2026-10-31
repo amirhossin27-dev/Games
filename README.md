@@ -15,7 +15,7 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 - **Erst lernen, dann spielen:** Die Arcade-Spiele sind jeden Tag erst nach ein paar Lernspielen frei. Die Anzahl stellen die Eltern ein, siehe unten.
 - **Online-Spielzimmer** für bis zu 4 Kinder, siehe unten.
 - **Spielstände dauerhaft gesichert:** auf dem Gerät und – wenn die Eltern Online erlaubt haben – zusätzlich in der Cloud. Mit dem **Spielerpass** (Elternbereich) nimmt ein Kind seinen Spielstand auf ein neues Gerät mit.
-- **Kindersicher:** kein Chat (nur 5 feste Reaktionen), keine Werbung, keine Käufe, keine Tracker. Schriften werden mit der App ausgeliefert, kein Abruf bei Google. Alles Online (Spielzimmer, Cloud, Spielerpass, Rangliste mit Spielfreunden) ist aus, bis die Eltern es im Elternbereich erlauben; dort lassen sich die Online-Daten auch löschen.
+- **Kindersicher:** Chat im Spielzimmer nur mit fertigen Sätzen und kurzen eigenen Nachrichten durch einen Wortfilter (Eltern können das Selbstschreiben abschalten), keine Werbung, keine Käufe, keine Tracker. Schriften werden mit der App ausgeliefert, kein Abruf bei Google. Alles Online (Spielzimmer, Cloud, Spielerpass, Rangliste mit Spielfreunden) ist aus, bis die Eltern es im Elternbereich erlauben; dort lassen sich die Online-Daten auch löschen.
 
 ## Die Spiele
 
@@ -49,11 +49,19 @@ Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktione
 4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen.
 5. Der Gastgeber startet, alle spielen auf ihrem Gerät. „Nochmal“ startet die nächste Runde für alle.
 
+**Schneller wieder zusammen:**
+
+- **Zuletzt im Zimmer:** Unter **Zimmer** stehen die letzten Zimmer (3 Tage lang). Ein Tipp auf **Wieder rein** genügt, kein Code. Das eigene Zimmer lässt sich nach dem Schließen mit **Wieder öffnen** und demselben Code wieder aufmachen.
+- **Ohne Klingeln rein:** Wer schon einmal im Zimmer war oder Spielfreund des Gastgebers ist, kommt beim Klingeln gleich rein (solange Platz ist). Alle anderen müssen weiter klingeln.
+- **Spielfreunde mit Online-Punkt:** Unter **Zimmer → Spielfreunde** sieht ein Kind, wer gerade online ist (grüner Punkt) und wer in einem Zimmer wartet. **Mitspielen** führt direkt dorthin, **Einladen** öffnet ein Zimmer und schickt eine Einladung. Im Zimmer lädt der Bereich **Spielfreunde einladen** mit einem Tipp ein. Die Einladung erscheint unten auf dem Bildschirm, egal wo das Kind gerade ist, und gilt 10 Minuten.
+- **Chat:** 13 fertige Sätze zum Antippen („Hallo!“, „Gut gemacht!“, „Noch eine Runde?“ …) und ein Feld zum Selbstschreiben (höchstens 60 Zeichen). Der Wortfilter blockt Schimpfwörter, Telefonnummern, E-Mails, Links und Fragen nach Adresse oder Nummer – in der App und noch einmal in der Datenbank. Während der Runde öffnet das Sprechblasen-Symbol oben den Chat. Neue Nachrichten erscheinen als kleiner Hinweis, wenn man gerade woanders ist.
+- **Allein spielen, während man im Zimmer ist:** geht. Joyboy sagt dazu „Du bleibst im Spielzimmer …“, die anderen sehen „spielt kurz allein“. Startet der Gastgeber die Runde, schließt das Einzelspiel und es geht im Zimmer weiter. Läuft die Runde schon, startet kein Spiel daneben, sondern ein Hinweis erklärt, warum.
+
 Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
 
 **Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus, übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
 
-Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK) und anonyme Anmeldung pro Kind. Der Gastgeber rechnet mit denselben Regel-Funktionen wie offline und veröffentlicht jeden Stand; die anderen schicken nur ihre Züge. Regeln: [`database.rules.json`](database.rules.json), Einrichtung: [`docs/FIREBASE.md`](docs/FIREBASE.md).
+Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK) und anonyme Anmeldung pro Kind. Der Gastgeber rechnet mit denselben Regel-Funktionen wie offline und veröffentlicht jeden Stand; die anderen schicken nur ihre Züge. Regeln: [`database.rules.json`](database.rules.json) (gebaut mit `npm run rules`, getestet mit `npm run test:rules` gegen den Firebase-Emulator), Einrichtung: [`docs/FIREBASE.md`](docs/FIREBASE.md).
 
 ## Spielzeit-Limit (für Eltern)
 

@@ -10,7 +10,8 @@
     "preview": "vite preview --host",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "rules": "node scripts/make-rules.mjs"
+    "rules": "node scripts/make-rules.mjs",
+    "test:rules": "npx -y firebase-tools@14 emulators:exec --only database --project demo-joyboy \"node scripts/test-rules.mjs\""
   },
   "dependencies": {
     "@fontsource-variable/grandstander": "^5.3.0",

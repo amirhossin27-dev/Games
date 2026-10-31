@@ -1327,6 +1327,168 @@ p {
   opacity: 0.5;
 }
 
+/* Chat im Spielzimmer */
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--card);
+  border: 2px dashed var(--stitch);
+}
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  min-height: 70px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+}
+
+.chat.compact .chat-log {
+  max-height: 38dvh;
+}
+
+.chat-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 88%;
+}
+
+.chat-msg.mine {
+  align-self: flex-end;
+}
+
+.chat-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 12px;
+  border-radius: 14px 14px 14px 4px;
+  background: var(--kraft);
+  overflow-wrap: anywhere;
+}
+
+.chat-msg.mine .chat-bubble {
+  border-radius: 14px 14px 4px 14px;
+  background: var(--sage-soft);
+}
+
+.chat-bubble b {
+  font-family: var(--font-display);
+}
+
+.chat-quick {
+  /* Zwei Reihen zum Wischen – die angeschnittene Spalte rechts zeigt, dass es weitergeht */
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, auto);
+  justify-content: start;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: thin;
+}
+
+.chat-chip {
+  flex-shrink: 0;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+  background: var(--butter-soft);
+  font-family: var(--font-display);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 1px 2px 0 var(--ink);
+}
+
+.chat-chip:active:not(:disabled) {
+  transform: translate(1px, 2px);
+  box-shadow: none;
+}
+
+.chat-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-input .input {
+  min-height: 48px;
+  font-size: 1rem;
+}
+
+.icon-btn.send {
+  background: var(--sage);
+  color: #fffdf8;
+}
+
+.icon-btn.send:disabled {
+  opacity: 0.4;
+}
+
+/* Spielfreunde und zuletzt besuchte Zimmer */
+.code-mini {
+  display: inline-flex;
+  gap: 1px;
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.friend-ava {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.online-dot {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--card);
+  background: var(--stitch);
+}
+
+.online-dot.on {
+  background: #3fae5a;
+}
+
+.invite-pop {
+  position: fixed;
+  left: 50%;
+  /* unten über den Reitern – oben erscheinen die Hinweise */
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
+  z-index: 110;
+  width: min(420px, calc(100% - 24px));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 2px solid var(--ink);
+  background: var(--card);
+  box-shadow: 3px 4px 0 var(--ink);
+  animation: invite-in 0.25s ease;
+}
+
+@keyframes invite-in {
+  from {
+    transform: translate(-50%, 16px);
+    opacity: 0;
+  }
+}
+
 /* ───────────── Ich ───────────── */
 .stats3 {
   display: grid;

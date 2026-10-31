@@ -3,6 +3,8 @@ import type { NetLink, SeatInfo } from '../engine/game';
 import { rememberFriends } from '../net/cloud';
 import { backToLobby, leaveRoom, publishState, pushAct, serverNow, startGame, useRoom } from '../net/room';
 import { absentSeats, guestActs } from '../net/roomLogic';
+import { getData } from '../lib/store';
+import { ChatSheet } from './Chat';
 import { GameScreen } from './GameScreen';
 
 /** Das laufende Spiel im Online-Spielzimmer – auf jedem Gerät aus Sicht des eigenen Kindes. */
@@ -10,6 +12,7 @@ export function OnlineGame({ profileId }: { profileId: string }) {
   const room = useRoom();
   const { info, game, uid, seats } = room;
   const [, tick] = useState(0);
+  const [chat, setChat] = useState(false);
 
   // Alle paar Sekunden prüfen, wer gerade weg ist
   useEffect(() => {
@@ -38,11 +41,16 @@ export function OnlineGame({ profileId }: { profileId: string }) {
   const playSeats: SeatInfo[] = game.seats.map((s, i) => ({ name: s.name, avatar: s.avatar, color: s.color, robo: s.robo, profileId: i === me ? profileId : undefined }));
   const hostName = game.seats.find((s) => s.uid === info.host)?.name ?? 'der Gastgeber';
 
+  const profile = getData().profiles.find((p) => p.id === profileId);
+
   return (
-    <GameScreen
-      session={{ game: game.game, seats: playSeats, level: game.level, round: game.round }}
-      net={net}
-      online={{ host, hostName, again: () => void startGame(), lobby: () => void backToLobby(), leave: () => void leaveRoom() }}
-    />
+    <>
+      <GameScreen
+        session={{ game: game.game, seats: playSeats, level: game.level, round: game.round }}
+        net={net}
+        online={{ host, hostName, again: () => void startGame(), lobby: () => void backToLobby(), leave: () => void leaveRoom(), chat: () => setChat(true) }}
+      />
+      {chat && profile && <ChatSheet profile={profile} onClose={() => setChat(false)} />}
+    </>
   );
 }
