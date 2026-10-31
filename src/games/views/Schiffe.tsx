@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { buzz, sfx, tone } from '../../arcade/engine';
+import { buzz, sfx } from '../../arcade/engine';
 import type { PlayProps } from '../../engine/game';
 import { useGame } from '../../engine/useGame';
 import { cls } from '../../lib/util';
@@ -52,9 +52,9 @@ export function Schiffe(props: PlayProps) {
       sfx.win();
       buzz([60, 40, 60]);
     } else if (last.hit) {
-      tone(220, 160, 'sawtooth', 0.05, 90);
+      sfx.hit();
       buzz(40);
-    } else tone(700, 70, 'sine', 0.04, 400);
+    } else sfx.splash();
   });
 
   const setupTurn = s.phase === 'setup' && g.myTurn && s.fleets[me] === null;

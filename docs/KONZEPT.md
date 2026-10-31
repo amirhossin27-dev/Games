@@ -240,7 +240,7 @@ Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindung
 | Installierbar | PWA: Manifest, Icons (inkl. maskable + Apple-Touch-Icon), Service Worker für Offline, iOS-Standalone-Meta-Tags, In-App-Hilfe „Zum Home-Bildschirm“ für iOS und Android |
 | Veröffentlichung | GitHub Actions: Tests → Build → GitHub Pages, erreichbar unter `https://amirhossin27-dev.github.io/Games/` |
 | Echtzeit & Cloud | Firebase Realtime Database + anonyme Anmeldung, nur REST und Server-Sent Events. Adresse und API-Key in einer Konfigurationsdatei bzw. per `VITE_JOYBOY_DB_URL` / `VITE_JOYBOY_API_KEY`. Ohne Konfiguration laufen alle Offline-Modi. |
-| Ton & Sprache | WebAudio-Klänge (aus Arta), Vorlesen per Web Speech API |
+| Ton & Sprache | WebAudio-Klänge: weich (Xylofon, Holz, Glöckchen) in Lern- und Brettspielen, 8-Bit (aus Arta) in Arcade und Duellen; Vorlesen per Web Speech API (vorerst aus) |
 
 ### Projektstruktur
 

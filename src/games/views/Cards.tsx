@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { buzz, sfx, tone } from '../../arcade/engine';
+import { buzz, sfx } from '../../arcade/engine';
 import type { PlayProps } from '../../engine/game';
 import { useGame } from '../../engine/useGame';
 import { cls } from '../../lib/util';
@@ -43,7 +43,7 @@ export function MauMau(props: PlayProps) {
     buzz(10);
   });
   useOnChange(s.last, (_, last) => {
-    if (last?.kind === 'draw') tone(300, 60, 'triangle', 0.05);
+    if (last?.kind === 'draw') sfx.take();
   });
 
   const play = (c: Card) => {

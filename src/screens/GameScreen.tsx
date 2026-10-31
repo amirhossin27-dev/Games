@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { sfx, unlockAudio, useTouchLock } from '../arcade/engine';
+import { setSoundStyle, sfx, unlockAudio, useTouchLock } from '../arcade/engine';
 import type { NetLink, Outcome } from '../engine/game';
 import { GameView } from '../games/play';
 import { GAME_BY_ID, type GameMeta } from '../games/registry';
@@ -45,6 +45,11 @@ export function GameScreen({ session, net, online }: { session: Session; net?: N
   const data = useData();
   const ref = useRef<HTMLDivElement>(null);
   useTouchLock(ref);
+  // Arcade und Duelle piepen im 8-Bit-Stil, Lern- und Brettspiele klingen weich (Xylofon, Holz, Glöckchen).
+  useEffect(() => {
+    setSoundStyle(meta.kind === 'def' ? 'soft' : 'retro');
+    return () => setSoundStyle('soft');
+  }, [meta.kind]);
   const [result, setResult] = useState<Result | null>(null);
   const first = session.seats[0];
   const firstProfile = data.profiles.find((p) => p.id === first.profileId);
