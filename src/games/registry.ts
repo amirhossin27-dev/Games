@@ -396,7 +396,7 @@ export const GAMES: GameMeta[] = [
     levels: false,
     scoreLabel: 'Äpfel',
     tutorial: [
-      { say: 'Wische in eine Richtung oder tippe auf die Pfeile, dann biegt die Schlange ab.', art: { k: 'gesture', g: 'right' } },
+      { say: 'Tippe neben die Schlange, dann biegt sie dorthin ab. Wischen geht auch.', art: { k: 'gesture', g: 'tap' } },
       { say: 'Sammle Äpfel, dann wird die Schlange länger.', art: { k: 'pics', items: ['🐍', '🍎'] } },
       { say: 'Nicht gegen die Wand fahren und dich nicht selbst beißen!', art: { k: 'art', art: { emoji: '🐍', bg: '#DDEBDD' } } },
     ],
