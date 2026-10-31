@@ -16,6 +16,8 @@ export type GameId =
   | 'maumau'
   | 'wuerfel'
   | 'schiffe'
+  | 'muehle'
+  | 'dame'
   | 'slf'
   | 'schlange'
   | 'kloetzchen'
@@ -81,6 +83,7 @@ const R = '#D9774F';
 const B = '#2F6E9E';
 const W = '#DCE9F3';
 const SH = '#5E6B60';
+const DK = '#8A6A4A';
 
 export const GAMES: GameMeta[] = [
   {
@@ -358,6 +361,49 @@ export const GAMES: GameMeta[] = [
       { say: 'Dann tippst du abwechselnd auf das Meer des anderen.', art: { k: 'grid', cols: 5, cells: [W, null, null, W, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], point: 12 } },
       { say: 'Triffst du ein Schiff, darfst du gleich nochmal!', art: { k: 'grid', cols: 5, cells: [W, null, null, W, null, null, null, null, null, null, null, R, R, null, null, null, null, null, null, null, null, null, null, null, null], mark: [11, 12] } },
       { say: 'Wer zuerst alle Schiffe versenkt, gewinnt.', art: { k: 'art', art: 'schiffe' } },
+    ],
+  },
+  {
+    id: 'muehle',
+    name: 'Mühle',
+    tagline: 'Steine setzen, ziehen und Mühlen bauen – der Brettspiel-Klassiker.',
+    learn: 'Vorausdenken, Muster erkennen und den Gegner blockieren.',
+    category: 'klassiker',
+    minAge: 7,
+    players: [2, 2],
+    minutes: '10 Min',
+    art: 'muehle',
+    kind: 'def',
+    robo: true,
+    levels: true,
+    logic: true,
+    tutorial: [
+      { say: 'Ihr habt jeder 9 Steine. Abwechselnd setzt ihr sie auf die Punkte.', art: { k: 'art', art: 'muehle' } },
+      { say: 'Drei eigene Steine in einer Linie sind eine Mühle! Dann nimmst du einen Stein vom anderen weg.', art: { k: 'grid', cols: 3, cells: ['🔴', '🔴', '🔴', null, '🔵', null, '🔵', null, null], mark: [0, 1, 2] } },
+      { say: 'Sind alle Steine gesetzt, schiebst du einen Stein zu einem freien Nachbarpunkt. Wer nur noch 3 Steine hat, darf springen.', art: { k: 'gesture', g: 'drag' } },
+      { say: 'Wer nur noch 2 Steine hat oder nicht mehr ziehen kann, verliert.', art: { k: 'pics', items: ['🔵', '🔵'], caption: 'Nur noch 2 Steine – verloren' } },
+    ],
+  },
+  {
+    id: 'dame',
+    name: 'Dame',
+    tagline: 'Schräg ziehen, drüberspringen, Dame werden!',
+    learn: 'Vorausdenken, Regeln einhalten und Fallen erkennen.',
+    category: 'klassiker',
+    minAge: 6,
+    players: [2, 2],
+    minutes: '10 Min',
+    art: 'dame',
+    kind: 'def',
+    robo: true,
+    levels: true,
+    logic: true,
+    tutorial: [
+      { say: 'Jeder hat eine Farbe. Die Steine stehen nur auf den dunklen Feldern.', art: { k: 'art', art: 'dame' } },
+      { say: 'Ein Stein zieht schräg ein Feld nach vorn. Tippe erst auf den Stein, dann auf das Ziel.', art: { k: 'grid', cols: 4, cells: [null, DK, null, DK, DK, null, DK, null, null, DK, null, DK, DK, null, '🔴', null], mark: [9, 11], point: 9 } },
+      { say: 'Steht ein fremder Stein schräg vor dir und dahinter ist frei, springst du drüber und schlägst ihn. Schlagen ist Pflicht!', art: { k: 'grid', cols: 4, cells: [null, DK, null, DK, DK, null, DK, null, null, '🔵', null, DK, DK, null, '🔴', null], mark: [4], point: 4 } },
+      { say: 'Kommst du auf der anderen Seite an, wird dein Stein eine Dame. Sie zieht schräg beliebig weit, auch rückwärts.', art: { k: 'pics', items: ['🔴', '➡️', '👑'], caption: 'Dame: schräg, so weit sie will' } },
+      { say: 'Wer keinen Stein mehr hat oder nicht mehr ziehen kann, verliert.', art: { k: 'art', art: 'dame' } },
     ],
   },
   {

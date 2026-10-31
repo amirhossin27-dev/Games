@@ -19,6 +19,7 @@ import type { Outcome, PlayProps, SeatInfo } from '../engine/game';
 import { animalInfo } from '../lib/names';
 import type { GameId } from './registry';
 import { Memory, ConnectFour, TicTacToe } from './views/Classic';
+import { Dame, Muehle } from './views/Boards';
 import { MauMau } from './views/Cards';
 import { Ludo } from './views/Ludo';
 import { Quiz } from './views/Quiz';
@@ -76,6 +77,10 @@ export function GameView({ id, props }: { id: GameId; props: PlayProps }) {
       return <Wuerfel {...props} />;
     case 'schiffe':
       return <Schiffe {...props} />;
+    case 'muehle':
+      return <Muehle {...props} />;
+    case 'dame':
+      return <Dame {...props} />;
     case 'slf':
       return <Slf {...props} />;
   }

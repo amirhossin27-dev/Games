@@ -395,7 +395,7 @@ describe('Namen und Katalog', () => {
   });
 
   it('jedes Spiel hat ein Tutorial mit mindestens zwei Schritten', () => {
-    expect(GAMES).toHaveLength(29);
+    expect(GAMES).toHaveLength(31);
     for (const g of GAMES) {
       expect(g.tutorial.length, g.id).toBeGreaterThanOrEqual(2);
       for (const step of g.tutorial) expect(step.say.length, g.id).toBeGreaterThan(10);
@@ -410,7 +410,7 @@ describe('Erst lernen, dann spielen', () => {
     applyResult(p, { profileId: p.id, game, stars: 2, won: false, together: false, logic: false, learn: isLearnGame(GAME_BY_ID[game]) }).profile;
 
   it('trennt Lern- und Brettspiele von Arcade- und Duell-Spielen', () => {
-    expect(GAMES.filter(isLearnGame)).toHaveLength(14);
+    expect(GAMES.filter(isLearnGame)).toHaveLength(16);
     expect(isLearnGame(GAME_BY_ID.rechnen)).toBe(true);
     expect(isLearnGame(GAME_BY_ID.ludo)).toBe(true);
     expect(isLearnGame(GAME_BY_ID.schlange)).toBe(false);

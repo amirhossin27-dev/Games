@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 /** Illustrationen der Spiele im Papierwelt-Stil. Arcade-Spiele bekommen ein großes Bild-Symbol. */
-export type ArtKind = 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'slf' | { emoji: string; bg: string };
+export type ArtKind = 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'muehle' | 'dame' | 'slf' | { emoji: string; bg: string };
 
 const C = { sky: '#6FA8D6', plum: '#8E6BA8', terra: '#D9774F', butter: '#F2C94C', sage: '#5E9C6B', peach: '#E58F7A', ink: '#2D3A31', paper: '#FFFDF8' };
 
@@ -19,6 +19,8 @@ const BG: Record<string, string> = {
   maumau: '#DDEBDD',
   wuerfel: '#F6E1D8',
   schiffe: '#DCE9F3',
+  muehle: '#F7EDC8',
+  dame: '#F6E1D8',
   slf: '#F7EDC8',
 };
 
@@ -219,6 +221,44 @@ function art(kind: Exclude<ArtKind, object>): ReactNode {
           <path d="M128 14 V54 M108 34 H148" stroke={C.ink} strokeWidth="2" />
         </>
       );
+    case 'muehle': {
+      const P: [number, number][] = [[40, 14], [80, 14], [120, 14], [53, 28], [80, 28], [107, 28], [66, 42], [80, 42], [94, 42], [40, 56], [53, 56], [66, 56], [94, 56], [107, 56], [120, 56], [66, 70], [80, 70], [94, 70], [53, 84], [80, 84], [107, 84], [40, 98], [80, 98], [120, 98]];
+      const stone: Record<number, string> = { 0: C.terra, 1: C.terra, 2: C.terra, 4: C.sky, 13: C.sky, 17: C.terra, 19: C.sky, 22: C.sky };
+      return (
+        <>
+          <rect x="40" y="14" width="80" height="84" fill="none" stroke={C.ink} strokeWidth="2.5" />
+          <rect x="53" y="28" width="54" height="56" fill="none" stroke={C.ink} strokeWidth="2.5" />
+          <rect x="66" y="42" width="28" height="28" fill="none" stroke={C.ink} strokeWidth="2.5" />
+          <path d="M80 14 V42 M80 70 V98 M40 56 H66 M94 56 H120" stroke={C.ink} strokeWidth="2.5" />
+          {P.map(([x, y], i) =>
+            stone[i] ? <circle key={i} cx={x} cy={y} r="7.5" fill={stone[i]} stroke={C.ink} strokeWidth="1.8" /> : <circle key={i} cx={x} cy={y} r="2.6" fill={C.ink} />,
+          )}
+        </>
+      );
+    }
+    case 'dame': {
+      const cells: ReactNode[] = [];
+      for (let r = 0; r < 4; r++)
+        for (let c = 0; c < 5; c++) cells.push(<rect key={`${r}${c}`} x={40 + c * 16} y={22 + r * 16} width="16" height="16" fill={(r + c) % 2 ? '#8A6A4A' : C.paper} />);
+      return (
+        <>
+          <g transform="rotate(-6 80 54)">
+            {cells}
+            <rect x="40" y="22" width="80" height="64" fill="none" stroke={C.ink} strokeWidth="2.5" />
+            <circle cx="64" cy="30" r="6" fill={C.sky} stroke={C.ink} strokeWidth="1.5" />
+            <circle cx="96" cy="30" r="6" fill={C.sky} stroke={C.ink} strokeWidth="1.5" />
+            <circle cx="80" cy="46" r="6" fill={C.sky} stroke={C.ink} strokeWidth="1.5" />
+            <circle cx="64" cy="78" r="6" fill={C.terra} stroke={C.ink} strokeWidth="1.5" />
+            <circle cx="96" cy="62" r="6" fill={C.terra} stroke={C.ink} strokeWidth="1.5" />
+          </g>
+          <g transform="translate(128 74) rotate(10)">
+            <circle r="15" fill={C.terra} stroke={C.ink} strokeWidth="2" />
+            <circle r="10" fill="none" stroke={C.butter} strokeWidth="3" />
+            <text y="5" textAnchor="middle" fontSize="14" fill={C.paper}>♛</text>
+          </g>
+        </>
+      );
+    }
     case 'slf':
       return (
         <>
