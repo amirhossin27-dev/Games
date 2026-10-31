@@ -15,7 +15,7 @@ export const SHORT_WORDS: [string, string][] = [
   ['OMA', '👵'], ['OPA', '👴'], ['AUTO', '🚗'], ['MOND', '🌙'], ['HASE', '🐰'], ['KUH', '🐮'],
   ['ROSE', '🌹'], ['NASE', '👃'], ['UHR', '⌚'], ['HUT', '🎩'], ['BUCH', '📕'], ['ZUG', '🚂'],
   ['IGEL', '🦔'], ['BÄR', '🐻'], ['ENTE', '🦆'], ['KÄSE', '🧀'], ['WAL', '🐳'], ['OHR', '👂'],
-  ['LÖWE', '🦁'], ['PILZ', '🍄'], ['HERZ', '❤️'], ['MUND', '👄'], ['TOR', '🥅'], ['FROSCH', '🐸'],
+  ['LÖWE', '🦁'], ['PILZ', '🍄'], ['HAI', '🦈'], ['MUND', '👄'], ['TOR', '🥅'], ['FROSCH', '🐸'],
 ];
 
 /** Wörter mit ihren Silben */

@@ -41,14 +41,6 @@ function newPipe(x: number, score: number): Pipe {
 
 const fresh = (): FlappyState => ({ y: H / 2 - 20, vy: 0, started: false, alive: true, pipes: [], score: 0, t: 0, ground: 0, wing: 0 });
 
-function heart(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
-  ctx.beginPath();
-  ctx.moveTo(x, y + r * 0.9);
-  ctx.bezierCurveTo(x - r * 1.6, y - r * 0.2, x - r * 0.8, y - r * 1.3, x, y - r * 0.45);
-  ctx.bezierCurveTo(x + r * 0.8, y - r * 1.3, x + r * 1.6, y - r * 0.2, x, y + r * 0.9);
-  ctx.fill();
-}
-
 export function Flappy({ best, onEnd }: GameProps) {
   const s = useRef<FlappyState>(fresh());
   const [score, setScore] = useState(0);
@@ -57,8 +49,8 @@ export function Flappy({ best, onEnd }: GameProps) {
   const { wrapRef, canvasRef, paint } = useFitCanvas(W, H, (ctx) => {
     const st = s.current;
     const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#ffb6d1');
-    sky.addColorStop(1, '#ffe7c2');
+    sky.addColorStop(0, '#9fd3f5');
+    sky.addColorStop(1, '#e4f4fb');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
     // Wolken
@@ -91,24 +83,40 @@ export function Flappy({ best, onEnd }: GameProps) {
     ctx.fillRect(0, GROUND, W, H - GROUND);
     ctx.fillStyle = '#5cb86c';
     for (let x = -((st.ground % 16) + 16); x < W; x += 16) ctx.fillRect(x, GROUND, 8, 5);
-    // Herz mit Flügeln
+    // Kleiner Vogel mit Schnabel und Flügel
     ctx.save();
     ctx.translate(HX, st.y);
     ctx.rotate(Math.max(-0.5, Math.min(1.1, st.vy / 420)));
     const flap = Math.sin(st.wing) * 4;
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = '#ffc93c';
     ctx.beginPath();
-    ctx.ellipse(-9, -3 - flap, 8, 4, -0.5, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, R * 1.1, R * 0.95, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#ff2f6d';
-    heart(ctx, 0, 0, R);
+    ctx.strokeStyle = '#d99a12';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+    ctx.fillStyle = '#fff3c9';
+    ctx.beginPath();
+    ctx.ellipse(1, 4.5, 6.5, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ff8a3d';
+    ctx.beginPath();
+    ctx.moveTo(R * 0.85, -1.5);
+    ctx.lineTo(R * 1.55, 1);
+    ctx.lineTo(R * 0.85, 3.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#f3a81c';
+    ctx.beginPath();
+    ctx.ellipse(-4, -1 - flap, 7, 4, -0.4, 0, Math.PI * 2);
+    ctx.fill();
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(4, -3, 2.4, 0, Math.PI * 2);
+    ctx.arc(4, -3, 2.6, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = '#2b1030';
     ctx.beginPath();
-    ctx.arc(4.6, -2.8, 1.2, 0, Math.PI * 2);
+    ctx.arc(4.8, -2.8, 1.3, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
     // Punkte groß in der Mitte
@@ -198,7 +206,7 @@ export function Flappy({ best, onEnd }: GameProps) {
   return (
     <div className="g-col fill">
       <div className="score-strip">
-        <span>💘 {score}</span>
+        <span>🐦 {score}</span>
         <span>🏆 {best ?? '–'}</span>
       </div>
       <div
@@ -212,7 +220,7 @@ export function Flappy({ best, onEnd }: GameProps) {
         <canvas ref={canvasRef} className="game-canvas" />
         {!started && (
           <div className="canvas-overlay">
-            <span className="flappy-start">Tippe zum Flattern 💘</span>
+            <span className="flappy-start">Tippe zum Flattern 🐦</span>
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
-import { burst, buzz, clamp, drawParticles, heartPath, oval, outlinedText, stepParticles, tone, useFitCanvas, useLoop, type Particle } from './engine';
+import { burst, buzz, clamp, drawParticles, oval, outlinedText, stepParticles, tone, useFitCanvas, useLoop, type Particle } from './engine';
 import type { GameProps } from './types';
 
 const W = 320;
@@ -254,8 +254,9 @@ function drawPlat(ctx: CanvasRenderingContext2D, p: HopPlat, y: number, t: numbe
     ctx.moveTo(bx, by + 12);
     ctx.quadraticCurveTo(bx + 4, by + 22, bx, y);
     ctx.stroke();
-    ctx.fillStyle = '#ff2f6d';
-    heartPath(ctx, bx, by, 13);
+    ctx.fillStyle = '#ff6b4a';
+    ctx.beginPath();
+    oval(ctx, bx, by - 1, 11, 13);
     ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.beginPath();
@@ -315,7 +316,7 @@ function drawFoe(ctx: CanvasRenderingContext2D, f: Foe, y: number) {
   ctx.restore();
 }
 
-/** Hüpfi: ein Herz mit Füßen, Augen und roten Bäckchen */
+/** Hüpfi: ein Hüpfball mit Füßen, Augen und roten Bäckchen */
 function drawHero(ctx: CanvasRenderingContext2D, st: HopState, y: number) {
   ctx.save();
   ctx.translate(st.x, y);
@@ -326,19 +327,20 @@ function drawHero(ctx: CanvasRenderingContext2D, st: HopState, y: number) {
   if (!st.alive) ctx.rotate(st.fallT * 6);
   // Füße
   const tuck = st.vy < 0 ? 4 : 0;
-  ctx.fillStyle = '#b81e5c';
+  ctx.fillStyle = '#b8560f';
   ctx.beginPath();
   oval(ctx, -6, BODY - 1 - tuck, 5, 3.4);
   oval(ctx, 7, BODY - 1 - tuck, 5, 3.4);
   ctx.fill();
   // Körper
   const g = ctx.createLinearGradient(0, -BODY, 0, BODY);
-  g.addColorStop(0, '#ff6fa5');
-  g.addColorStop(1, '#e8185f');
+  g.addColorStop(0, '#ffb347');
+  g.addColorStop(1, '#f47b20');
   ctx.fillStyle = g;
-  heartPath(ctx, 0, 2, BODY * 1.08);
+  ctx.beginPath();
+  oval(ctx, 0, 1, BODY * 1.02, BODY * 0.98);
   ctx.fill();
-  ctx.strokeStyle = '#a3124a';
+  ctx.strokeStyle = '#b8560f';
   ctx.lineWidth = 1.6;
   ctx.stroke();
   ctx.fillStyle = 'rgba(255,255,255,0.55)';
@@ -380,7 +382,7 @@ function drawHero(ctx: CanvasRenderingContext2D, st: HopState, y: number) {
   oval(ctx, -4, 5, 3, 2);
   oval(ctx, 14, 5, 2.5, 1.8);
   ctx.fill();
-  ctx.strokeStyle = '#6d0d34';
+  ctx.strokeStyle = '#6d2a05';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   if (st.vy < -200 || !st.alive) oval(ctx, 6, 7, 2.4, st.alive ? 2.6 : 1.4);
@@ -476,9 +478,17 @@ export function Hopper({ best, onEnd }: GameProps) {
       ctx.fill();
       ctx.fillStyle = '#7ccf8a';
       ctx.fillRect(0, groundY + 30, W, 200);
-      ctx.fillStyle = '#ff7eb3';
+      // Blumen
       for (let i = 0; i < 9; i++) {
-        heartPath(ctx, 18 + i * 36, groundY + 44 + (i % 2) * 8, 4);
+        const fx = 18 + i * 36;
+        const fy = groundY + 44 + (i % 2) * 8;
+        ctx.fillStyle = i % 3 === 0 ? '#fff' : i % 3 === 1 ? '#ffd23f' : '#ff9e7a';
+        ctx.beginPath();
+        for (let k = 0; k < 5; k++) oval(ctx, fx + Math.cos((k * Math.PI * 2) / 5) * 3.2, fy + Math.sin((k * Math.PI * 2) / 5) * 3.2, 2.4, 2.4);
+        ctx.fill();
+        ctx.fillStyle = '#f08c00';
+        ctx.beginPath();
+        oval(ctx, fx, fy, 1.8, 1.8);
         ctx.fill();
       }
     }
@@ -493,7 +503,7 @@ export function Hopper({ best, onEnd }: GameProps) {
       if (y > -40 && y < H + 200) drawFoe(ctx, f, y);
     }
 
-    // Herzballon trägt Hüpfi
+    // Ballon trägt Hüpfi
     if (st.balloon > 0) {
       const by = st.y - st.cam - 40;
       ctx.strokeStyle = 'rgba(80,40,80,0.55)';
@@ -502,8 +512,9 @@ export function Hopper({ best, onEnd }: GameProps) {
       ctx.moveTo(st.x, by + 12);
       ctx.lineTo(st.x, st.y - st.cam - 10);
       ctx.stroke();
-      ctx.fillStyle = '#ff2f6d';
-      heartPath(ctx, st.x, by, 15);
+      ctx.fillStyle = '#ff6b4a';
+      ctx.beginPath();
+      oval(ctx, st.x, by - 1, 13, 15);
       ctx.fill();
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
       ctx.beginPath();
@@ -645,10 +656,10 @@ export function Hopper({ best, onEnd }: GameProps) {
     if (st.balloon > 0) {
       st.balloon -= dt;
       st.vy = Math.max(st.vy - 3000 * dt, -980);
-      if (Math.random() < dt * 20) st.parts.push({ x: st.x + (Math.random() - 0.5) * 10, y: st.y + BODY, vx: (Math.random() - 0.5) * 30, vy: 60, life: 0.6, max: 0.6, size: 3, color: '#ff8cc6', heart: true });
+      if (Math.random() < dt * 20) st.parts.push({ x: st.x + (Math.random() - 0.5) * 10, y: st.y + BODY, vx: (Math.random() - 0.5) * 30, vy: 60, life: 0.6, max: 0.6, size: 3, color: '#ffd23f', star: true });
       if (st.balloon <= 0) {
         st.vy = Math.min(st.vy, -500);
-        burst(st.parts, st.x, st.y - 40, '#ff2f6d', 10, 90, { heart: true, size: 3 });
+        burst(st.parts, st.x, st.y - 40, '#ffd23f', 10, 90, { star: true, size: 3 });
         tone(300, 120, 'triangle', 0.05, 900);
       }
     } else st.vy += GRAVITY * dt;

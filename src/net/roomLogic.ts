@@ -5,7 +5,7 @@ import type { Level } from '../lib/store';
 
 /** Reine Logik der Spielzimmer – ohne Netz, damit sie sich testen lässt. */
 
-export type ReactionId = 'thumb' | 'smile' | 'wow' | 'heart' | 'star';
+export type ReactionId = 'thumb' | 'smile' | 'wow' | 'party' | 'star';
 
 export interface SeatDoc {
   name: string;

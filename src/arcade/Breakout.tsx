@@ -82,8 +82,13 @@ export function Breakout({ best, onEnd }: GameProps) {
     ctx.fillStyle = 'rgba(251,233,240,0.6)';
     ctx.fillText(`LEVEL ${st.level}`, W / 2, 20);
     ctx.textAlign = 'right';
-    ctx.font = '14px serif';
-    ctx.fillText('❤️'.repeat(Math.max(st.lives, 0)), W - 8, 20);
+    // Leben als Bälle
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < st.lives; i++) {
+      ctx.beginPath();
+      ctx.arc(W - 14 - i * 16, 20, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.fillStyle = 'rgba(255,255,255,0.08)';
     ctx.fillRect(0, 38, W, 1);
 

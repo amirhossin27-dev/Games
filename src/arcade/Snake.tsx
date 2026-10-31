@@ -11,7 +11,7 @@ const H = ROWS * C;
 // Game-Boy-Palette
 const LCD = { bg: '#9bbc0f', grid: '#8bac0f', mid: '#306230', dark: '#0f380f' };
 
-const HEART = ['.XX.XX.', 'XXXXXXX', 'XXXXXXX', '.XXXXX.', '..XXX..', '...X...'];
+const APPLE = ['....X..', '...X...', '.XX.XX.', 'XXXXXXX', 'XXXXXXX', 'XXXXXXX', '.XX.XX.'];
 
 type Dir = 'up' | 'down' | 'left' | 'right';
 const VEC: Record<Dir, [number, number]> = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -76,12 +76,12 @@ export function Snake({ best, onEnd }: GameProps) {
     ctx.fillStyle = LCD.grid;
     for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) ctx.fillRect(x * C + C / 2 - 1, y * C + C / 2 - 1, 2, 2);
 
-    // Herz in Pixeln
+    // Apfel in Pixeln
     const px = C / 8;
     ctx.fillStyle = LCD.dark;
-    HEART.forEach((row, ry) =>
+    APPLE.forEach((row, ry) =>
       [...row].forEach((ch, rx) => {
-        if (ch === 'X') ctx.fillRect(st.food.x * C + px * (rx + 0.5), st.food.y * C + px * (ry + 1), px, px);
+        if (ch === 'X') ctx.fillRect(st.food.x * C + px * (rx + 0.5), st.food.y * C + px * (ry + 0.5), px, px);
       }),
     );
 
@@ -210,7 +210,7 @@ export function Snake({ best, onEnd }: GameProps) {
   return (
     <div className="g-col fill">
       <div className="score-strip lcd">
-        <span>❤ {String(score).padStart(3, '0')}</span>
+        <span>🍎 {String(score).padStart(3, '0')}</span>
         <span>🏆 {best !== undefined ? String(best).padStart(3, '0') : '---'}</span>
       </div>
       <div className="canvas-wrap lcd-frame" ref={wrapRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>

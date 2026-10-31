@@ -8,10 +8,11 @@ import { shuffle, type Rnd } from '../../lib/util';
  * 8: der Nächste setzt aus, Bube: passt immer und man wünscht sich eine Farbe.
  */
 
+/** H ist in Joyboy die rote Stern-Farbe (statt Herz), das Kürzel bleibt für laufende Spiele gleich. */
 export type Suit = 'C' | 'S' | 'H' | 'D';
 export const SUITS: Suit[] = ['C', 'S', 'H', 'D'];
-export const SUIT_SYMBOL: Record<Suit, string> = { C: '♣', S: '♠', H: '♥', D: '♦' };
-export const SUIT_NAME: Record<Suit, string> = { C: 'Kreuz', S: 'Pik', H: 'Herz', D: 'Karo' };
+export const SUIT_SYMBOL: Record<Suit, string> = { C: '♣', S: '♠', H: '★', D: '♦' };
+export const SUIT_NAME: Record<Suit, string> = { C: 'Kreuz', S: 'Pik', H: 'Stern', D: 'Karo' };
 export const isRed = (s: Suit) => s === 'H' || s === 'D';
 
 export interface Card {
