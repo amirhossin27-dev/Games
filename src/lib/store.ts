@@ -57,7 +57,7 @@ export interface Profile {
   counters: Counters;
   /** Spiele, deren Tutorial bis zum Ende angeschaut wurde (zählt fürs Abzeichen) */
   tutorials: string[];
-  /** Übersprungene Tutorials – damit sie nicht jedes Mal von selbst kommen */
+  /** Früher: übersprungene Tutorials. Wird nicht mehr genutzt (Tutorials kommen nur noch auf Wunsch), bleibt für alte Spielstände. */
   skipped: string[];
   badges: string[];
   daily: { date: string; progress: number; done: boolean };
@@ -235,9 +235,6 @@ export const actions = {
   },
   editProfile(id: string, changes: Partial<Pick<Profile, 'name' | 'avatar' | 'color' | 'age'>>) {
     updateProfile(id, (p) => ({ ...p, ...changes }));
-  },
-  skipTutorial(id: string, game: string) {
-    updateProfile(id, (p) => (p.skipped.includes(game) ? p : { ...p, skipped: [...p.skipped, game] }));
   },
   settings(changes: Partial<Settings>) {
     setData({ ...data, settings: { ...data.settings, ...changes } });

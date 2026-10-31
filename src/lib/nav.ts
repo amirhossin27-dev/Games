@@ -26,7 +26,8 @@ interface NavState {
   route: Route;
   back: Route[];
   session: Session | null;
-  tutorial: { game: GameId; start?: Omit<Session, 'round'> } | null;
+  /** Nur auf Wunsch geöffnet (So geht's / ?), nie von selbst beim Spielstart */
+  tutorial: { game: GameId } | null;
 }
 
 let state: NavState = { route: { name: 'home' }, back: [], session: null, tutorial: null };
@@ -75,8 +76,8 @@ export const nav = {
   closeGame() {
     set({ session: null });
   },
-  tutorial(game: GameId, start?: Omit<Session, 'round'>) {
-    set({ tutorial: { game, start } });
+  tutorial(game: GameId) {
+    set({ tutorial: { game } });
   },
   closeTutorial() {
     set({ tutorial: null });
