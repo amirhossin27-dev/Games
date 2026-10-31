@@ -24,7 +24,7 @@ export const QUICK_SENTENCES = [
   'Noch eine Runde?',
   'Du bist dran!',
   'Hihi 😄',
-  'Danke fürs Spielen! 💛',
+  'Danke fürs Spielen! 😊',
   'Tschüss! 👋',
 ] as const;
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import dbRules from '../../database.rules.json';
-import { ANIMALS, BAD_WORDS, nameProblem, onlineName } from '../lib/names';
+import { ANIMALS, BAD_WORDS, nameProblem, OLD_ANIMALS, onlineName, upgradeAnimal, upgradeColor } from '../lib/names';
 import { CODE_LEN, codeAnimals, codeFromIndexes, isCode, randomCode } from '../net/codes';
 import { applyStreamEvent } from '../net/db';
 import { absentSeats, buildSeats, guestActs, isMember, knocking, leftRoom, members, nextSlot, parseActs, robosFor, takeOver, taken, type RoomInfo, type SeatDoc } from '../net/roomLogic';
@@ -140,8 +140,8 @@ describe('Datenbank-Regeln', () => {
       for (const w of BAD_WORDS) expect(check).toContain(`.contains('${w}')`);
       // dazu @, http und www
       expect(check.match(/\.contains\('/g)).toHaveLength(BAD_WORDS.length + 3);
-      for (const a of ANIMALS) expect(check).toContain(`=== '${a.kind}'`);
-      expect(check.match(/child\('avatar'\)\.val\(\) === '/g)).toHaveLength(ANIMALS.length);
+      for (const a of [...ANIMALS, ...OLD_ANIMALS]) expect(check).toContain(`=== '${a.kind}'`);
+      expect(check.match(/child\('avatar'\)\.val\(\) === '/g)).toHaveLength(ANIMALS.length + OLD_ANIMALS.length);
     }
   });
 
@@ -151,5 +151,21 @@ describe('Datenbank-Regeln', () => {
     expect(room['.write']).toContain(`[0-9a-f]{${CODE_LEN}}`);
     expect(room['.read']).toContain("info/allowed/' + auth.uid");
     expect(room.info['.read']).toContain("seats/' + auth.uid");
+  });
+});
+
+describe('Profile umstellen', () => {
+  it('macht aus dem Dino einen Bär – auch im Würfel-Namen', () => {
+    expect(upgradeAnimal('dino', 'Flinker Dino')).toEqual({ kind: 'baer', name: 'Flinker Bär' });
+    expect(upgradeAnimal('dino', 'Lena')).toEqual({ kind: 'baer', name: 'Lena' });
+    expect(upgradeAnimal('fuchs', 'Flinker Fuchs')).toEqual({ kind: 'fuchs', name: 'Flinker Fuchs' });
+    // Andere Geräte mit älterer App zeigen weiter einen Dino, nicht „Robo“
+    expect(onlineName('insta_lena', 'dino')).toBe('Flinker Dino');
+  });
+
+  it('macht alte blasse Farben kräftiger', () => {
+    expect(upgradeColor('#F6D3B8')).toBe('#FFB066');
+    expect(upgradeColor('#f6d3b8')).toBe('#FFB066');
+    expect(upgradeColor('#123456')).toBe('#123456');
   });
 });

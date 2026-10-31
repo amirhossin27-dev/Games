@@ -66,6 +66,23 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   background: var(--paper);
+  /* Wie eine App: kein Markieren, kein „Kopieren / Nachschlagen“ beim langen Drücken */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+[contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+img,
+svg {
+  -webkit-user-drag: none;
 }
 
 body {
@@ -817,9 +834,11 @@ p {
 }
 
 .swatches {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, 46px);
+  justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
+  max-width: 260px;
 }
 
 .swatch {

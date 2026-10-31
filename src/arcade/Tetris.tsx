@@ -58,7 +58,7 @@ interface Piece {
   y: number;
 }
 
-interface Heart {
+interface Spark {
   x: number;
   y: number;
   vy: number;
@@ -77,7 +77,7 @@ interface TetrisState {
   lines: number;
   level: number;
   alive: boolean;
-  hearts: Heart[];
+  sparks: Spark[];
   flash: number;
 }
 
@@ -124,7 +124,7 @@ function fresh(): TetrisState {
     lines: 0,
     level: 1,
     alive: true,
-    hearts: [],
+    sparks: [],
     flash: 0,
   };
 }
@@ -184,13 +184,13 @@ export function Tetris({ best, onEnd }: GameProps) {
       ctx.fillStyle = `rgba(255,255,255,${st.flash * 0.6})`;
       ctx.fillRect(0, 0, COLS * C, H);
     }
-    // Herzen bei vollen Reihen
+    // Sterne bei vollen Reihen
     ctx.font = '12px sans-serif';
     ctx.textAlign = 'center';
-    for (const h of st.hearts) {
+    for (const h of st.sparks) {
       ctx.globalAlpha = Math.max(0, h.life);
-      ctx.fillStyle = '#ff6b9d';
-      ctx.fillText('❤', h.x, h.y);
+      ctx.fillStyle = '#ffd23f';
+      ctx.fillText('★', h.x, h.y);
     }
     ctx.globalAlpha = 1;
     // Seitenleiste
@@ -234,7 +234,7 @@ export function Tetris({ best, onEnd }: GameProps) {
       st.score += LINE_POINTS[full.length] * st.level;
       st.level = 1 + Math.floor(st.lines / 10);
       st.flash = full.length === 4 ? 1 : 0.6;
-      for (const y of full) for (let k = 0; k < 4; k++) st.hearts.push({ x: 10 + Math.random() * (COLS * C - 20), y: y * C + 10, vy: -30 - Math.random() * 40, life: 1 });
+      for (const y of full) for (let k = 0; k < 4; k++) st.sparks.push({ x: 10 + Math.random() * (COLS * C - 20), y: y * C + 10, vy: -30 - Math.random() * 40, life: 1 });
       if (full.length === 4) {
         sfx.win();
         buzz([30, 30, 60]);
@@ -329,8 +329,8 @@ export function Tetris({ best, onEnd }: GameProps) {
   useLoop((dt) => {
     const st = s.current;
     st.flash = Math.max(0, st.flash - dt * 3);
-    st.hearts = st.hearts.filter((h) => (h.life -= dt * 0.9) > 0);
-    st.hearts.forEach((h) => (h.y += h.vy * dt));
+    st.sparks = st.sparks.filter((h) => (h.life -= dt * 0.9) > 0);
+    st.sparks.forEach((h) => (h.y += h.vy * dt));
     if (st.alive) {
       const resting = !fits(st.grid, st.piece, 0, 1);
       if (resting) {

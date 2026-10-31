@@ -1,5 +1,6 @@
 // Joyboy Service Worker: App offline verfügbar machen.
-const CACHE = 'joyboy-v1';
+// Neuer Name: main.tsx legt hier auch die Dateien des ersten Besuchs ab
+const CACHE = 'joyboy-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png'];
 
 self.addEventListener('install', (event) => {
@@ -30,14 +31,15 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE).then((c) => c.put('./index.html', copy));
           return res;
         })
-        .catch(() => caches.match('./index.html')),
+        .catch(() => caches.match('./index.html', { ignoreVary: true })),
     );
     return;
   }
 
   // Dateien (JS, CSS, Schriften, Icons): aus dem Cache, im Hintergrund aktualisieren.
   event.respondWith(
-    caches.match(request).then((cached) => {
+    // ignoreVary: statische Dateien hängen nicht vom Origin-Header ab (Modul-Skripte schicken ihn mit)
+    caches.match(request, { ignoreVary: true }).then((cached) => {
       const network = fetch(request)
         .then((res) => {
           if (res.ok) {

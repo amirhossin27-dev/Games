@@ -109,6 +109,21 @@ function Face({ kind }: { kind: AvatarKind }) {
           <Cheeks y={68} x1={32} x2={68} />
         </>
       );
+    case 'baer':
+      return (
+        <>
+          <circle cx="26" cy="32" r="12" fill="#7E4A2A" />
+          <circle cx="74" cy="32" r="12" fill="#7E4A2A" />
+          <circle cx="26" cy="32" r="6" fill="#D9A27A" />
+          <circle cx="74" cy="32" r="6" fill="#D9A27A" />
+          <ellipse cx="50" cy="58" rx="34" ry="30" fill="#9C6238" />
+          <ellipse cx="50" cy="70" rx="15.5" ry="11.5" fill="#E9C39C" />
+          <Eyes l={[38, 52]} r={[62, 52]} size={4.4} />
+          <ellipse cx="50" cy="65.5" rx="5.8" ry="4.2" fill={INK} />
+          <path d="M50 69.5 V73 M44.5 73.5 Q50 78 55.5 73.5" fill="none" stroke={INK} strokeWidth="2.4" strokeLinecap="round" />
+          <Cheeks y={66} x1={27} x2={73} />
+        </>
+      );
     case 'dino':
       return (
         <>

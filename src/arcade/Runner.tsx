@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
-import { buzz, heartPath, noise, outlinedText, oval, tone, useFillCanvas, useLoop } from './engine';
+import { buzz, noise, outlinedText, oval, starPath, tone, useFillCanvas, useLoop } from './engine';
 import { FWD, HALF, LANE, newRun, rightOf, runScore, runStep, segPoint, TURN_WINDOW, yawOf, type Decor, type Obstacle, type RunInput, type RunState, type Seg } from './runner';
 import type { GameProps } from './types';
 
@@ -232,7 +232,7 @@ function drawRunner(ctx: CanvasRenderingContext2D, x: number, y: number, ppm: nu
   ctx.roundRect(-21, -132, 42, 60, 14);
   ctx.fill();
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  heartPath(ctx, 0, -104, 7);
+  starPath(ctx, 0, -103, 8);
   ctx.fill();
   // Arme
   for (const dir of [-1, 1]) {
@@ -312,7 +312,7 @@ function drawMonster(ctx: CanvasRenderingContext2D, x: number, y: number, ppm: n
     ctx.lineTo(dir * 70, -195);
     ctx.fill();
   }
-  // Augen und Herz-Bauch
+  // Augen und Bauchfleck
   ctx.fillStyle = '#fff';
   ctx.beginPath();
   oval(ctx, -30, -160, 20, 24);
@@ -324,7 +324,8 @@ function drawMonster(ctx: CanvasRenderingContext2D, x: number, y: number, ppm: n
   oval(ctx, 28, -152, 9, 11);
   ctx.fill();
   ctx.fillStyle = '#ff6fa5';
-  heartPath(ctx, 0, -92, 26);
+  ctx.beginPath();
+  oval(ctx, 0, -88, 26, 22);
   ctx.fill();
   ctx.fillStyle = '#4a1f5e';
   ctx.beginPath();
@@ -402,13 +403,13 @@ function drawDecor(ctx: CanvasRenderingContext2D, dec: Decor, x: number, y: numb
     ctx.fill();
     ctx.globalAlpha = 1;
   } else {
-    // Herz-Statue auf Sockel
+    // Stern-Statue auf Sockel
     ctx.fillStyle = fogged(C.stone, z, 0.8);
     ctx.fillRect(-34, -120, 68, 120 + DROP * 100);
     ctx.fillStyle = fogged(C.stoneTop, z);
     ctx.fillRect(-40, -132, 80, 16);
-    ctx.fillStyle = fogged(hex('#e2557f'), z);
-    heartPath(ctx, 0, -190, 50);
+    ctx.fillStyle = fogged(hex('#e9b637'), z);
+    starPath(ctx, 0, -186, 56);
     ctx.fill();
     ctx.fillStyle = `rgba(255,255,255,${0.3 * (1 - fogK)})`;
     ctx.beginPath();
@@ -492,7 +493,7 @@ const TIPS = ['👆 Wischen: ⬅️ ➡️ Spur wechseln · ⬆️ springen · �
 export function Runner({ best, onEnd }: GameProps) {
   const s = useRef<RunState>(newRun());
   const inp = useRef<RunInput>({});
-  const [hud, setHud] = useState({ m: 0, hearts: 0, score: 0 });
+  const [hud, setHud] = useState({ m: 0, coins: 0, score: 0 });
   const [started, setStarted] = useState(false);
   const startedRef = useRef(false);
   const ended = useRef(false);
@@ -505,8 +506,8 @@ export function Runner({ best, onEnd }: GameProps) {
 
   const sync = () => {
     const st = s.current;
-    const n = { m: Math.floor(st.dist), hearts: st.hearts, score: runScore(st) };
-    setHud((h) => (h.m === n.m && h.hearts === n.hearts ? h : n));
+    const n = { m: Math.floor(st.dist), coins: st.coins, score: runScore(st) };
+    setHud((h) => (h.m === n.m && h.coins === n.coins ? h : n));
   };
 
   const { wrapRef, canvasRef, paint } = useFillCanvas((ctx, w, h) => {
@@ -614,7 +615,7 @@ export function Runner({ best, onEnd }: GameProps) {
     for (let i = first; i < Math.min(st.segs.length, st.si + 3); i++) {
       const sg = st.segs[i];
       for (const o of sg.obs) addObstacle(ctx, cam, sg, o, objs);
-      for (const ht of sg.hearts) {
+      for (const ht of sg.coins) {
         if (ht.got) continue;
         const c3 = toCam(cam, ...wp(sg, ht.d, ht.lane * LANE, ht.y));
         if (c3[2] < NEAR || c3[2] > FAR) continue;
@@ -628,8 +629,14 @@ export function Runner({ best, onEnd }: GameProps) {
             ctx.save();
             ctx.translate(sx, sy);
             ctx.scale(Math.max(0.15, Math.abs(spin)), 1);
-            ctx.fillStyle = fogged(hex('#ff3d7f'), c3[2]);
-            heartPath(ctx, 0, 0, ppm * 0.22);
+            const rc = ppm * 0.2;
+            ctx.fillStyle = fogged(hex('#f2b01e'), c3[2]);
+            ctx.beginPath();
+            oval(ctx, 0, 0, rc, rc);
+            ctx.fill();
+            ctx.fillStyle = fogged(hex('#ffd75e'), c3[2]);
+            ctx.beginPath();
+            oval(ctx, 0, 0, rc * 0.7, rc * 0.7);
             ctx.fill();
             ctx.fillStyle = 'rgba(255,255,255,0.55)';
             ctx.beginPath();
@@ -705,13 +712,13 @@ export function Runner({ best, onEnd }: GameProps) {
     if (st.chase > 0 && !st.dead && startedRef.current) {
       ctx.font = '800 14px system-ui, sans-serif';
       ctx.globalAlpha = Math.min(1, st.chase / 2);
-      outlinedText(ctx, '💜 Das Knuddelmonster ist dir dicht auf den Fersen!', w / 2, 56, '#fff', 'rgba(60,20,80,0.7)', 4);
+      outlinedText(ctx, '👀 Das Knuddelmonster ist dir dicht auf den Fersen!', w / 2, 56, '#fff', 'rgba(60,20,80,0.7)', 4);
       ctx.globalAlpha = 1;
     }
     if (st.dead) {
       ctx.font = '900 30px system-ui, sans-serif';
       ctx.textBaseline = 'middle';
-      const text = st.dead === 'caught' ? 'Geknuddelt! 💜' : st.dead === 'fall' ? 'Abgestürzt! 😵' : 'Autsch! 💫';
+      const text = st.dead === 'caught' ? 'Geknuddelt! 🤗' : st.dead === 'fall' ? 'Abgestürzt! 😵' : 'Autsch! 💫';
       outlinedText(ctx, text, w / 2, h * 0.3, '#fff', 'rgba(90,20,60,0.7)', 6);
     }
   });
@@ -741,8 +748,8 @@ export function Runner({ best, onEnd }: GameProps) {
         else if (e === 'slide') noise(160, 0.06, 700, 300);
         else if (e === 'lane') noise(60, 0.03, 1500, 900);
         else if (e === 'turn') tone(780, 70, 'triangle', 0.04, 1170);
-        else if (e === 'heart') {
-          tone(1046 + (st.hearts % 5) * 110, 60, 'square', 0.03);
+        else if (e === 'coin') {
+          tone(1046 + (st.coins % 5) * 110, 60, 'square', 0.03);
           sync();
         } else if (e === 'stumble') {
           noise(220, 0.12, 500, 120);
@@ -821,14 +828,14 @@ export function Runner({ best, onEnd }: GameProps) {
     <div className="g-col fill runner">
       <div className="score-strip">
         <span>⭐ {hud.score}</span>
-        <span>💗 {hud.hearts}</span>
+        <span>🪙 {hud.coins}</span>
         <span>🏆 {best ?? '–'}</span>
       </div>
       <div className="canvas-wrap runner-wrap" ref={wrapRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
-        <canvas ref={canvasRef} className="amor-canvas" />
+        <canvas ref={canvasRef} className="runner-canvas" />
         {!started && (
           <div className="canvas-overlay">
-            <span className="flappy-start amor-start">
+            <span className="flappy-start runner-start">
               🏃 Tippen oder wischen zum Loslaufen
               {TIPS.map((t) => (
                 <small key={t}>{t}</small>
@@ -864,8 +871,8 @@ function addObstacle(ctx: CanvasRenderingContext2D, cam: Cam, sg: Seg, o: Obstac
     boxItem(ctx, cam, sg, o.d, 0, 0.35, HALF + 0.3, 1.05, 1.75, C.stone, C.stoneTop, list, (face, zc) => {
       const cx = (face[0][0] + face[2][0]) / 2;
       const cy = (face[0][1] + face[2][1]) / 2;
-      ctx.fillStyle = fogged(hex('#e2557f'), zc);
-      heartPath(ctx, cx, cy, Math.abs(face[2][1] - face[0][1]) * 0.28);
+      ctx.fillStyle = fogged(hex('#e9b637'), zc);
+      starPath(ctx, cx, cy, Math.abs(face[2][1] - face[0][1]) * 0.34);
       ctx.fill();
     });
     return;
@@ -877,8 +884,8 @@ function addObstacle(ctx: CanvasRenderingContext2D, cam: Cam, sg: Seg, o: Obstac
       const size = Math.abs(face[2][1] - face[0][1]);
       ctx.fillStyle = fogged(C.moss, zc, 0.9);
       ctx.fillRect(Math.min(face[0][0], face[2][0]), Math.min(face[0][1], face[2][1]) + size * 0.82, Math.abs(face[2][0] - face[0][0]), size * 0.18);
-      ctx.fillStyle = fogged(hex('#c94a72'), zc);
-      heartPath(ctx, cx, cy - size * 0.05, size * 0.17);
+      ctx.fillStyle = fogged(hex('#c9962a'), zc);
+      starPath(ctx, cx, cy - size * 0.05, size * 0.2);
       ctx.fill();
     });
   }

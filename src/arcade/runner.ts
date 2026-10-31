@@ -33,7 +33,7 @@ export interface Obstacle {
   done?: boolean;
 }
 
-export interface Heart {
+export interface Coin {
   d: number;
   lane: number;
   y: number;
@@ -56,7 +56,7 @@ export interface Seg {
   /** -1 = links abbiegen, 1 = rechts */
   turn: -1 | 1;
   obs: Obstacle[];
-  hearts: Heart[];
+  coins: Coin[];
   decor: Decor[];
 }
 
@@ -88,7 +88,7 @@ export function makeSeg(prev: Seg | null, k: number, rnd: Rnd = Math.random): Se
   }
   const len = prev ? Math.round(46 + rnd() * (44 - diff * 14)) : 80;
   const turn: -1 | 1 = rnd() < 0.5 ? -1 : 1;
-  const seg: Seg = { x, z, h, len, turn, obs: [], hearts: [], decor: [] };
+  const seg: Seg = { x, z, h, len, turn, obs: [], coins: [], decor: [] };
 
   // Hindernisse
   let d = prev ? 12 + rnd() * 6 : 38;
@@ -106,14 +106,14 @@ export function makeSeg(prev: Seg | null, k: number, rnd: Rnd = Math.random): Se
       o.lanes = lanes.slice(0, rnd() < 0.35 + diff * 0.3 ? 2 : 1);
     }
     seg.obs.push(o);
-    // Herzen: über Stämme im Bogen, sonst eine Reihe in einer freien Spur
+    // Münzen: über Stämme im Bogen, sonst eine Reihe in einer freien Spur
     if (rnd() < 0.7) {
       const free = [-1, 0, 1].filter((l) => !o.lanes.includes(l));
       const lane = free[Math.floor(rnd() * free.length)];
       if (kind === 'log' || kind === 'gap') {
-        for (let i = -2; i <= 2; i++) seg.hearts.push({ d: d + i * 1.4, lane, y: 0.7 + (1 - (i * i) / 5) * 0.9 });
+        for (let i = -2; i <= 2; i++) seg.coins.push({ d: d + i * 1.4, lane, y: 0.7 + (1 - (i * i) / 5) * 0.9 });
       } else {
-        for (let i = 0; i < 5; i++) seg.hearts.push({ d: d + 4 + i * 1.6, lane, y: 0.7 });
+        for (let i = 0; i < 5; i++) seg.coins.push({ d: d + 4 + i * 1.6, lane, y: 0.7 });
       }
     }
     d += 15 - diff * 5 + rnd() * (11 - diff * 4);
@@ -128,7 +128,7 @@ export function makeSeg(prev: Seg | null, k: number, rnd: Rnd = Math.random): Se
   return seg;
 }
 
-export type RunEvent = 'jump' | 'slide' | 'lane' | 'turn' | 'heart' | 'stumble' | 'crash' | 'fall' | 'caught';
+export type RunEvent = 'jump' | 'slide' | 'lane' | 'turn' | 'coin' | 'stumble' | 'crash' | 'fall' | 'caught';
 
 export interface RunState {
   segs: Seg[];
@@ -144,7 +144,7 @@ export interface RunState {
   slow: number;
   t: number;
   dist: number;
-  hearts: number;
+  coins: number;
   /** Solange > 0, ist das Knuddelmonster dicht hinter dir */
   chase: number;
   /** Am Anfang taucht es nur kurz auf (ohne Gefahr) */
@@ -174,7 +174,7 @@ export function newRun(rnd: Rnd = Math.random): RunState {
     slow: 0,
     t: 0,
     dist: 0,
-    hearts: 0,
+    coins: 0,
     chase: 0,
     intro: 3,
     dead: null,
@@ -194,7 +194,7 @@ export interface RunInput {
 export const yawOf = (h: Heading) => (h * Math.PI) / 2;
 
 export function runScore(st: RunState) {
-  return Math.floor(st.dist) + st.hearts * 5;
+  return Math.floor(st.dist) + st.coins * 5;
 }
 
 /** Ein Zeitschritt. Gibt die Ereignisse zurück (für Töne und Effekte). */
@@ -321,16 +321,16 @@ export function runStep(st: RunState, dt: number, inp: RunInput, rnd: Rnd = Math
     }
   }
 
-  // Herzen
-  for (const ht of cur.hearts) {
+  // Münzen
+  for (const ht of cur.coins) {
     if (ht.got) continue;
     if (Math.abs(ht.d - st.d) > 0.9) continue;
     if (Math.abs(ht.lane * LANE - st.laneX) > 0.7) continue;
     const head = st.slide > 0 ? 0.8 : 1.7;
     if (ht.y < st.y - 0.2 || ht.y > st.y + head + 0.2) continue;
     ht.got = true;
-    st.hearts++;
-    ev.push('heart');
+    st.coins++;
+    ev.push('coin');
   }
 
   // Verpasste Kurve: über die Kante in den Abgrund

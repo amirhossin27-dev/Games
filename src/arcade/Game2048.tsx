@@ -182,7 +182,7 @@ export function Game2048({ best, onEnd }: GameProps) {
             </span>
           );
         })}
-        {won && !over && <span className="g2048-badge">2048! 💖 Weiter geht’s</span>}
+        {won && !over && <span className="g2048-badge">2048! 🎉 Weiter geht’s</span>}
       </div>
       <p className="game-hint">{over ? 'Nichts geht mehr!' : 'Wische, um alle Kacheln zu schieben'}</p>
     </div>

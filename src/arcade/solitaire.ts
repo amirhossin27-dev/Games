@@ -20,7 +20,8 @@ export type Where = { k: 'waste' } | { k: 'found'; i: number } | { k: 'tab'; i: 
 export type Target = { k: 'found'; i: number } | { k: 'tab'; i: number };
 
 export const S_SUITS: SSuit[] = ['H', 'D', 'S', 'C'];
-export const SUIT_CHAR: Record<SSuit, string> = { H: '♥', D: '♦', S: '♠', C: '♣' };
+// H ist in Joyboy die rote Stern-Farbe (statt Herz)
+export const SUIT_CHAR: Record<SSuit, string> = { H: '★', D: '♦', S: '♠', C: '♣' };
 export const isRed = (c: { s: SSuit }) => c.s === 'H' || c.s === 'D';
 export const rankText = (r: number) => ({ 1: 'A', 11: 'B', 12: 'D', 13: 'K' })[r] ?? String(r);
 

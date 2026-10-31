@@ -7,7 +7,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const names = readFileSync(new URL('../src/lib/names.ts', import.meta.url), 'utf8');
 const list = (name) => [...names.match(new RegExp(`export const ${name}[^=]*= \\[([^\\]]*)\\]`, 's'))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 const bad = list('BAD_WORDS');
-const animals = [...names.match(/export const ANIMALS[^=]*= \[(.*?)\];/s)[1].matchAll(/kind: '([a-z]+)'/g)].map((m) => m[1]);
+const kinds = (name) => [...names.match(new RegExp(`export const ${name}[^=]*= \\[(.*?)\\];`, 's'))[1].matchAll(/kind: '([a-z]+)'/g)].map((m) => m[1]);
+// Dazu die früheren Tiere (z. B. Dino), damit ältere App-Versionen weiter ins Zimmer kommen
+const animals = [...kinds('ANIMALS'), ...kinds('OLD_ANIMALS')];
 const chat = readFileSync(new URL('../src/lib/chat.ts', import.meta.url), 'utf8');
 const chatWords = [...chat.match(/export const CHAT_WORDS[^=]*= \[([^\]]*)\]/s)[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 const chatMax = Number(chat.match(/export const CHAT_MAX = (\d+);/)[1]);

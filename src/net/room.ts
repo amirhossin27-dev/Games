@@ -118,7 +118,11 @@ let retry: number | undefined;
 let lastStateRaw = '';
 let myActs: { n: number; r: number; a: unknown }[] = [];
 
-const token = async (force = false) => (await ensureAuth(view.profileId!, force)).token!;
+const token = async (force = false) => {
+  // Nie ein Konto für „kein Kind“ anlegen (z. B. wenn ein Zug noch unterwegs ist und das Zimmer schon zu)
+  if (!view.profileId) throw new Error('kein Kind im Zimmer');
+  return (await ensureAuth(view.profileId, force)).token!;
+};
 
 const denied = (e: unknown) => e instanceof DbError && (e.status === 401 || e.status === 403);
 
@@ -451,13 +455,14 @@ export async function resumeRoom(profile: Profile) {
 }
 
 export async function leaveRoom() {
-  const { code, uid, info } = view;
+  const { code, uid, info, profileId } = view;
   stopAll();
   set(EMPTY);
   saveResume();
-  if (!code || !uid) return;
+  if (!code || !uid || !profileId) return;
   try {
-    const t = await token().catch(() => null);
+    // Konto des Kindes von vorhin – `view` ist hier schon leer
+    const t = (await ensureAuth(profileId).catch(() => null))?.token;
     if (!t) return;
     if (info?.host === uid) await dbRequest('PATCH', `rooms/${code}/info`, t, { status: 'closed', at: SERVER_TIME });
     else await dbRequest('DELETE', `rooms/${code}/seats/${uid}`, t);

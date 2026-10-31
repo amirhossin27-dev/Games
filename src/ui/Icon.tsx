@@ -184,7 +184,14 @@ const PATHS: Record<string, ReactNode> = {
       <path d="M9 9.5h.01M15 9.5h.01" />
     </>
   ),
-  heart: <path d="M12 20s-7.5-4.4-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10z" />,
+  party: (
+    <>
+      <path d="M4 20l4.5-11.5 7 7z" />
+      <path d="M14 3.5v3M17.5 6.5l2-2M17.5 10h3" />
+      <circle cx="11.5" cy="5" r=".6" fill="currentColor" />
+      <circle cx="19.5" cy="14" r=".6" fill="currentColor" />
+    </>
+  ),
   sparkle: <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" />,
   share: (
     <>
