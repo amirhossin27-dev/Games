@@ -145,8 +145,8 @@ Ablauf:
 
 ### 5.2 Spielzimmer & Zimmer-Code
 
-- Ein Kind tippt **„Zimmer öffnen“** und wählt ein Spiel. Es bekommt einen Code aus **4 Tieren** (z. B. Fuchs · Frosch · Löwe · Panda). Mit 16 Tieren gibt es 65.536 Codes.
-- Die anderen tippen **„Code eingeben“** und tippen die 4 Tiere an. Das klappt auch für Kinder, die noch nicht lesen. Alternativ: Link teilen oder QR-Code scannen.
+- Ein Kind tippt **„Zimmer öffnen“** und wählt ein Spiel. Es bekommt einen Code aus **6 Tieren** (z. B. Fuchs · Frosch · Löwe · Panda · Hase · Wal). Mit 16 Tieren gibt es 16,7 Millionen Codes.
+- Die anderen tippen **„Code eingeben“** und tippen die 6 Tiere an. Das klappt auch für Kinder, die noch nicht lesen. Alternativ: Link teilen oder QR-Code scannen.
 - **Klingel-Prinzip:** Wer neu ins Zimmer will, erscheint beim Gastgeber als „Panda möchte mitspielen – reinlassen?“. Bekannte Spielfreunde dürfen direkt rein. So kann niemand Fremdes durch Raten eines Codes einfach mitspielen.
 - Freie Plätze kann der Gastgeber mit **Robo** füllen.
 - Mit „Spiel starten“ schließt das Zimmer für Neue. Nach 2 Stunden ohne Aktivität verfällt es.
@@ -186,7 +186,8 @@ Weil jeder Knoten genau einen Schreiber hat, gibt es keine Konflikte – das ist
 - `profiles/<uid>/private`: nur `<uid>` selbst.
 - `rooms/<code>/seats/<uid>`: schreibt nur `<uid>` selbst.
 - `rooms/<code>/info` und `state`: schreibt nur der Gastgeber; ein neuer Gastgeber darf übernehmen, wenn der Herzschlag des alten älter als 20 s ist (die Regeln kennen die Serverzeit `now`).
-- Größen und Formate werden validiert (Code genau 4 Zeichen, max. 4 Plätze, Spielstand max. 64 KB).
+- Ein Zimmer lesen nur der Gastgeber und reingelassene Kinder. Wer klingelt, sieht nur `info` und den Platz des Gastgebers.
+- Größen und Formate werden validiert (Code genau 6 Zeichen, max. 4 Plätze, Spielstand max. 64 KB). Namen und Tiere prüft die Datenbank mit demselben Wortfilter wie die App.
 
 ### 5.7 Mengen & Kosten
 
@@ -211,7 +212,7 @@ Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindung
 - **Kein freier Chat** – nur 5 feste Reaktionen (Daumen hoch, Lachen, Staunen, Herz, Super).
 - **Spitznamen statt echter Namen:** Namensvorschläge per Würfel, Hinweis „Nimm einen Spitznamen“, Wortfilter, max. 16 Zeichen. Im Elternbereich lässt sich „nur Vorschlags-Namen“ einschalten.
 - **Klingel-Prinzip** im Spielzimmer, Zimmer schließen beim Spielstart.
-- **Elternbereich mit Passwort:** Spielzeit-Limit, Vorlesen, Ton, nur Vorschlags-Namen, Profile löschen (später auch Online-Spiel an/aus und Spielerpass).
+- **Elternbereich mit Passwort:** Spielzeit-Limit, Vorlesen, Ton, nur Vorschlags-Namen, Profile löschen, Online an/aus (Standard: aus) mit Löschen der Online-Daten, Spielerpass.
 - **Datensparsam:** Spielername, Avatar, Altersstufe und Spielstände – sonst nichts. Keine Werbung, keine Käufe, keine Tracker.
 - **Schriften werden mit der App ausgeliefert** (kein Abruf bei Google Fonts – DSGVO).
 
@@ -225,7 +226,8 @@ Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindung
 - Die **Restzeit** steht oben in der App und im Spiel; bei 5 und 1 Minute erinnert Joy (Hinweis + Vorlesen).
 - Ist die Zeit aufgebraucht, endet das laufende Spiel und Joyboy zeigt **12 Stunden** lang den Pausen-Bildschirm mit Countdown.
 - Mit dem Passwort können Eltern **15 Minuten schenken**, die **Sperre aufheben** oder das Limit ändern.
-- Gegen das Vorstellen der Geräte-Uhr gleicht Joyboy die Zeit über den `Date`-Header von GitHub Pages ab, sobald Internet da ist.
+- Gegen das Vorstellen der Geräte-Uhr prüft Joyboy die Zeit über den `Date`-Header von GitHub Pages. Eine Pause endet und ein neues Fenster beginnt nur mit geprüfter Zeit – ohne Internet bleibt die Pause, bis das Gerät wieder online ist oder die Eltern sie aufheben.
+- Das Limit gilt für das ganze Gerät, also für alle Kinder darauf zusammen (pro Kind ließe es sich mit einem neuen Profil umgehen).
 
 ---
 
@@ -290,8 +292,8 @@ Jede Phase endet mit Tests und einer veröffentlichten Version, die du auf dem H
 
 ## 10. Umsetzungsnotizen Phase 3
 
-- **Firebase-Projekt** `joyboy-916f0` (Realtime Database in Belgien, anonyme Anmeldung). Die Regeln aus `database.rules.json` sind mit Testkonten gegen die echte Datenbank geprüft (Profile schützen, Zimmer anlegen, Klingel, Gastgeber-Wechsel, fremdes Überschreiben verhindert).
+- **Firebase-Projekt** `joyboy-916f0` (Realtime Database in Belgien, anonyme Anmeldung). Die Regeln aus `database.rules.json` sind mit Testkonten gegen die echte Datenbank geprüft (Profile schützen, Zimmer anlegen, Klingel, Gastgeber-Wechsel, fremdes Überschreiben verhindert). Die strengeren Regeln vom 31.10.2026 (nur Mitglieder sehen ein Zimmer, Namensprüfung in der Datenbank) sind noch nicht gegen die echte Datenbank geprüft.
 - **Online-Spiele:** alle Regel-Spiele für mehrere (11 Spiele). Lernspiele und Stadt-Land-Fluss laufen online gleichzeitig, sonst reihum. Arcade-Spiele bleiben vorerst an einem Gerät (Wettkampf-Modus ist Phase 4).
-- **Zimmer-Code** aus 16 Tieren (65.536 Codes); ein Zimmer kann nur neu vergeben werden, wenn es 2 Stunden unbenutzt war.
+- **Zimmer-Code** aus 6 von 16 Tieren (16,7 Millionen Codes, bis Okt. 2026 waren es 4 Tiere); ein Zimmer kann nur neu vergeben werden, wenn es 2 Stunden unbenutzt war.
 - **Abwesenheit:** Herzschlag alle 5 s; nach 20 s ohne Herzschlag springt Robo ein bzw. übernimmt das nächste Kind den Gastgeber.
-- **Cloud-Spielstände:** jedes Profil bekommt automatisch ein anonymes Konto; abgeglichen wird nach Zeitstempel (neuer gewinnt).
+- **Cloud-Spielstände:** jedes Profil bekommt ein anonymes Konto, sobald die Eltern Online erlaubt haben; abgeglichen wird nach Zeitstempel (neuer gewinnt).

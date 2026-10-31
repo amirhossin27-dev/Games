@@ -8,6 +8,7 @@ import { speakIfAuto } from '../lib/speech';
 import { LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
 import { arcadeAfter, learnedToday, learnLeft, learnText } from '../lib/unlock';
 import { pick } from '../lib/util';
+import { onlineAllowed } from '../net/consent';
 import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
 import { Icon, type IconName } from '../ui/Icon';
@@ -246,7 +247,7 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
               <ModeTile
                 icon="globe"
                 title="Online"
-                sub={isOnlineGame(id) ? 'Jedes Kind am eigenen Gerät' : 'Für dieses Spiel noch nicht'}
+                sub={!isOnlineGame(id) ? 'Für dieses Spiel noch nicht' : onlineAllowed(data.settings) ? 'Jedes Kind am eigenen Gerät' : 'Erst die Eltern fragen'}
                 disabled={!isOnlineGame(id)}
                 onClick={() => nav.go({ name: 'rooms', preset: id })}
               />

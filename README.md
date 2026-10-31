@@ -14,8 +14,8 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 - **Spielzeit-Limit für Eltern:** siehe unten.
 - **Erst lernen, dann spielen:** Die Arcade-Spiele sind jeden Tag erst nach ein paar Lernspielen frei. Die Anzahl stellen die Eltern ein, siehe unten.
 - **Online-Spielzimmer** für bis zu 4 Kinder, siehe unten.
-- **Spielstände dauerhaft gesichert:** auf dem Gerät und zusätzlich in der Cloud. Mit dem **Spielerpass** (Elternbereich) nimmt ein Kind seinen Spielstand auf ein neues Gerät mit.
-- **Kindersicher:** kein Chat (nur 5 feste Reaktionen), keine Werbung, keine Käufe, keine Tracker. Schriften werden mit der App ausgeliefert, kein Abruf bei Google. In der Cloud liegen nur Spitzname, Tier, Sterne und Spielstand.
+- **Spielstände dauerhaft gesichert:** auf dem Gerät und – wenn die Eltern Online erlaubt haben – zusätzlich in der Cloud. Mit dem **Spielerpass** (Elternbereich) nimmt ein Kind seinen Spielstand auf ein neues Gerät mit.
+- **Kindersicher:** kein Chat (nur 5 feste Reaktionen), keine Werbung, keine Käufe, keine Tracker. Schriften werden mit der App ausgeliefert, kein Abruf bei Google. Alles Online (Spielzimmer, Cloud, Spielerpass, Rangliste mit Spielfreunden) ist aus, bis die Eltern es im Elternbereich erlauben; dort lassen sich die Online-Daten auch löschen.
 
 ## Die Spiele
 
@@ -41,9 +41,11 @@ Gegen Robo antworten in den Lernspielen alle gleichzeitig. Teilen sich mehrere K
 
 ## Online-Spielzimmer
 
+Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktionen (Standard: aus).
+
 1. Ein Kind tippt **Zimmer → Zimmer öffnen** (oder auf einer Spielseite „Online“) und wählt ein Spiel.
-2. Es bekommt einen **Zimmer-Code aus vier Tieren**, z. B. „Fuchs, Panda, Schildkröte, Löwe“. Den sagt es laut oder teilt den Link.
-3. Die anderen tippen **Zimmer → Code eingeben** und die vier Tiere – oder öffnen den Link – und **klingeln**.
+2. Es bekommt einen **Zimmer-Code aus sechs Tieren**, z. B. „Fuchs, Panda, Schildkröte, Löwe, Hase, Wal“. Den sagt es laut oder teilt den Link.
+3. Die anderen tippen **Zimmer → Code eingeben** und die sechs Tiere – oder öffnen den Link – und **klingeln**.
 4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen.
 5. Der Gastgeber startet, alle spielen auf ihrem Gerät. „Nochmal“ startet die nächste Runde für alle.
 
@@ -61,9 +63,9 @@ Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK)
 4. Ist die Zeit aufgebraucht, macht Joyboy **12 Stunden Pause**. Ein Countdown zeigt, wann es weitergeht.
 5. Eltern können mit dem Passwort jederzeit **15 Minuten schenken**, die **Sperre aufheben** oder das Limit ausschalten.
 
-Gezählt wird, solange Joyboy sichtbar geöffnet ist (nicht im Elternbereich). Das Kontingent gilt für 12 Stunden ab dem ersten Spielen. Damit das Verstellen der Geräte-Uhr nicht hilft, gleicht Joyboy die Zeit mit dem Server ab, sobald Internet da ist. Das Passwort wird nur als Hash gespeichert (PBKDF2).
+Gezählt wird, solange Joyboy sichtbar geöffnet ist (nicht im Elternbereich), auch bei zwei offenen Tabs nur einmal. Das Kontingent gilt für 12 Stunden ab dem ersten Spielen. Damit das Verstellen der Geräte-Uhr nicht hilft, prüft Joyboy die Uhrzeit über das Internet: Eine Pause endet und ein neues Kontingent beginnt nur mit geprüfter Uhrzeit. Ohne Internet bleibt eine Pause deshalb, bis das Gerät wieder online ist oder die Eltern sie aufheben. Das Passwort wird nur als Hash gespeichert (PBKDF2).
 
-> Grenzen: Das Limit gilt pro Gerät. Löscht jemand die Website-Daten im Browser, ist es weg (die Spielstände lassen sich über den Spielerpass zurückholen). Am sichersten ist es zusätzlich, die Bildschirmzeit-Funktionen von iOS bzw. Android zu nutzen.
+> Grenzen: Das Limit gilt pro Gerät, also für alle Kinder darauf zusammen. Löscht jemand die Website-Daten im Browser, ist es weg (die Spielstände lassen sich über den Spielerpass zurückholen). Am sichersten ist es zusätzlich, die Bildschirmzeit-Funktionen von iOS bzw. Android zu nutzen.
 
 ## Erst lernen, dann spielen (für Eltern)
 

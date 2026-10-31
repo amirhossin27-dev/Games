@@ -3,11 +3,12 @@ import { ONLINE_GAMES } from '../games/defs';
 import { GAME_BY_ID, playersText, type GameId } from '../games/registry';
 import { CODE_ANIMALS, CODE_LEN, codeAnimals, codeFromIndexes, codeWords, roomLink } from '../net/codes';
 import { onlineConfigured } from '../net/config';
-import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
+import { onlineAllowed } from '../net/consent';
+import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, ONLINE_OFF, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
 import { isAway, knocking, maxPlayers, members, ROBO_NAMES, taken, type ReactionId } from '../net/roomLogic';
 import { nav, useNav } from '../lib/nav';
 import { speak, speakIfAuto, VOICE_ENABLED } from '../lib/speech';
-import { LEVEL_LABEL, levelForAge, type Level, type Profile } from '../lib/store';
+import { LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
@@ -26,7 +27,7 @@ function CodeAnimals({ code, size = 46 }: { code: string; size?: number }) {
   return (
     <div className="code-row" aria-label={`Zimmer-Code: ${codeWords(code)}`}>
       {codeAnimals(code).map((a, i) => (
-        <span key={i} className="code-stamp" style={{ transform: `rotate(${[-3, 2, -2, 3][i]}deg)` }}>
+        <span key={i} className="code-stamp" style={{ transform: `rotate(${[-3, 2, -2, 3, -2, 2][i] ?? 0}deg)` }}>
           <span style={{ fontSize: size }} aria-hidden="true">
             {a.e}
           </span>
@@ -37,20 +38,22 @@ function CodeAnimals({ code, size = 46 }: { code: string; size?: number }) {
   );
 }
 
-/** Spiel und Schwierigkeit fürs Zimmer wählen */
-function GamePicker({ profile, title, initial, onPick, onClose }: { profile: Profile; title: string; initial?: GameId; onPick: (game: GameId, level: Level) => Promise<void>; onClose: () => void }) {
+/** Spiel und Schwierigkeit fürs Zimmer wählen. `kids`: so viele Kinder sind schon im Zimmer. */
+function GamePicker({ profile, title, initial, kids = 1, onPick, onClose }: { profile: Profile; title: string; initial?: GameId; kids?: number; onPick: (game: GameId, level: Level) => Promise<void>; onClose: () => void }) {
   const [game, setGameId] = useState<GameId>(initial ?? 'rechnen');
   const [level, setLevel] = useState<Level>(levelForAge(profile.age));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Spiele, für die schon zu viele Kinder im Zimmer sind, lassen sich nicht wählen.
+  const fits = (id: GameId) => GAME_BY_ID[id].players[1] >= kids;
   return (
     <Sheet title={title} onClose={onClose}>
       <div className="pick-games">
         {ONLINE_GAMES.map((g) => (
-          <button key={g.id} type="button" className="pick-game" aria-pressed={g.id === game} onClick={() => setGameId(g.id)}>
+          <button key={g.id} type="button" className="pick-game" aria-pressed={g.id === game} disabled={!fits(g.id)} onClick={() => setGameId(g.id)}>
             <GameArt kind={g.art} height={54} />
             <b>{g.name}</b>
-            <span className="small muted">{playersText(g)} Spieler</span>
+            <span className="small muted">{fits(g.id) ? `${playersText(g)} Spieler` : `nur bis ${g.players[1]} – ihr seid ${kids}`}</span>
           </button>
         ))}
       </div>
@@ -65,7 +68,7 @@ function GamePicker({ profile, title, initial, onPick, onClose }: { profile: Pro
       <button
         type="button"
         className="btn primary big block"
-        disabled={busy}
+        disabled={busy || !fits(game)}
         onClick={async () => {
           setBusy(true);
           setError(null);
@@ -106,7 +109,7 @@ function JoinSheet({ profile, initial, onClose }: { profile: Profile; initial?: 
   };
   return (
     <Sheet title="Zimmer-Code eingeben" onClose={onClose}>
-      <p className="muted">Tippe die vier Tiere in der richtigen Reihenfolge.</p>
+      <p className="muted">Tippe die sechs Tiere in der richtigen Reihenfolge.</p>
       <div className="code-slots">
         {Array.from({ length: CODE_LEN }, (_, i) => (
           <span key={i} className={cls('code-slot', picked[i] !== undefined && 'on')}>
@@ -185,9 +188,10 @@ function Lobby({ profile }: { profile: Profile }) {
   const admitted = isHost || (uid ? info.allowed?.[uid] !== undefined : false);
   const denied = uid ? !!info.denied?.[uid] : false;
   const robos = info.robos ?? 0;
-  const count = taken(info);
+  const count = taken(info, seats);
   const max = maxPlayers(info);
-  const enough = count >= Math.max(2, meta.players[0]) && count <= max;
+  const min = Math.max(2, meta.players[0]);
+  const enough = count >= min && count <= max;
   const code = room.code!;
 
   const share = async () => {
@@ -360,7 +364,7 @@ function Lobby({ profile }: { profile: Profile }) {
             <p className="card center display">Die Runde läuft gerade …</p>
           ) : isHost ? (
             <button type="button" className="btn primary big block" disabled={!enough} onClick={() => void startGame()}>
-              {enough ? 'Spiel starten' : `Noch ${Math.max(2, meta.players[0]) - count} Mitspieler`}
+              {enough ? 'Spiel starten' : count > max ? `Zu viele für ${meta.name} – höchstens ${max}` : `Noch ${min - count} Mitspieler`}
             </button>
           ) : (
             <p className="card center display">Warte, bis {hostName} das Spiel startet …</p>
@@ -376,13 +380,15 @@ function Lobby({ profile }: { profile: Profile }) {
         </>
       )}
 
-      {picker && <GamePicker profile={profile} title="Anderes Spiel" initial={info.game} onPick={(g, l) => setGame(g, l)} onClose={() => setPicker(false)} />}
+      {picker && <GamePicker profile={profile} title="Anderes Spiel" initial={info.game} kids={list.length} onPick={(g, l) => setGame(g, l)} onClose={() => setPicker(false)} />}
     </section>
   );
 }
 
 export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; joinCode?: string; preset?: GameId }) {
   const room = useRoom();
+  const data = useData();
+  const allowed = onlineAllowed(data.settings);
   const [sheet, setSheet] = useState<'create' | 'join' | null>(joinCode ? 'join' : preset ? 'create' : null);
 
   if (room.code && room.profileId === profile.id) return <Lobby profile={profile} />;
@@ -395,18 +401,26 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
       <JoySays text="Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!" mood="happy" size={72} />
       {!onlineConfigured() ? (
         <p className="card">Online-Spielen ist noch nicht eingerichtet.</p>
+      ) : !allowed ? (
+        <section className="card stitched col" style={{ gap: 12 }} role="status">
+          <h2>Erst die Eltern fragen</h2>
+          <p>{ONLINE_OFF}</p>
+          <button type="button" className="btn secondary block" onClick={() => nav.go({ name: 'parents' })}>
+            <Icon name="lock" /> Für Eltern
+          </button>
+        </section>
       ) : (
         <>
           <section className="card tape col" style={{ gap: 12 }}>
             <h2>Zimmer öffnen</h2>
-            <p className="muted">Du suchst ein Spiel aus und bekommst einen Code aus vier Tieren. Den sagst du den anderen.</p>
+            <p className="muted">Du suchst ein Spiel aus und bekommst einen Code aus sechs Tieren. Den sagst du den anderen.</p>
             <button type="button" className="btn primary big block" onClick={() => setSheet('create')}>
               <Icon name="plus" /> Zimmer öffnen
             </button>
           </section>
           <section className="card tape butter-tape col" style={{ gap: 12 }}>
             <h2>Mitspielen</h2>
-            <p className="muted">Jemand hat schon ein Zimmer? Tippe die vier Tiere ein und klingle.</p>
+            <p className="muted">Jemand hat schon ein Zimmer? Tippe die sechs Tiere ein und klingle.</p>
             <button type="button" className="btn secondary big block" onClick={() => setSheet('join')}>
               <Icon name="grid" /> Code eingeben
             </button>
@@ -414,7 +428,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
           <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Es gibt keinen Chat – nur lustige Reaktionen.</p>
         </>
       )}
-      {sheet === 'create' && (
+      {allowed && sheet === 'create' && (
         <GamePicker
           profile={profile}
           title="Welches Spiel?"
@@ -425,7 +439,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
           onClose={() => setSheet(null)}
         />
       )}
-      {sheet === 'join' && <JoinSheet profile={profile} initial={joinCode} onClose={() => setSheet(null)} />}
+      {allowed && sheet === 'join' && <JoinSheet profile={profile} initial={joinCode} onClose={() => setSheet(null)} />}
     </section>
   );
 }
