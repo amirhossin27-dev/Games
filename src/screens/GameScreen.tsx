@@ -197,7 +197,7 @@ function ResultCard({
   else title = 'Gleichstand vorne!';
 
   const scoreText = (i: number) => {
-    if (outcome.correct && outcome.asked) return `${outcome.correct[i]} von ${outcome.asked[i]} richtig`;
+    if (outcome.correct && outcome.asked) return `${outcome.correct[i]} von ${outcome.asked[i]} ${meta.scoreLabel ?? 'richtig'}`;
     if (outcome.scores) return `${outcome.scores[i]} ${meta.id === 'maumau' ? 'Karten übrig' : meta.id === 'paare' ? 'Paare' : 'Punkte'}`;
     return '';
   };
@@ -239,7 +239,7 @@ function ResultCard({
             <span className="display" style={{ fontSize: '2.4rem', lineHeight: 1 }}>
               {outcome.correct ? `${outcome.correct[0]} / ${outcome.asked?.[0]}` : outcome.solo?.failed ? '–' : outcome.solo?.score}
             </span>
-            <span className="muted">{outcome.correct ? 'richtig' : meta.scoreLabel}</span>
+            <span className="muted">{outcome.correct ? (meta.scoreLabel ?? 'richtig') : meta.scoreLabel}</span>
             {best !== undefined && !me?.newRecord && <span className="small muted">Dein Rekord: {best}</span>}
           </div>
         ) : (

@@ -9,6 +9,8 @@ export type GameId =
   | 'welt'
   | 'woerter'
   | 'englisch'
+  | 'zahlenspur'
+  | 'schwung'
   | 'paare'
   | 'vier'
   | 'ttt'
@@ -213,6 +215,50 @@ export const GAMES: GameMeta[] = [
       { say: 'Schau dir das Bild an und tippe auf das englische Wort.', art: { k: 'quiz', task: { prompt: 'Wie heißt das auf Englisch?', say: '', options: ['dog', 'cat', 'bird', 'fish'], correct: 1, visual: { k: 'picture', e: '🐱' } }, point: 1 } },
       { say: 'Nach jeder Frage zeigt dir Joy, wie man das Wort ungefähr ausspricht.', art: { k: 'pics', items: ['🐱'], caption: 'cat – man sagt „kätt“' } },
       { say: 'Jetzt du! Wie heißt der Hund auf Englisch?', art: { k: 'quiz', task: { prompt: 'Wie heißt das auf Englisch?', say: '', options: ['cat', 'fish', 'dog', 'bird'], correct: 2, visual: { k: 'picture', e: '🐶' } }, tryIt: true } },
+    ],
+  },
+  {
+    id: 'zahlenspur',
+    name: 'Zahlen-Spur',
+    tagline: 'Fahr die Zahlen mit dem Finger nach – und schreib sie bald selbst!',
+    learn: 'Ziffern 0 bis 9 und Zahlen bis 20 richtig schreiben: am richtigen Punkt anfangen, in der richtigen Richtung. Auf Schwer ohne Vorlage, nach Rechenaufgaben.',
+    category: 'mathe',
+    minAge: 4,
+    players: [1, 4],
+    minutes: '4 Min',
+    art: 'zahlenspur',
+    kind: 'def',
+    robo: true,
+    levels: true,
+    scoreLabel: 'sauber',
+    subject: 'writing',
+    tutorial: [
+      { say: 'Schau zu: Die Hand fährt die Zahl einmal vor. Am grünen Punkt geht es los.', art: { k: 'trace', task: { k: 'zahl', text: '2', mode: 'guided', prompt: '2', hint: '' }, level: 0 } },
+      { say: 'Auf Mittel zählst du erst und spurst dann eine gestrichelte Zahl bis 20 nach.', art: { k: 'pics', items: ['🍎', '🍎', '🍎', '🍎', '🍎', '🍎', '🍎'], caption: 'Wie viele? Spure die 7 nach.' } },
+      { say: 'Auf Schwer gibt es keine Vorlage. Du rechnest und schreibst das Ergebnis selbst ins Kästchen.', art: { k: 'pics', items: ['8', '+', '5', '=', '✍️'], caption: '8 + 5 = 13' } },
+      { say: 'Jetzt du! Setz den Finger auf den grünen Punkt und fahr die 1 nach.', art: { k: 'trace', task: { k: 'zahl', text: '1', mode: 'guided', prompt: '1', hint: '' }, level: 0, tryIt: true } },
+    ],
+  },
+  {
+    id: 'schwung',
+    name: 'Schwung-Strecke',
+    tagline: 'Bring den Bären zum Honig – fahr die Schwünge nach!',
+    learn: 'Vorbereitung aufs Schreiben: Linien, Bögen, Wellen, Zickzack, Schlaufen und Spiralen in der richtigen Richtung nachfahren. Stärkt Stiftführung und Ausdauer.',
+    category: 'sprache',
+    minAge: 4,
+    players: [1, 4],
+    minutes: '3 Min',
+    art: 'schwung',
+    kind: 'def',
+    robo: true,
+    levels: true,
+    scoreLabel: 'sauber',
+    subject: 'writing',
+    tutorial: [
+      { say: 'Der Bär will zum Honig. Fahr mit dem Finger auf der Straße hinter ihm her.', art: { k: 'trace', task: { k: 'schwung', id: 'huegel', mover: '🐻', goal: '🍯' }, level: 0 } },
+      { say: 'Fang immer beim grünen Punkt an und folge dem Pfeil. Je genauer, desto mehr Sterne.', art: { k: 'pics', items: ['🟢', '➡️', '⭐', '⭐', '⭐'] } },
+      { say: 'Auf Mittel und Schwer werden die Schwünge kniffliger und die Spur dünner.', art: { k: 'pics', items: ['〰️', '🌀', '➰'], caption: 'Welle, Schneckenhaus, Schlaufe' } },
+      { say: 'Jetzt du! Bring die Biene zur Blume.', art: { k: 'trace', task: { k: 'schwung', id: 'welle', mover: '🐝', goal: '🌻' }, level: 0, tryIt: true } },
     ],
   },
   {

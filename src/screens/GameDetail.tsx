@@ -24,6 +24,8 @@ const LEVEL_SUB: Record<string, [string, string, string]> = {
   welt: ['Bilder', 'Tiere, Natur', 'Länder, All'],
   woerter: ['Buchstaben', 'Silben', 'Mehrzahl, Schreiben'],
   englisch: ['Bild → Wort', 'Wort → Bild', 'Sätze, Grammatik'],
+  zahlenspur: ['0 bis 9', 'bis 20', 'ohne Vorlage'],
+  schwung: ['Bögen', 'Zickzack', 'Schlaufen'],
   paare: ['12 Karten', '16 Karten', '24 Karten'],
   vier: ['Robo übt', 'Robo denkt mit', 'Robo-Profi'],
   ttt: ['Robo übt', 'Robo denkt mit', 'Robo-Profi'],
