@@ -42,7 +42,7 @@ describe('Ball-Blitz', () => {
   });
 });
 
-describe('Herz-Hüpfer', () => {
+describe('Hüpfer', () => {
   it('die nächste feste Plattform ist immer mit einem Sprung erreichbar', () => {
     const maxJump = 720 ** 2 / (2 * 1500);
     for (const seed of [1, 2, 3]) {
@@ -61,7 +61,7 @@ describe('Herz-Hüpfer', () => {
   });
 });
 
-describe('Herz-Mampfer', () => {
+describe('Mampfer', () => {
   it('Labyrinth: gleich breite Zeilen, alles erreichbar, keine Sackgassen', () => {
     for (const row of MAZE) expect(row.length).toBe(MW);
     const seen = new Set<string>([`${START.x},${START.y}`]);
@@ -81,7 +81,7 @@ describe('Herz-Mampfer', () => {
     const dots = dotGrid();
     for (let y = 0; y < MH; y++) {
       for (let x = 0; x < MW; x++) {
-        if (dots[y][x] > 0) expect(seen.has(`${x},${y}`), `Herz bei ${x},${y}`).toBe(true);
+        if (dots[y][x] > 0) expect(seen.has(`${x},${y}`), `Krümel bei ${x},${y}`).toBe(true);
         if (!seen.has(`${x},${y}`) || isWall(x, y)) continue;
         const ways = ([0, 1, 2, 3] as Dir[]).filter((d) => canGo(x, y, d)).length;
         expect(ways, `Sackgasse bei ${x},${y}`).toBeGreaterThanOrEqual(2);
@@ -246,7 +246,7 @@ describe('Tempel-Lauf', () => {
       expect(st.dead, `seed ${seed}`).toBeNull();
       expect(st.dist).toBeGreaterThan(1500);
       expect(st.segs.length).toBeLessThanOrEqual(6);
-      expect(runScore(st)).toBe(Math.floor(st.dist) + st.hearts * 5);
+      expect(runScore(st)).toBe(Math.floor(st.dist) + st.coins * 5);
     }
   });
 

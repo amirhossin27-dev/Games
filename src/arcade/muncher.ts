@@ -1,5 +1,5 @@
 /**
- * Herz-Mampfer: Labyrinth-Logik (eigenes Labyrinth, eigene Figuren).
+ * Mampfer: Labyrinth-Logik (eigenes Labyrinth, eigene Figuren).
  * Koordinaten in Feldern; die Mitte eines Feldes liegt bei ganzen Zahlen.
  */
 
@@ -69,7 +69,7 @@ export function canGo(x: number, y: number, d: Dir, door = false): boolean {
 }
 
 export function dotGrid(): number[][] {
-  // 0 = nichts, 1 = Herzchen, 2 = großes Herz (Liebestrank)
+  // 0 = nichts, 1 = Krümel, 2 = Zauberstern
   return MAZE.map((r) => [...r].map((c) => (c === '.' ? 1 : c === 'o' ? 2 : 0)));
 }
 

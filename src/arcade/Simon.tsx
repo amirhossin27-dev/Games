@@ -5,10 +5,10 @@ import type { GameProps } from './types';
 
 // Die Töne des Original-Simon von 1978
 const PADS = [
-  { emoji: '💗', color: '#ff4f81', freq: 329.63 },
-  { emoji: '💛', color: '#ffc23d', freq: 277.18 },
-  { emoji: '💚', color: '#2fcf7a', freq: 220 },
-  { emoji: '💙', color: '#4f9dff', freq: 164.81 },
+  { emoji: '🔺', name: 'Dreieck', color: '#ff4f81', freq: 329.63 },
+  { emoji: '⭐', name: 'Stern', color: '#ffc23d', freq: 277.18 },
+  { emoji: '🟩', name: 'Quadrat', color: '#2fcf7a', freq: 220 },
+  { emoji: '🔵', name: 'Kreis', color: '#4f9dff', freq: 164.81 },
 ];
 
 type Phase = 'start' | 'show' | 'input' | 'over';
@@ -86,7 +86,7 @@ export function Simon({ best, onEnd }: GameProps) {
               e.preventDefault();
               press(i);
             }}
-            aria-label={`Herz ${i + 1}`}
+            aria-label={p.name}
           >
             {p.emoji}
           </button>

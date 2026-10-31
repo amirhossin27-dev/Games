@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { AvatarKind } from './names';
+import { upgradeAnimal, upgradeColor, type AvatarKind } from './names';
 import { dayKey, randomId, weekKey } from './util';
 
 /**
@@ -131,8 +131,13 @@ function defaults(): AppData {
 }
 
 function fixProfile(p: Profile): Profile {
+  // Dino → Bär, blasse → kräftige Lieblingsfarbe
+  const animal = upgradeAnimal(p.avatar, p.name);
   return {
     ...p,
+    name: animal.name,
+    avatar: animal.kind,
+    color: upgradeColor(p.color),
     games: p.games ?? {},
     counters: { ...emptyCounters(), ...p.counters },
     tutorials: p.tutorials ?? [],

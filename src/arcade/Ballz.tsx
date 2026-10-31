@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
-import { burst, buzz, clamp, drawParticles, heartPath, stepParticles, tone, useFitCanvas, useLoop, type Particle } from './engine';
+import { burst, buzz, clamp, drawParticles, stepParticles, tone, useFitCanvas, useLoop, type Particle } from './engine';
 import type { GameProps } from './types';
 
 export const BZ_COLS = 7;
@@ -274,11 +274,12 @@ export function Ballz({ best, onEnd }: GameProps) {
       ctx.lineTo(W - MX, TOP + r * CELL);
       ctx.stroke();
     }
-    // schwebende Herzen im Hintergrund
-    ctx.fillStyle = 'rgba(255,90,160,0.06)';
+    // schwebende Blasen im Hintergrund
+    ctx.fillStyle = 'rgba(120,200,255,0.07)';
     for (let k = 0; k < 7; k++) {
       const y = (((k * 83 - st.t * (8 + k)) % (H + 40)) + H + 40) % (H + 40) - 20;
-      heartPath(ctx, ((k * 97) % (W - 30)) + 15, y, 8 + (k % 3) * 5);
+      ctx.beginPath();
+      ctx.arc(((k * 97) % (W - 30)) + 15, y, 7 + (k % 3) * 5, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -349,8 +350,9 @@ export function Ballz({ best, onEnd }: GameProps) {
           ctx.beginPath();
           ctx.arc(cx, cy, ITEM_R * p, 0, Math.PI * 2);
           ctx.stroke();
-          ctx.fillStyle = '#ff6fae';
-          heartPath(ctx, cx, cy + 1, 6 * p);
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(cx, cy, 4.5 * p, 0, Math.PI * 2);
           ctx.fill();
         } else {
           const cx = x + BS / 2;
@@ -435,13 +437,14 @@ export function Ballz({ best, onEnd }: GameProps) {
       ctx.fill();
     }
 
-    // Abschussrampe: Herz mit Anzahl
+    // Abschussrampe: Ball mit Anzahl
     const waiting = st.phase === 'aim' || st.phase === 'shift' ? st.balls : st.flying.filter((b) => b.st === 0).length;
     if (st.phase !== 'over' && (waiting > 0 || st.phase === 'aim')) {
       ctx.fillStyle = '#ff4f9a';
       ctx.shadowColor = '#ff4f9a';
       ctx.shadowBlur = 12;
-      heartPath(ctx, st.lx, FLOOR - R - 1, 8);
+      ctx.beginPath();
+      ctx.arc(st.lx, FLOOR - R - 1, 7, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#ffd6ea';
@@ -502,7 +505,7 @@ export function Ballz({ best, onEnd }: GameProps) {
       st.grid[r][c] = null;
       st.gained++;
       st.pops.push({ x: cellX(c) + BS / 2, y: cellY(r) + BS / 2, life: 0.9, text: '+1', color: '#ffb3d6' });
-      burst(st.parts, cellX(c) + BS / 2, cellY(r) + BS / 2, '#ff8cc6', 8, 80, { heart: true, size: 3 });
+      burst(st.parts, cellX(c) + BS / 2, cellY(r) + BS / 2, '#ffd23f', 8, 80, { star: true, size: 3 });
       tone(880, 70, 'triangle', 0.05, 1320);
     } else if (cell.k === 'laser') {
       if (cell.flash > 0.6) return;

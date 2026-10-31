@@ -459,12 +459,14 @@ export function oval(ctx: CanvasRenderingContext2D, x: number, y: number, rx: nu
   ctx.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
 }
 
-/** Herzform als Pfad (Mitte x/y, Größe r) – füllen oder umranden macht der Aufrufer. */
-export function heartPath(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+/** Sternform als Pfad (Mitte x/y, äußerer Radius r) – füllen oder umranden macht der Aufrufer. */
+export function starPath(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, inner = 0.5) {
   ctx.beginPath();
-  ctx.moveTo(x, y + r * 0.9);
-  ctx.bezierCurveTo(x - r * 1.6, y - r * 0.2, x - r * 0.8, y - r * 1.3, x, y - r * 0.45);
-  ctx.bezierCurveTo(x + r * 0.8, y - r * 1.3, x + r * 1.6, y - r * 0.2, x, y + r * 0.9);
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const k = i % 2 ? r * inner : r;
+    ctx.lineTo(x + Math.cos(a) * k, y + Math.sin(a) * k);
+  }
   ctx.closePath();
 }
 
@@ -480,7 +482,7 @@ export interface Particle {
   color: string;
   /** Schwerkraft (px/s²) */
   g?: number;
-  heart?: boolean;
+  star?: boolean;
 }
 
 export function burst(list: Particle[], x: number, y: number, color: string, n = 12, speed = 120, opts: Partial<Particle> = {}) {
@@ -511,8 +513,8 @@ export function drawParticles(ctx: CanvasRenderingContext2D, list: Particle[]) {
     const k = Math.max(0, p.life / p.max);
     ctx.globalAlpha = Math.min(1, k * 1.6);
     ctx.fillStyle = p.color;
-    if (p.heart) {
-      heartPath(ctx, p.x, p.y, p.size * (0.6 + k * 0.4));
+    if (p.star) {
+      starPath(ctx, p.x, p.y, p.size * (0.9 + k * 0.5));
       ctx.fill();
     } else {
       ctx.beginPath();

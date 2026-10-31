@@ -174,7 +174,7 @@ function art(kind: Exclude<ArtKind, object>): ReactNode {
         <>
           {[
             { r: -14, x: 46, s: '♣', c: C.ink },
-            { r: 0, x: 66, s: '♥', c: C.terra },
+            { r: 0, x: 66, s: '★', c: C.terra },
             { r: 14, x: 86, s: '♠', c: C.ink },
           ].map((k) => (
             <g key={k.x} transform={`rotate(${k.r} ${k.x + 14} 90)`}>
