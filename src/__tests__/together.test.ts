@@ -4,7 +4,7 @@ import { CHAT_MAX, CHAT_WORDS, chatProblem, chatText, freeChat, QUICK_SENTENCES 
 import { BAD_WORDS } from '../lib/names';
 import { canJoin, isOnline, ONLINE_MS } from '../net/presence';
 import { mergeRecent, RECENT_DAYS, RECENT_MAX, type RecentRoom } from '../net/recent';
-import { autoAdmit, chatOf, chatToPrune, CHAT_KEEP, slotsFor, type ChatMsg, type RoomInfo, type SeatDoc } from '../net/roomLogic';
+import { admitChanges, autoAdmit, chatOf, chatToPrune, CHAT_KEEP, fillSeats, openSeat, slotsFor, waitingKids, type ChatMsg, type NetSeat, type RoomInfo, type SeatDoc } from '../net/roomLogic';
 
 const seat = (name: string, at = 1000): SeatDoc => ({ name, avatar: 'fuchs', color: '#fff', at });
 const settings = { sound: true, speech: 'auto' as const, onlyGeneratedNames: false };
@@ -68,15 +68,61 @@ describe('Ohne Klingeln rein', () => {
     expect(autoAdmit(info, seats, { n: {} })).toEqual(['k']);
   });
 
-  it('nur so viele, wie Platz ist', () => {
-    expect(autoAdmit({ ...info, robos: 1 }, seats, { f: {} })).toHaveLength(1);
-    expect(autoAdmit({ ...info, robos: 2 }, seats, { f: {} })).toEqual([]);
+  it('nur so viele Kinder, wie mitspielen können – Robos machen Platz', () => {
+    expect(autoAdmit({ ...info, robos: 2 }, seats, { f: {} })).toHaveLength(2);
+    expect(autoAdmit({ ...info, allowed: { a: 1, x: 2 } }, seats, { f: {} })).toHaveLength(1);
     expect(autoAdmit({ ...info, game: 'vier' }, seats, { f: {} })).toEqual([]);
   });
 
   it('gibt jedem einen eigenen Platz', () => {
     expect(slotsFor(info, seats, ['k', 'f'])).toEqual({ k: 2, f: 3 });
-    expect(slotsFor({ ...info, robos: 1 }, seats, ['k', 'f'])).toEqual({ k: 2 });
+    expect(slotsFor({ ...info, robos: 2 }, seats, ['k', 'f'])).toEqual({ k: 2, f: 3 });
+    expect(slotsFor({ ...info, allowed: { a: 1, x: 2 } }, seats, ['k', 'f'])).toEqual({ k: 3 });
+  });
+
+  it('beim Reinlassen gehen so viele Robos, wie nötig', () => {
+    // Anna + Gastgeber + 2 Robos = 4 → für Kim geht ein Robo
+    expect(admitChanges({ ...info, robos: 2 }, seats, ['k'])).toEqual({ 'allowed/k': 2, 'denied/k': null, 'known/k': true, robos: 1 });
+    // Mit Platz bleiben die Robos
+    expect(admitChanges({ ...info, robos: 1 }, seats, ['k'])).toEqual({ 'allowed/k': 2, 'denied/k': null, 'known/k': true });
+    // Zwei Kinder auf einmal, beide Robos gehen
+    expect(admitChanges({ ...info, robos: 2 }, seats, ['k', 'f'])).toMatchObject({ 'allowed/k': 2, 'allowed/f': 3, robos: 0 });
+    // Voll mit Kindern: nichts zu ändern
+    expect(admitChanges({ ...info, allowed: { a: 1, x: 2, n: 3 } }, { ...seats }, ['k'])).toEqual({});
+  });
+});
+
+describe('Mitten in der Runde dazukommen', () => {
+  const info: RoomInfo = { host: 'h', game: 'ludo', level: 1, status: 'playing', allowed: { a: 1 }, robos: 2, round: 1, at: 0 };
+  const seats = { h: seat('Lena'), a: seat('Ben'), m: seat('Mia') };
+  const robo = (name: string): NetSeat => ({ name, avatar: 'robo', color: '#E6E6DF', robo: true });
+  const kid = (uid: string, name: string): NetSeat => ({ uid, name, avatar: 'fuchs', color: '#fff', robo: false });
+  const players: NetSeat[] = [kid('h', 'Lena'), kid('a', 'Ben'), robo('Robo'), robo('Robbi')];
+
+  it('ein neues Kind übernimmt den ersten Robo-Platz', () => {
+    const inn = { ...info, allowed: { a: 1, m: 2 }, robos: 1 };
+    expect(waitingKids(inn, seats, players).map((w) => w.uid)).toEqual(['m']);
+    const next = fillSeats(players, inn, seats)!;
+    expect(next[2]).toMatchObject({ uid: 'm', name: 'Mia', robo: false, was: 'Robo' });
+    expect(next[3].robo).toBe(true);
+    // Danach wartet niemand mehr
+    expect(fillSeats(next, inn, seats)).toBeNull();
+  });
+
+  it('ohne Robo übernimmt man den Platz eines Kindes, das gegangen ist', () => {
+    const two = [kid('h', 'Lena'), kid('b', 'Bo'), kid('a', 'Ben')];
+    const inn = { ...info, allowed: { a: 1, m: 2 }, robos: 0 };
+    expect(openSeat(two, inn, seats)).toBe(1);
+    expect(fillSeats(two, inn, seats)![1]).toMatchObject({ uid: 'm', was: 'Bo' });
+    // Ist Bo noch im Zimmer (nur kurz weg), bleibt sein Platz seiner
+    expect(openSeat(two, { ...inn, allowed: { a: 1, b: 3, m: 2 } }, { ...seats, b: seat('Bo') })).toBe(-1);
+  });
+
+  it('ist kein Platz frei, wartet das Kind auf die nächste Runde', () => {
+    const full = [kid('h', 'Lena'), kid('a', 'Ben')];
+    const inn = { ...info, allowed: { a: 1, m: 2 }, robos: 0 };
+    expect(fillSeats(full, inn, seats)).toBeNull();
+    expect(waitingKids(inn, seats, full).map((w) => w.doc.name)).toEqual(['Mia']);
   });
 });
 
