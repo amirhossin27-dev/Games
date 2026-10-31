@@ -5,6 +5,7 @@ import { CATEGORY, GAME_BY_ID, playersText, type GameId, type GameMeta } from '.
 import { ANIMALS } from '../lib/names';
 import { nav } from '../lib/nav';
 import { speakIfAuto } from '../lib/speech';
+import { lockSpeech } from '../lib/speechtexts';
 import { LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
 import { arcadeAfter, learnedToday, learnLeft, learnText } from '../lib/unlock';
 import { pick } from '../lib/util';
@@ -138,7 +139,7 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
   const left = learnLeft(meta, profile, data.settings);
   const lockText = `${meta.name} ist frei, sobald du heute ${learnText(left)} gespielt hast.`;
   useEffect(() => {
-    if (left > 0) speakIfAuto(`Erst lernen, dann spielen! ${lockText}`);
+    if (left > 0) speakIfAuto(lockSpeech(left));
   }, []);
 
   const start = (seats: SeatInfo[]) => {

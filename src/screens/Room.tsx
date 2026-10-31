@@ -8,7 +8,7 @@ import { sendInvite } from '../net/presence';
 import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, ONLINE_OFF, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
 import { isAway, knocking, maxPlayers, members, ROBO_NAMES, taken, type ReactionId } from '../net/roomLogic';
 import { nav, useNav } from '../lib/nav';
-import { speak, speakIfAuto, VOICE_ENABLED } from '../lib/speech';
+import { canSpeak, speak, speakIfAuto } from '../lib/speech';
 import { LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
@@ -25,6 +25,9 @@ export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: 
   { id: 'heart', icon: 'heart', label: 'Herz', color: '#8F3E1F' },
   { id: 'star', icon: 'sparkle', label: 'Super', color: '#33673E' },
 ];
+
+/** Zimmer-Code zum Vorlesen: jeder Tiername ist eine eigene Aufnahme */
+const codeSpeech = (code: string) => ['Der Zimmer-Code ist:', ...codeAnimals(code).map((a) => a.name)];
 
 function CodeAnimals({ code, size = 46 }: { code: string; size?: number }) {
   return (
@@ -266,8 +269,8 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
             <div className="row between">
               <b className="display">Zimmer-Code</b>
               <div className="row" style={{ gap: 8 }}>
-                {VOICE_ENABLED && (
-                  <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(`Der Zimmer-Code ist: ${codeWords(code)}`)}>
+                {canSpeak(codeSpeech(code)) && (
+                  <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(codeSpeech(code))}>
                     <Icon name="speaker" />
                   </button>
                 )}
