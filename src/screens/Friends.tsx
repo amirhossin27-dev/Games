@@ -3,18 +3,16 @@ import { GAME_BY_ID } from '../games/registry';
 import { nav } from '../lib/nav';
 import type { Profile } from '../lib/store';
 import { cls } from '../lib/util';
-import { codeAnimals, codeWords } from '../net/codes';
-import { canJoin, dropInvite, isOnline, presenceNow, refreshFriends, sendInvite, usePresence, type Invite, type Presence } from '../net/presence';
+import { canJoin, dropInvite, friendRooms, isOnline, presenceNow, refreshFriends, sendInvite, usePresence, type Invite, type Presence } from '../net/presence';
 import type { CallFriend } from '../net/call';
-import { forgetRecent, recentRooms, type RecentRoom } from '../net/recent';
 import { CLOSED, joinRoom, NO_ROOM, useRoom } from '../net/room';
 import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
 import { toast } from '../ui/parts';
 
 /**
- * Schneller zusammen spielen: zuletzt besuchte Zimmer (ein Tipp statt sechs Tiere),
- * Spielfreunde mit Online-Punkt und Einladungen.
+ * Schneller zusammen spielen: Spielzimmer, in denen gerade Freunde sind (ein Tipp statt sechs
+ * Tiere), Spielfreunde mit Online-Punkt und Einladungen.
  */
 
 /** Alle paar Sekunden neu zeichnen, damit „online“ stimmt */
@@ -26,63 +24,56 @@ function useTick(ms = 10_000) {
   }, [ms]);
 }
 
-function SmallCode({ code }: { code: string }) {
-  return (
-    <span className="code-mini" aria-label={`Code: ${codeWords(code)}`}>
-      {codeAnimals(code).map((a, i) => (
-        <span key={i} aria-hidden="true">
-          {a.e}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-/** Zuletzt besuchte Zimmer: mit einem Tipp wieder rein (eigene Zimmer: wieder öffnen) */
-export function RecentRooms({ profile }: { profile: Profile }) {
-  const [list, setList] = useState<RecentRoom[]>(() => recentRooms(profile.id));
+/**
+ * Spielzimmer, in denen gerade Spielfreunde sind – mit einem Tipp rein, ohne Code. Spielfreunde
+ * des Gastgebers kommen gleich rein; läuft schon eine Runde, übernimmt man einen Robo-Platz oder
+ * spielt ab der nächsten Runde mit. Ist gerade kein Freund in einem Spielzimmer, steht hier nichts.
+ */
+export function FriendRooms({ profile }: { profile: Profile }) {
+  const { friends: presence } = usePresence();
   const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<{ code: string; text: string } | null>(null);
-  if (!list.length) return null;
+  useTick();
+  useEffect(() => refreshFriends(), [profile.id]);
+  const rooms = friendRooms(presence, Object.keys(profile.friends), presenceNow());
+  if (!rooms.length) return null;
 
-  const enter = async (r: RecentRoom) => {
-    setBusy(r.code);
-    setError(null);
+  const enter = async (code: string) => {
+    setBusy(code);
     try {
-      await joinRoom(profile, r.code);
+      await joinRoom(profile, code);
     } catch (e) {
       const text = (e as Error).message;
-      if (text === NO_ROOM) {
-        // Das Zimmer gibt es nicht mehr → aus der Liste nehmen
-        forgetRecent(profile.id, r.code);
-        setList(recentRooms(profile.id));
-        toast('Dieses Spielzimmer gibt es nicht mehr.');
-      } else setError({ code: r.code, text: text === CLOSED ? `${r.host.name} hat das Spielzimmer gerade zugemacht.` : text });
+      toast(text === NO_ROOM || text === CLOSED ? 'Dieses Spielzimmer ist gerade zugegangen.' : text);
+      refreshFriends();
     } finally {
       setBusy(null);
     }
   };
 
   return (
-    <section className="card col" aria-label="Zuletzt im Spielzimmer" style={{ gap: 10 }}>
-      <h2>Zuletzt im Spielzimmer</h2>
+    <section className="card col" aria-label="Hier spielen deine Freunde" style={{ gap: 10 }}>
+      <h2>Hier spielen deine Freunde</h2>
       <div className="seat-list">
-        {list.map((r) => {
-          const meta = GAME_BY_ID[r.game];
+        {rooms.map((r) => {
+          const kids = r.friends.map((uid) => profile.friends[uid]).filter(Boolean);
+          const names = kids.map((k) => k.name);
+          const who = names.length > 1 ? `${names.slice(0, -1).join(', ')} und ${names[names.length - 1]}` : names[0];
+          const game = (r.game && GAME_BY_ID[r.game]?.name) || 'Spiel';
           return (
-            <div key={r.code} className="col" style={{ gap: 4 }}>
-              <div className="seat-row">
-                <Avatar kind={r.host.avatar} size={42} bg={r.host.color} />
-                <span className="grow">
-                  <b className="display">{r.mine ? 'Dein Spielzimmer' : `Bei ${r.host.name}`}</b>
-                  <br />
-                  <span className="small muted">{meta?.name ?? 'Spielzimmer'}</span> <SmallCode code={r.code} />
-                </span>
-                <button type="button" className="btn small primary" disabled={busy !== null} onClick={() => void enter(r)}>
-                  {busy === r.code ? '…' : r.mine ? 'Wieder öffnen' : 'Wieder rein'}
-                </button>
-              </div>
-              {error?.code === r.code && <p className="error small">{error.text}</p>}
+            <div key={r.code} className="seat-row">
+              <span className="friend-stack" aria-hidden="true">
+                {kids.slice(0, 3).map((k, i) => (
+                  <Avatar key={i} kind={k.avatar} size={42} bg={k.color} />
+                ))}
+              </span>
+              <span className="grow">
+                <b className="display">{who}</b>
+                <br />
+                <span className="small muted">{game} · {r.playing ? 'Runde läuft, komm dazu!' : 'wartet auf dich'}</span>
+              </span>
+              <button type="button" className="btn small primary" disabled={busy !== null} aria-label={`Zu ${who} ins Spielzimmer`} onClick={() => void enter(r.code)}>
+                {busy === r.code ? '…' : 'Rein!'}
+              </button>
             </div>
           );
         })}
@@ -102,8 +93,7 @@ function friendRows(profile: Profile, presence: Record<string, Presence>, skip: 
 }
 
 function statusText(r: Row) {
-  if (r.join) return `wartet im Spielzimmer · ${GAME_BY_ID[r.p!.game!]?.name ?? 'Spiel'}`;
-  if (r.online && r.p?.room) return 'spielt gerade im Spielzimmer';
+  if (r.join) return `${r.p!.st === 'playing' ? 'spielt gerade' : 'wartet im Spielzimmer'} · ${GAME_BY_ID[r.p!.game!]?.name ?? 'Spiel'}`;
   if (r.online) return 'ist online';
   return 'offline';
 }
@@ -121,16 +111,15 @@ const onlineTag = { '--tag-bg': '#DDEBDD', '--tag-fg': '#33673E' } as CSSPropert
 
 /** Was unter dem Freund steht: kurz, damit es unter das große Bild passt */
 function tileText(r: Row) {
-  if (r.join) return `wartet · ${GAME_BY_ID[r.p!.game!]?.name ?? 'Spiel'}`;
-  if (r.online && r.p?.room) return 'spielt gerade';
+  if (r.join) return `${r.p!.st === 'playing' ? 'spielt' : 'wartet'} · ${GAME_BY_ID[r.p!.game!]?.name ?? 'Spiel'}`;
   if (r.online) return 'online';
   return 'offline';
 }
 
 /**
  * Ganz oben im Spielzimmer: die Spielfreunde groß zum Antippen.
- * Online → anrufen (`onCall`, erst wird das Spiel ausgesucht). Wartet der Freund schon in seinem
- * Spielzimmer → gleich hin. Offline oder mitten in einer Runde → ausgegraut.
+ * Online → anrufen (`onCall`, erst wird das Spiel ausgesucht). Ist der Freund schon in einem
+ * Spielzimmer (wartend oder mitten in der Runde) → gleich hin. Offline → ausgegraut.
  */
 export function CallFriends({ profile, onCall }: { profile: Profile; onCall: (friend: CallFriend) => void }) {
   const { friends } = usePresence();

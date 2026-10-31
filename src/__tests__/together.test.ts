@@ -2,8 +2,7 @@ import { describe, expect, it } from 'vitest';
 import dbRules from '../../database.rules.json';
 import { CHAT_MAX, CHAT_WORDS, chatProblem, chatText, freeChat, QUICK_SENTENCES } from '../lib/chat';
 import { BAD_WORDS } from '../lib/names';
-import { canJoin, isOnline, ONLINE_MS } from '../net/presence';
-import { mergeRecent, RECENT_DAYS, RECENT_MAX, type RecentRoom } from '../net/recent';
+import { canJoin, friendRooms, isOnline, ONLINE_MS } from '../net/presence';
 import { admitChanges, autoAdmit, chatOf, chatToPrune, CHAT_KEEP, fillSeats, openSeat, slotsFor, waitingKids, type ChatMsg, type NetSeat, type RoomInfo, type SeatDoc } from '../net/roomLogic';
 
 const seat = (name: string, at = 1000): SeatDoc => ({ name, avatar: 'fuchs', color: '#fff', at });
@@ -136,30 +135,37 @@ describe('Online-Punkt', () => {
 
   it('dazukommen geht nur, solange im Zimmer noch nicht gespielt wird', () => {
     expect(canJoin({ at: 1000, room: '0a3f7c', st: 'lobby' }, 2000)).toBe(true);
-    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'playing' }, 2000)).toBe(false);
+    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'playing' }, 2000)).toBe(true);
+    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'lobby', on: false }, 2000)).toBe(false);
+    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'lobby' }, 1000 + ONLINE_MS + 1)).toBe(false);
     expect(canJoin({ at: 1000, room: 'kaputt', st: 'lobby' }, 2000)).toBe(false);
     expect(canJoin({ at: 1000 }, 2000)).toBe(false);
   });
 });
 
-describe('Zuletzt im Zimmer', () => {
-  const room = (code: string, at: number): RecentRoom => ({ code, game: 'vier', host: { name: 'Lena', avatar: 'katze', color: '#fff' }, mine: false, at });
-  const day = 86_400_000;
+describe('Spielzimmer mit Freunden', () => {
+  const now = 10_000;
+  const presence = {
+    lena: { at: now - 1000, room: 'aaaaaa', st: 'playing' as const, game: 'ludo' as const },
+    ben: { at: now - 1000, room: 'bbbbbb', st: 'lobby' as const, game: 'vier' as const },
+    mia: { at: now - 1000, room: 'aaaaaa', st: 'playing' as const, game: 'ludo' as const },
+    tom: { at: now - 1000 },
+    alt: { at: now - ONLINE_MS - 1, room: 'cccccc', st: 'lobby' as const },
+    weg: { at: now - 1000, on: false, room: 'dddddd', st: 'lobby' as const },
+    fremd: { at: now - 1000, room: 'eeeeee', st: 'lobby' as const },
+  };
+  const friends = ['lena', 'ben', 'mia', 'tom', 'alt', 'weg'];
 
-  it('neuestes zuerst, ohne doppelte, höchstens ein paar', () => {
-    const now = 10 * day;
-    let list: RecentRoom[] = [];
-    for (let i = 0; i < 6; i++) list = mergeRecent(list, room(`00000${i}`, now - 100 + i), now);
-    expect(list).toHaveLength(RECENT_MAX);
-    expect(list[0].code).toBe('000005');
-    list = mergeRecent(list, room('000003', now), now);
-    expect(list.map((r) => r.code)).toEqual(['000003', '000005', '000004', '000002']);
+  it('zeigt nur offene Zimmer, in denen gerade ein Spielfreund ist – nach Zimmer zusammengefasst', () => {
+    const rooms = friendRooms(presence, friends, now);
+    expect(rooms.map((r) => r.code)).toEqual(['bbbbbb', 'aaaaaa']);
+    expect(rooms[1]).toEqual({ code: 'aaaaaa', game: 'ludo', playing: true, friends: ['lena', 'mia'] });
+    expect(rooms[0].playing).toBe(false);
   });
 
-  it('vergisst alte Zimmer', () => {
-    const now = 10 * day;
-    const list = mergeRecent([room('000001', now - RECENT_DAYS * day - 1), room('000002', now - day)], null, now);
-    expect(list.map((r) => r.code)).toEqual(['000002']);
+  it('lässt das eigene Zimmer weg und ist leer ohne Freunde', () => {
+    expect(friendRooms(presence, friends, now, 'bbbbbb').map((r) => r.code)).toEqual(['aaaaaa']);
+    expect(friendRooms(presence, [], now)).toEqual([]);
   });
 });
 

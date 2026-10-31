@@ -16,7 +16,7 @@ import { GameArt } from '../ui/GameArt';
 import { Icon, type IconName } from '../ui/Icon';
 import { JoySays, Sheet, toast } from '../ui/parts';
 import { ChatPanel } from './Chat';
-import { CallFriends, InviteFriends, RecentRooms } from './Friends';
+import { CallFriends, FriendRooms, InviteFriends } from './Friends';
 
 export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: string }[] = [
   { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: '#2F5F86' },
@@ -588,8 +588,8 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
         </section>
       ) : (
         <>
+          <FriendRooms profile={profile} />
           <CallFriends profile={profile} onCall={setCalling} />
-          <RecentRooms profile={profile} />
           <section className="card tape col" style={{ gap: 12 }}>
             <h2>Spielzimmer öffnen</h2>
             <p className="muted">Du suchst ein Spiel aus und bekommst einen Code aus sechs Tieren. Den sagst du den anderen.</p>
