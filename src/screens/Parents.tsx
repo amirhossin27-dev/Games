@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { freeChat } from '../lib/chat';
 import { nav } from '../lib/nav';
-import { checkParentPassword, checkRecoveryCode, PARENT_PASSWORD_ENABLED, PASSWORD_MIN, setParentPassword } from '../lib/parent';
+import { checkParentPassword, checkRecoveryCode, PASSWORD_MIN, setParentPassword } from '../lib/parent';
 import { LIMIT_CHOICES, LOCK_MS, nowMs, playActions, usePlaytime } from '../lib/playtime';
 import { actions, useData, type Settings } from '../lib/store';
 import { VOICE_ENABLED } from '../lib/speech';
@@ -395,11 +395,9 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
         </p>
       </section>
 
-      {PARENT_PASSWORD_ENABLED && (
-        <button type="button" className="btn secondary block" onClick={() => setNewPw(true)}>
-          <Icon name="key" /> Passwort ändern
-        </button>
-      )}
+      <button type="button" className="btn secondary block" onClick={() => setNewPw(true)}>
+        <Icon name="key" /> Passwort ändern
+      </button>
       <button type="button" className="btn primary big block" onClick={onClose}>
         Fertig
       </button>
@@ -409,8 +407,7 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
 
 export function Parents() {
   const data = useData();
-  // Ist das Eltern-Passwort ausgeschaltet (PARENT_PASSWORD_ENABLED), ist der Bereich gleich offen.
-  const [open, setOpen] = useState(!PARENT_PASSWORD_ENABLED);
+  const [open, setOpen] = useState(false);
   // Beim ersten Mal bleibt die Einrichtung offen, bis der Notfall-Code gezeigt wurde.
   const [firstSetup] = useState(() => !data.parent);
   const close = () => {

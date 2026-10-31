@@ -5,13 +5,6 @@ import { actions, getData, type ParentLock } from './store';
  * Dazu gibt es einmalig einen Notfall-Code, falls das Passwort vergessen wird.
  */
 
-/**
- * Hauptschalter für das Eltern-Passwort. Vorerst aus: Der Elternbereich öffnet sich ohne Passwort.
- * Auf `true` setzen, dann fragt Joyboy wieder nach dem Passwort. Ein schon festgelegtes Passwort
- * und der Notfall-Code bleiben gespeichert und gelten dann sofort wieder.
- */
-export const PARENT_PASSWORD_ENABLED = false;
-
 const enc = new TextEncoder();
 const ITERATIONS = 120_000;
 
