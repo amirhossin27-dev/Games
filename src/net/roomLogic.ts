@@ -257,3 +257,14 @@ export function fillSeats(players: NetSeat[], info: RoomInfo, seats: Record<stri
   }
   return used.size ? next : null;
 }
+
+/**
+ * Spielfreund angerufen: Das Spiel startet beim Gastgeber von selbst, sobald der Freund drin ist,
+ * noch nicht gespielt wird und genug Kinder (oder Robos) für das Spiel da sind.
+ */
+export function callStartsNow(info: RoomInfo, seats: Record<string, SeatDoc>, uid: string | null, friend: string): boolean {
+  if (!uid || info.host !== uid || info.status !== 'lobby') return false;
+  if (!isMember(info, friend) || !seats[friend]) return false;
+  const meta = GAME_BY_ID[info.game];
+  return taken(info, seats) >= Math.max(2, meta?.players[0] ?? 2) && taken(info, seats) <= maxPlayers(info);
+}

@@ -17,7 +17,7 @@ import { TimePill } from '../ui/TimePill';
 export function TabBar({ active }: { active: 'home' | 'rooms' | 'me' }) {
   const tabs: { id: 'home' | 'rooms' | 'me'; label: string; icon: IconName }[] = [
     { id: 'home', label: 'Spielen', icon: 'pad' },
-    { id: 'rooms', label: 'Zimmer', icon: 'users' },
+    { id: 'rooms', label: 'Spielzimmer', icon: 'users' },
     { id: 'me', label: 'Ich', icon: 'user' },
   ];
   return (
