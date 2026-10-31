@@ -16,11 +16,11 @@ export function SpeakButton({ text, className }: { text: string | string[]; clas
   );
 }
 
-/** Joy mit Sprechblase. Liest von selbst vor, wenn das für dieses Kind eingeschaltet ist. */
-export function JoySays({ text, mood = 'talk', size = 64, children }: { text: string; mood?: JoyMood; size?: number; children?: ReactNode }) {
+/** Joy mit Sprechblase. Liest von selbst vor, wenn das für dieses Kind eingeschaltet ist (außer `quiet`). */
+export function JoySays({ text, mood = 'talk', size = 64, quiet, children }: { text: string; mood?: JoyMood; size?: number; quiet?: boolean; children?: ReactNode }) {
   useEffect(() => {
-    speakIfAuto(text);
-  }, [text]);
+    if (!quiet) speakIfAuto(text);
+  }, [text, quiet]);
   const speakable = useVoiceReady() && canSpeak(text);
   return (
     <div className="joy-row">

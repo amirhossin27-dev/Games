@@ -319,10 +319,28 @@ def main() -> None:
 
     os.makedirs(OUT, exist_ok=True)
     wanted = json.load(open(os.path.join(HERE, "saetze.json"), encoding="utf8"))
+    if not wanted:
+        sys.exit("saetze.json ist leer – erst scripts/stimme/saetze.ts laufen lassen")
     index = {"stimme": VOICE_ID, "clips": {}}
     if os.path.exists(INDEX):
         index = json.load(open(INDEX, encoding="utf8"))
     clips = index["clips"]
+
+    def save_index():
+        keep = {w["key"] for w in wanted}
+        index["clips"] = {k: v for k, v in sorted(clips.items()) if k in keep}
+        tmp = INDEX + ".tmp"
+        json.dump(index, open(tmp, "w", encoding="utf8"), ensure_ascii=False, separators=(",", ":"))
+        os.replace(tmp, INDEX)
+
+    # Aufnahmen von Sätzen, die es in der App nicht mehr gibt, aus Verzeichnis und Ordner entfernen
+    save_index()
+    used = set(index["clips"].values())
+    old = [f for f in os.listdir(OUT) if f.endswith(".mp3") and f[:-4] not in used]
+    for f in old:
+        os.remove(os.path.join(OUT, f))
+    if old:
+        print(f"{len(old)} alte Aufnahmen entfernt", flush=True)
 
     todo = [w for w in wanted if not (w["key"] in clips and os.path.exists(os.path.join(OUT, clips[w["key"]] + ".mp3")))]
     if args.only:
@@ -340,13 +358,6 @@ def main() -> None:
     log = open(args.log, "a", encoding="utf8")
     t_start = time.time()
     done = 0
-
-    def save_index():
-        keep = {w["key"] for w in wanted}
-        index["clips"] = {k: v for k, v in sorted(clips.items()) if k in keep}
-        tmp = INDEX + ".tmp"
-        json.dump(index, open(tmp, "w", encoding="utf8"), ensure_ascii=False, separators=(",", ":"))
-        os.replace(tmp, INDEX)
 
     # Gruppen ähnlicher Länge, damit beim gemeinsamen Rechnen wenig Leerlauf entsteht
     for g in range(0, len(todo), args.batch):

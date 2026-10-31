@@ -108,7 +108,6 @@ function JoinSheet({ profile, initial, onClose }: { profile: Profile; initial?: 
       onClose();
     } catch (e) {
       setError((e as Error).message);
-      speakIfAuto((e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -171,7 +170,8 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
         <div className="topbar">
           <h1>Spielzimmer</h1>
         </div>
-        {error ? <JoySays text={error} mood="happy" /> : <JoySays text="Ich verbinde mich mit dem Spielzimmer …" mood="talk" />}
+        {/* Im Spielzimmer liest Joy nicht von selbst vor (Amirs Wunsch), nur über den Lautsprecher-Knopf */}
+        {error ? <JoySays quiet text={error} mood="happy" /> : <JoySays quiet text="Ich verbinde mich mit dem Spielzimmer …" mood="talk" />}
         {error && (
           <button type="button" className="btn primary block" onClick={forgetRoom}>
             Okay
@@ -228,7 +228,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
 
       {!admitted ? (
         <>
-          <JoySays text={denied ? `${hostName} hat gerade keinen Platz frei.` : `Du hast geklingelt! Warte, bis ${hostName} dich reinlässt.`} mood={denied ? 'happy' : 'talk'} />
+          <JoySays quiet text={denied ? `${hostName} hat gerade keinen Platz frei.` : `Du hast geklingelt! Warte, bis ${hostName} dich reinlässt.`} mood={denied ? 'happy' : 'talk'} />
           <CodeAnimals code={code} size={38} />
           <button type="button" className="btn secondary block" onClick={() => void leaveRoom()}>
             {denied ? 'Okay' : 'Doch nicht'}
@@ -427,7 +427,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
       <div className="topbar">
         <h1>Spielzimmer</h1>
       </div>
-      <JoySays text="Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!" mood="happy" size={72} />
+      <JoySays quiet text="Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!" mood="happy" size={72} />
       {!onlineConfigured() ? (
         <p className="card">Online-Spielen ist noch nicht eingerichtet.</p>
       ) : !allowed ? (
