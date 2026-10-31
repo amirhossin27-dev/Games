@@ -257,7 +257,6 @@ function ResultCard({
               <div className="grow">
                 <b className="display">{s.name}</b>
                 <div className="small muted">
-                  {result.records[s.profileId]?.dailyDone ? 'Tagesaufgabe geschafft! +3 Sterne · ' : ''}
                   {result.records[s.profileId]?.levelUp ? 'Neues Level! ' : ''}
                   {result.records[s.profileId]?.earned.map((b) => `Abzeichen: ${b.name}`).join(' · ')}
                 </div>

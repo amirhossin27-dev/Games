@@ -8,9 +8,10 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 
 - **Profile ohne Konto:** Spielername (mit Namens-Würfel, z. B. „Flinker Fuchs“), Tier-Avatar, Lieblingsfarbe und Alter. Mehrere Kinder können sich ein Gerät teilen („Wer spielt?“).
 - **29 Spiele**, davon 14 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
-- **Tutorials mit Joy:** Das Maskottchen erklärt jedes Spiel in 2–4 Schritten, liest alles vor (für 4–7-Jährige automatisch) und lässt bei den Lernspielen einen Probezug machen. Beim ersten Spielen startet das Tutorial von selbst, danach über das ?.
+- **Tutorials mit Joy:** Das Maskottchen erklärt jedes Spiel in 2–4 Schritten, liest alles vor (für 4–7-Jährige automatisch) und lässt bei den Lernspielen einen Probezug machen. Das Tutorial startet nur auf Wunsch: über „So geht's“ auf der Spielseite oder das ? im Spiel.
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
-- **Belohnungen:** Sterne (0–3 pro Spiel), Level, 12 Abzeichen, Rekorde, eine Tagesaufgabe und eine Wochen-Rangliste der Kinder auf dem Gerät.
+- **Belohnungen:** Sterne (0–3 pro Spiel), Level, 12 Abzeichen, Rekorde und eine Wochen-Rangliste der Kinder auf dem Gerät.
+- **Mut-mach-Sprüche:** Bei jedem Start zeigt Joy auf der Startseite einen neuen Spruch, zum Beispiel „Fehler sind deine Helfer“. Erst wenn alle 30 Sprüche dran waren, kommt einer wieder.
 - **Spielzeit-Limit für Eltern:** siehe unten.
 - **Erst lernen, dann spielen:** Die Arcade-Spiele sind jeden Tag erst nach ein paar Lernspielen frei. Die Anzahl stellen die Eltern ein, siehe unten.
 - **Online-Spielzimmer** für bis zu 4 Kinder, siehe unten.

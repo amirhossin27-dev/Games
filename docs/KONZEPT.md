@@ -118,7 +118,7 @@ Jedes Spiel bringt eine kleine Tutorial-Beschreibung mit (3–5 Schritte). Ein S
 
 Ablauf:
 
-- Beim ersten Öffnen eines Spiels startet das Tutorial automatisch (überspringbar).
+- Das Tutorial startet nur, wenn man es bewusst öffnet („So geht's“ auf der Spielseite, ? im Spiel, „Spielregeln ansehen“ im Spielzimmer) – nie von selbst beim Spielstart.
 - In jedem Spiel gibt es oben einen **?-Knopf**.
 - Im Spielzimmer sehen die anderen „**Lernt die Regeln**“ – man kann trotzdem starten.
 - Für die Kleinsten zeigt der **Robo-Tipp** auf Wunsch einen möglichen Zug (kommt aus der vorhandenen KI-Funktion).
@@ -205,7 +205,7 @@ Der kostenlose Firebase-Tarif („Spark“) erlaubt 100 gleichzeitige Verbindung
 - **Anonyme Anmeldung:** Jedes Profil bekommt im Hintergrund ein anonymes Firebase-Konto (zwei REST-Aufrufe, kein SDK). Damit kann nur das eigene Gerät den eigenen Spielstand verändern.
 - **Speicherung:** sofort lokal (funktioniert offline) und nach jedem Spiel zusätzlich in der Cloud. Geht der Browser-Speicher verloren, ist der Spielstand nicht weg.
 - **Spielerpass:** QR-Code im Elternbereich, um ein Profil auf ein neues Gerät mitzunehmen (enthält den Anmelde-Schlüssel – deshalb nur für Eltern sichtbar).
-- **Fortschritt:** Sterne pro Spiel (0–3), Level mit Namen (Neuling, Entdecker, Profi …), 8+ Abzeichen (Rechen-Profi, Gedächtnis-Ass, Regel-Kenner, Teamplayer …), Tagesaufgabe.
+- **Fortschritt:** Sterne pro Spiel (0–3), Level mit Namen (Neuling, Entdecker, Profi …), 8+ Abzeichen (Rechen-Profi, Gedächtnis-Ass, Regel-Kenner, Teamplayer …). Statt einer Tagesaufgabe zeigt Joy bei jedem Start einen neuen Mut-mach-Spruch (30 Sprüche, `src/lib/sprueche.ts`).
 - **Rangliste der Woche:** Wer schon einmal zusammen in einem Zimmer gespielt hat, wird automatisch Spielfreund. Die Rangliste zeigt die Wochensterne der Spielfreunde – ohne Freundschaftsanfragen, ohne Suche nach Fremden.
 
 ---

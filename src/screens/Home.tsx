@@ -2,14 +2,16 @@ import { useState, type CSSProperties } from 'react';
 import { CATEGORY, CATEGORY_ORDER, GAMES, playersText, type Category, type GameMeta } from '../games/registry';
 import { nav } from '../lib/nav';
 import { useRoom } from '../net/room';
-import { DAILY_REWARD, dailyOf, levelOf } from '../lib/progress';
+import { levelOf } from '../lib/progress';
+import { startSpruch } from '../lib/sprueche';
 import { useData, type Profile } from '../lib/store';
 import { arcadeAfter, learnedToday, learnLeft, learnText } from '../lib/unlock';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
 import { Icon, type IconName } from '../ui/Icon';
-import { Stars } from '../ui/parts';
+import { Joy } from '../ui/Joy';
+import { SpeakButton, Stars } from '../ui/parts';
 import { TimePill } from '../ui/TimePill';
 
 export function TabBar({ active }: { active: 'home' | 'rooms' | 'me' }) {
@@ -76,7 +78,7 @@ export function Home({ profile, tab: initial }: { profile: Profile; tab?: string
   const room = useRoom();
   const { settings } = useData();
   const lvl = levelOf(profile.stars);
-  const daily = dailyOf(profile);
+  const spruch = startSpruch();
   const games = GAMES.filter((g) => (tab === 'alle' ? true : tab === 'zusammen' ? g.players[1] > 1 : g.category === tab));
   // Altersgerechte Spiele zuerst
   const age = [4, 6, 8, 10][profile.age];
@@ -147,21 +149,13 @@ export function Home({ profile, tab: initial }: { profile: Profile; tab?: string
         </div>
       </section>
 
-      <section className="sticky" aria-label="Tagesaufgabe">
-        <div className="row between">
-          <b className="display" style={{ fontSize: '1.15rem' }}>
-            Tagesaufgabe
-          </b>
-          <span className="display" style={{ color: '#6B5410' }}>
-            {daily.done ? 'Geschafft!' : `+${DAILY_REWARD} Sterne`}
-          </span>
+      <section className="sticky spruch" aria-label="Joys Spruch für dich">
+        <Joy size={54} mood="cheer" />
+        <div className="grow col" style={{ gap: 2 }}>
+          <span className="label">Joy sagt:</span>
+          <p className="display">{spruch}</p>
         </div>
-        <p>{daily.task.text}</p>
-        <div className="dots" aria-label={`${daily.progress} von ${daily.task.target}`} style={{ marginTop: 8 }}>
-          {Array.from({ length: Math.min(daily.task.target, 10) }, (_, i) => (
-            <span key={i} className={i < Math.round((daily.progress / daily.task.target) * Math.min(daily.task.target, 10)) ? 'on' : ''} />
-          ))}
-        </div>
+        <SpeakButton text={spruch} />
       </section>
 
       {learned < need && (
