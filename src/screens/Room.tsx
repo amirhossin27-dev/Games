@@ -18,6 +18,12 @@ import { JoySays, Sheet, toast } from '../ui/parts';
 import { ChatPanel } from './Chat';
 import { CallFriends, FriendRooms, InviteFriends } from './Friends';
 
+/**
+ * Spielzimmer, die über „Neues Kind dazuholen“ aufgemacht wurden: Dort steht der Tier-Code gleich
+ * offen. Sonst (Anruf, Freund dazu) braucht ihn keiner und er bleibt hinter einem Knopf.
+ */
+const codeOpen = new Set<string>();
+
 export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: string }[] = [
   { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: '#2F5F86' },
   { id: 'smile', icon: 'smile', label: 'Lachen', color: '#6B5410' },
@@ -252,7 +258,14 @@ function Calling({ profile, call, game }: { profile: Profile; call: Call; game: 
       >
         Auflegen
       </button>
-      <button type="button" className="btn ghost block" onClick={endCall}>
+      <button
+        type="button"
+        className="btn ghost block"
+        onClick={() => {
+          codeOpen.add(call.code);
+          endCall();
+        }}
+      >
         Spielzimmer mit Code zeigen
       </button>
     </section>
@@ -264,6 +277,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
   const navState = useNav();
   const { info, seats, uid, conn, error } = room;
   const [picker, setPicker] = useState(false);
+  const [codeTapped, setCodeTapped] = useState(false);
   const learning = useRef(false);
   const call = useCall();
 
@@ -309,6 +323,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
   const min = Math.max(2, meta.players[0]);
   const enough = count >= min && count <= max;
   const code = room.code!;
+  const showCode = codeTapped || codeOpen.has(code);
   // Platz für ein weiteres Kind? Robos machen dafür Platz.
   const space = roomForKid(info, seats);
   // Vor der Tür: Wie viele Kinder sind schon drin? (Mehr als die Tür verrät das Zimmer nicht.)
@@ -375,7 +390,6 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
               <span>🔔</span>
             </p>
           )}
-          <CodeAnimals code={code} size={38} />
           <button type="button" className="btn secondary block" onClick={() => void leaveRoom()}>
             {denied || doorFull ? 'Okay' : 'Doch nicht'}
           </button>
@@ -412,23 +426,31 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
             </section>
           )}
 
-          <section className="card col" aria-label="Spielzimmer-Code">
-            <div className="row between">
-              <b className="display">Spielzimmer-Code</b>
-              <div className="row" style={{ gap: 8 }}>
-                {VOICE_ENABLED && (
-                  <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(`Der Spielzimmer-Code ist: ${codeWords(code)}`)}>
-                    <Icon name="speaker" />
+          {showCode ? (
+            <section className="card col" aria-label="Spielzimmer-Code">
+              <div className="row between">
+                <b className="display">Spielzimmer-Code</b>
+                <div className="row" style={{ gap: 8 }}>
+                  {VOICE_ENABLED && (
+                    <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(`Der Spielzimmer-Code ist: ${codeWords(code)}`)}>
+                      <Icon name="speaker" />
+                    </button>
+                  )}
+                  <button type="button" className="icon-btn soft" aria-label="Link teilen" onClick={share}>
+                    <Icon name="share" />
                   </button>
-                )}
-                <button type="button" className="icon-btn soft" aria-label="Link teilen" onClick={share}>
-                  <Icon name="share" />
-                </button>
+                </div>
               </div>
-            </div>
-            <CodeAnimals code={code} />
-            <p className="small muted center">Laut sagen oder teilen – die anderen tippen die Tiere unter „Code eingeben“.</p>
-          </section>
+              <CodeAnimals code={code} />
+              <p className="small muted center">Laut sagen oder teilen – das neue Kind tippt unter „Ich habe einen Code“ die Tiere.</p>
+            </section>
+          ) : (
+            count < max && (
+              <button type="button" className="btn secondary block" onClick={() => setCodeTapped(true)}>
+                <Icon name="plus" /> Neues Kind dazuholen
+              </button>
+            )
+          )}
 
           {isHost &&
             knocking(info, seats).map(({ uid: other, doc }) => (
@@ -567,6 +589,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
   const [sheet, setSheet] = useState<'create' | 'join' | null>(joinCode ? 'join' : preset ? 'create' : null);
   // Spielfreund anrufen: erst das Spiel aussuchen, dann öffnet Joyboy ein Spielzimmer und klingelt
   const [calling, setCalling] = useState<CallFriend | null>(null);
+  const hasFriends = Object.keys(profile.friends).length > 0;
 
   if (room.code && room.profileId === profile.id) return <Lobby profile={profile} preset={preset} />;
 
@@ -575,7 +598,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
       <div className="topbar">
         <h1>Spielzimmer</h1>
       </div>
-      <JoySays text={Object.keys(profile.friends).length ? 'Tipp auf einen Spielfreund, dann rufe ich ihn an!' : 'Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!'} mood="happy" size={72} />
+      <JoySays text={hasFriends ? 'Tipp auf einen Spielfreund, dann rufe ich ihn an!' : 'Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!'} mood="happy" size={72} />
       {!onlineConfigured() ? (
         <p className="card">Online-Spielen ist noch nicht eingerichtet.</p>
       ) : !allowed ? (
@@ -590,18 +613,13 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
         <>
           <FriendRooms profile={profile} />
           <CallFriends profile={profile} onCall={setCalling} />
-          <section className="card tape col" style={{ gap: 12 }}>
-            <h2>Spielzimmer öffnen</h2>
-            <p className="muted">Du suchst ein Spiel aus und bekommst einen Code aus sechs Tieren. Den sagst du den anderen.</p>
-            <button type="button" className="btn primary big block" onClick={() => setSheet('create')}>
-              <Icon name="plus" /> Spielzimmer öffnen
+          <section className="card tape col" aria-label="Neues Kind dazuholen" style={{ gap: 10 }}>
+            <p className="muted">Mit einem Kind, das noch nicht dein Spielfreund ist? Such ein Spiel aus und sag ihm die sechs Tiere. Nach dem ersten Spiel seid ihr Spielfreunde.</p>
+            <button type="button" className={cls('btn big block', hasFriends ? 'secondary' : 'primary')} onClick={() => setSheet('create')}>
+              <Icon name="plus" /> Neues Kind dazuholen
             </button>
-          </section>
-          <section className="card tape butter-tape col" style={{ gap: 12 }}>
-            <h2>Mitspielen</h2>
-            <p className="muted">Jemand hat schon ein Spielzimmer? Tippe die sechs Tiere ein und klingle.</p>
-            <button type="button" className="btn secondary big block" onClick={() => setSheet('join')}>
-              <Icon name="grid" /> Code eingeben
+            <button type="button" className="btn ghost block" onClick={() => setSheet('join')}>
+              Ich habe einen Code
             </button>
           </section>
           <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Spielfreunde und Kinder, die schon einmal im Spielzimmer waren, kommen gleich rein. Im Chat gibt es fertige Sätze und einen Wortfilter.</p>
@@ -613,7 +631,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
           title="Welches Spiel?"
           initial={preset}
           onPick={async (g, l) => {
-            await createRoom(profile, g, l);
+            codeOpen.add(await createRoom(profile, g, l));
           }}
           onClose={() => setSheet(null)}
         />

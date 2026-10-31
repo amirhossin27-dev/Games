@@ -48,13 +48,15 @@ Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktione
 
 **Spielfreund anrufen (am schnellsten):** Unter **Spielzimmer → Wer spielt mit?** stehen die Spielfreunde groß als Bilder, wer online ist, hat einen grünen Punkt. Ein Tipp auf den Freund, ein Tipp aufs Spiel (die Stufe passt Joyboy dem Alter an, zuletzt gewählte Spiele stehen vorn) – Joyboy öffnet ein Spielzimmer und ruft den Freund an. Bei ihm erscheint groß in der Mitte „Lea möchte mit dir Vier gewinnt spielen!“, egal wo er gerade in der App ist. Sagt er **Ja, los!**, startet das Spiel bei beiden von selbst – ohne Code, Klingeln oder Start-Knopf. Geht er nicht ran, zeigt Joyboy nach 45 Sekunden **Nochmal anrufen**, **Auflegen** oder **Spielzimmer mit Code zeigen**. Ist ein Freund schon in einem Spielzimmer (wartend oder mitten in der Runde), führt ein Tipp auf ihn direkt dorthin.
 
-Mit Kindern, die noch keine Spielfreunde sind, geht es über den Tier-Code:
+Mit Kindern, die noch keine Spielfreunde sind, geht es einmal über den Tier-Code. Danach sind sie Spielfreunde und brauchen keinen Code mehr:
 
-1. Ein Kind tippt **Spielzimmer → Spielzimmer öffnen** (oder auf einer Spielseite „Online“) und wählt ein Spiel.
+1. Ein Kind tippt unten unter **Spielzimmer** auf **Neues Kind dazuholen** (oder auf einer Spielseite „Online“) und wählt ein Spiel.
 2. Es bekommt einen **Spielzimmer-Code aus sechs Tieren**, z. B. „Fuchs, Panda, Schildkröte, Löwe, Hase, Wal“. Den sagt es laut oder teilt den Link.
-3. Die anderen tippen **Spielzimmer → Code eingeben** und die sechs Tiere – beim sechsten Tier klingelt es von selbst – oder öffnen den Link und **klingeln**.
+3. Die anderen tippen unter **Spielzimmer** auf **Ich habe einen Code** und die sechs Tiere – beim sechsten Tier klingelt es von selbst – oder öffnen den Link und **klingeln**.
 4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen. Kinder gehen vor: Ist das Spielzimmer mit Robos voll, macht beim Reinlassen ein Robo Platz.
 5. Der Gastgeber startet, alle spielen auf ihrem Gerät. Jedes Kind sieht seine Farbe („Du bist Blau“) und wer dran ist. „Nochmal“ startet die nächste Runde für alle.
+
+Im Spielzimmer selbst steht der Tier-Code nur offen, wenn es über **Neues Kind dazuholen** aufgemacht wurde. Sonst (zum Beispiel nach einem Anruf) holt ihn ein Tipp auf **Neues Kind dazuholen** hervor. Wer vor der Tür klingelt, sieht keinen Code mehr, nur wessen Spielzimmer es ist und welches Spiel.
 
 **Mitten in der Runde dazukommen:** Wer klingelt, während schon gespielt wird, wartet vor der Tür („Die anderen spielen gerade Ludo …“). Der Gastgeber sieht im Spiel unten „Mia möchte mitspielen!“ und lässt mit einem Tipp rein. Spielt ein Robo mit (oder ist ein Kind gegangen), übernimmt das neue Kind sofort diesen Platz mit allen Figuren – alle sehen „Mia spielt jetzt für Robo weiter!“. Sonst spielt es ab der nächsten Runde mit; der Gastgeber kann mit **Neu starten mit allen** auch gleich eine neue Runde beginnen.
 

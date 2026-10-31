@@ -131,7 +131,7 @@ export function CallFriends({ profile, onCall }: { profile: Profile; onCall: (fr
     return (
       <section className="card stitched col" aria-label="Wer spielt mit?" style={{ gap: 8 }}>
         <h2>Wer spielt mit?</h2>
-        <p className="muted">Hier stehen bald deine Spielfreunde. Spielt einmal mit dem Tier-Code zusammen, dann reicht beim nächsten Mal ein Tipp auf den Freund.</p>
+        <p className="muted">Hier stehen bald deine Spielfreunde. Spielt einmal über „Neues Kind dazuholen“ zusammen, dann reicht beim nächsten Mal ein Tipp auf den Freund.</p>
       </section>
     );
   }
