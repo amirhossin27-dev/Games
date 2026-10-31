@@ -9,7 +9,14 @@ import { cls } from '../../lib/util';
 import { Icon } from '../../ui/Icon';
 import { AnalogClock, SeatStrip, SpeakButton } from '../../ui/parts';
 
-const DEFS = { rechnen: quizDef('rechnen'), buchstaben: quizDef('buchstaben'), uhr: quizDef('uhr') };
+const DEFS = {
+  rechnen: quizDef('rechnen'),
+  buchstaben: quizDef('buchstaben'),
+  uhr: quizDef('uhr'),
+  welt: quizDef('welt'),
+  woerter: quizDef('woerter'),
+  englisch: quizDef('englisch'),
+};
 
 export const ANSWER_COLORS = ['#417A4D', '#B5532E', '#2F6E9E', '#6E4C86'];
 
@@ -45,7 +52,18 @@ export function TaskCard({ task, speakable = true, letter }: { task: Task; speak
       {speakable && <SpeakButton text={task.say} />}
       {v?.k === 'picture' && <span className="quiz-pic">{v.e}</span>}
       {v?.k === 'clock' && <AnalogClock h={v.h} m={v.m} size={160} />}
+      {v?.k === 'tiles' && v.e && <span className="quiz-pic">{v.e}</span>}
+      {task.hint && <span className="quiz-hint">{task.hint}</span>}
       <span className={cls('quiz-prompt', letter && 'letter', task.prompt.length > 10 && 'small')}>{task.prompt}</span>
+      {v?.k === 'tiles' && (
+        <span className="quiz-tiles" aria-label={`Teile: ${v.parts.join(', ')}`}>
+          {v.parts.map((p, i) => (
+            <span key={i} className="quiz-tile" style={{ transform: `rotate(${((i * 37) % 7) - 3}deg)` }}>
+              {p}
+            </span>
+          ))}
+        </span>
+      )}
       {v?.k === 'picture' && v.word && <span className="quiz-word">{v.word.toUpperCase()}</span>}
       {v?.k === 'tenframe' && (
         <span className="tenframes" aria-hidden="true">

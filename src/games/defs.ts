@@ -8,7 +8,14 @@ import { battleDef } from './rules/schiffe';
 import { slfDef } from './rules/slf';
 import { wuerfelDef } from './rules/wuerfel';
 
-const QUIZ = { rechnen: quizDef('rechnen'), buchstaben: quizDef('buchstaben'), uhr: quizDef('uhr') };
+const QUIZ = {
+  rechnen: quizDef('rechnen'),
+  buchstaben: quizDef('buchstaben'),
+  uhr: quizDef('uhr'),
+  welt: quizDef('welt'),
+  woerter: quizDef('woerter'),
+  englisch: quizDef('englisch'),
+};
 
 /** Regel-Funktionen eines Spiels – damit legt der Gastgeber im Spielzimmer die Runde an. */
 export function defFor(id: GameId, robos: boolean[]): GameDef<unknown, unknown> | null {
@@ -17,6 +24,9 @@ export function defFor(id: GameId, robos: boolean[]): GameDef<unknown, unknown> 
     case 'rechnen':
     case 'buchstaben':
     case 'uhr':
+    case 'welt':
+    case 'woerter':
+    case 'englisch':
       return any(QUIZ[id]);
     case 'paare':
       return any(memoryDef);

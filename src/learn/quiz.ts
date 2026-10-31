@@ -59,10 +59,10 @@ export function quizDef(subject: Subject): GameDef<QuizState, QuizAction> {
       const order = shared ? 'turns' : 'together';
       const count = order === 'turns' ? QUIZ_EACH * n : QUIZ_SOLO;
       const tasks: Task[] = [];
-      // Keine Aufgabe doppelt hintereinander
-      while (tasks.length < count) {
+      // Keine Aufgabe doppelt (bei kleinen Sammlungen notfalls doch, statt endlos zu suchen)
+      for (let tries = 0; tasks.length < count; tries++) {
         const t = makeTask(subject, level, rnd);
-        if (!tasks.some((x) => x.prompt === t.prompt && x.options[x.correct] === t.options[t.correct])) tasks.push(t);
+        if (tries > 500 || !tasks.some((x) => x.prompt === t.prompt && x.options[x.correct] === t.options[t.correct])) tasks.push(t);
       }
       return {
         subject,

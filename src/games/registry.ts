@@ -6,6 +6,9 @@ export type GameId =
   | 'rechnen'
   | 'buchstaben'
   | 'uhr'
+  | 'welt'
+  | 'woerter'
+  | 'englisch'
   | 'paare'
   | 'vier'
   | 'ttt'
@@ -144,6 +147,72 @@ export const GAMES: GameMeta[] = [
       { say: 'Der lange Zeiger zeigt die Minuten. Steht er unten, ist es halb.', art: { k: 'clock', h: 3, m: 30, label: 'halb 4' } },
       { say: 'Schau dir die Uhr an und tippe auf die passende Uhrzeit.', art: { k: 'quiz', task: { prompt: 'Wie spät ist es?', say: '', options: ['5 Uhr', '3 Uhr', '12 Uhr', '9 Uhr'], correct: 1, visual: { k: 'clock', h: 3, m: 0 } }, point: 1 } },
       { say: 'Jetzt du! Wie spät ist es?', art: { k: 'quiz', task: { prompt: 'Wie spät ist es?', say: '', options: ['6 Uhr', '8 Uhr', '7 Uhr', '2 Uhr'], correct: 2, visual: { k: 'clock', h: 7, m: 0 } }, tryIt: true } },
+    ],
+  },
+  {
+    id: 'welt',
+    name: 'Welt-Quiz',
+    tagline: 'Tiere, Natur, Länder und Weltall – was weißt du über die Welt?',
+    learn: 'Allgemeinwissen: Tiere und Natur, der eigene Körper, Länder, Hauptstädte, Flaggen und Planeten.',
+    category: 'wissen',
+    minAge: 5,
+    players: [1, 4],
+    minutes: '3 Min',
+    art: 'welt',
+    kind: 'def',
+    robo: true,
+    levels: true,
+    scoreLabel: 'richtig',
+    subject: 'world',
+    tutorial: [
+      { say: 'Joy stellt dir Fragen über Tiere, Natur, deinen Körper und die ganze Welt.', art: { k: 'pics', items: ['🦒', '🌍', '🪐', '🧠'] } },
+      { say: 'Auf Leicht tippst du auf das passende Bild. Später antwortest du mit Wörtern.', art: { k: 'quiz', task: { prompt: 'Welches Tier macht Muh?', say: '', options: ['🐶', '🐮', '🐷', '🐑'], correct: 1, pictures: true }, point: 1 } },
+      { say: 'Auf Schwer geht es um Länder, Flaggen und das Weltall.', art: { k: 'quiz', task: { prompt: 'Was ist die Hauptstadt von Frankreich?', say: '', options: ['Lyon', 'Paris', 'Nizza', 'Marseille'], correct: 1, visual: { k: 'picture', e: '🇫🇷' } } } },
+      { say: 'Jetzt du! Welches Tier kann fliegen?', art: { k: 'quiz', task: { prompt: 'Welches Tier kann fliegen?', say: '', options: ['🐟', '🐢', '🐦', '🐘'], correct: 2, pictures: true }, tryIt: true } },
+    ],
+  },
+  {
+    id: 'woerter',
+    name: 'Wort-Baumeister',
+    tagline: 'Buchstaben und Silben ordnen – bau die richtigen Wörter!',
+    learn: 'Lesen und Schreiben: Buchstaben und Silben zum Wort ordnen, Silben klatschen, Wörter zusammensetzen und richtig schreiben.',
+    category: 'sprache',
+    minAge: 6,
+    players: [1, 4],
+    minutes: '3 Min',
+    art: 'woerter',
+    kind: 'def',
+    robo: true,
+    levels: true,
+    scoreLabel: 'richtig',
+    subject: 'words',
+    tutorial: [
+      { say: 'Hier liegen Buchstaben durcheinander. Welches Wort kannst du daraus bauen?', art: { k: 'quiz', task: { prompt: 'Bau das Wort!', say: '', options: ['HNUD', 'HUND', 'DUNH', 'UHND'], correct: 1, visual: { k: 'tiles', parts: ['N', 'D', 'H', 'U'], e: '🐶' } }, point: 1 } },
+      { say: 'Auf Mittel baust du Wörter aus Silben, findest fehlende Silben und klatschst Silben mit.', art: { k: 'quiz', task: { prompt: 'Ba · ? · ne', hint: 'Welche Silbe fehlt?', say: '', options: ['na', 'to', 'ke', 'lo'], correct: 0, visual: { k: 'picture', e: '🍌' } } } },
+      { say: 'Auf Schwer setzt du zwei Wörter zusammen und findest die richtige Schreibweise.', art: { k: 'pics', items: ['☀️', '➕', '🌸', '➡️', '🌻'], caption: 'Sonne + Blume = Sonnenblume' } },
+      { say: 'Jetzt du! Bau das Wort zum Bild.', art: { k: 'quiz', task: { prompt: 'Bau das Wort!', say: '', options: ['AUMS', 'MAUS', 'SMUA', 'UMAS'], correct: 1, visual: { k: 'tiles', parts: ['S', 'U', 'A', 'M'], e: '🐭' } }, tryIt: true } },
+    ],
+  },
+  {
+    id: 'englisch',
+    name: 'English Words',
+    tagline: 'Dog, cat, apple – deine ersten englischen Wörter!',
+    learn: 'Erste englische Wörter (Tiere, Essen, Farben, Zahlen, Körper) und kurze Sätze. Zu jedem Wort steht, wie man es ungefähr ausspricht.',
+    category: 'sprache',
+    minAge: 5,
+    players: [1, 4],
+    minutes: '3 Min',
+    art: 'englisch',
+    kind: 'def',
+    robo: true,
+    levels: true,
+    scoreLabel: 'richtig',
+    subject: 'english',
+    tutorial: [
+      { say: 'Lerne deine ersten englischen Wörter: Tiere, Essen, Farben, Zahlen und mehr.', art: { k: 'pics', items: ['🐶', '🍎', '🟥', '3️⃣'], caption: 'dog · apple · red · three' } },
+      { say: 'Schau dir das Bild an und tippe auf das englische Wort.', art: { k: 'quiz', task: { prompt: 'Wie heißt das auf Englisch?', say: '', options: ['dog', 'cat', 'bird', 'fish'], correct: 1, visual: { k: 'picture', e: '🐱' } }, point: 1 } },
+      { say: 'Nach jeder Frage zeigt dir Joy, wie man das Wort ungefähr ausspricht.', art: { k: 'pics', items: ['🐱'], caption: 'cat – man sagt „kätt“' } },
+      { say: 'Jetzt du! Wie heißt der Hund auf Englisch?', art: { k: 'quiz', task: { prompt: 'Wie heißt das auf Englisch?', say: '', options: ['cat', 'fish', 'dog', 'bird'], correct: 2, visual: { k: 'picture', e: '🐶' } }, tryIt: true } },
     ],
   },
   {

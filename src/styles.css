@@ -2080,6 +2080,33 @@ p {
   letter-spacing: 0.05em;
 }
 
+.quiz-hint {
+  position: relative;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+
+.quiz-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.quiz-tile {
+  min-width: 44px;
+  padding: 6px 10px;
+  border-radius: 9px;
+  border: 2px solid var(--ink);
+  background: var(--sticky);
+  box-shadow: 2px 3px 0 var(--ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
 .quiz-card .speak {
   position: absolute;
   top: 8px;
@@ -2157,6 +2184,7 @@ p {
 .answer.pic {
   font-size: 2.8rem;
   background: var(--card) !important;
+  color: var(--ink);
 }
 
 .answer .shape {

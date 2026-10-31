@@ -7,10 +7,10 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 ## Was Joyboy kann
 
 - **Profile ohne Konto:** Spielername (mit Namens-Würfel, z. B. „Flinker Fuchs“), Tier-Avatar, Lieblingsfarbe und Alter. Mehrere Kinder können sich ein Gerät teilen („Wer spielt?“).
-- **26 Spiele**, davon 11 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
+- **29 Spiele**, davon 14 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
 - **Tutorials mit Joy:** Das Maskottchen erklärt jedes Spiel in 2–4 Schritten, liest alles vor (für 4–7-Jährige automatisch) und lässt bei den Lernspielen einen Probezug machen. Beim ersten Spielen startet das Tutorial von selbst, danach über das ?.
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
-- **Belohnungen:** Sterne (0–3 pro Spiel), Level, 9 Abzeichen, Rekorde, eine Tagesaufgabe und eine Wochen-Rangliste der Kinder auf dem Gerät.
+- **Belohnungen:** Sterne (0–3 pro Spiel), Level, 12 Abzeichen, Rekorde, eine Tagesaufgabe und eine Wochen-Rangliste der Kinder auf dem Gerät.
 - **Spielzeit-Limit für Eltern:** siehe unten.
 - **Erst lernen, dann spielen:** Die Arcade-Spiele sind jeden Tag erst nach ein paar Lernspielen frei. Die Anzahl stellen die Eltern ein, siehe unten.
 - **Online-Spielzimmer** für bis zu 4 Kinder, siehe unten.
@@ -24,6 +24,9 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 | Rechen-Rallye | Plus und Minus bis 10, 20, 100 und Einmaleins, mit Zehnerfeldern als Zählhilfe | 1–4 |
 | Buchstaben-Jagd | Anlaute, Bild zum Buchstaben, fehlender Buchstabe | 1–4 |
 | Uhr-Profi | volle Stunden, halb, Viertel, Minuten | 1–4 |
+| Welt-Quiz | Tiere, Natur, Körper (Leicht mit Bild-Antworten), Länder, Hauptstädte, Flaggen und Planeten | 1–4 |
+| Wort-Baumeister | Buchstaben und Silben zum Wort ordnen, Silben zählen, Wörter zusammensetzen, Rechtschreibung | 1–4 |
+| English Words | erste englische Wörter mit Bild (Tiere, Essen, Farben, Zahlen, Körper) und kurze Sätze; nach jeder Frage steht, wie man das Wort ungefähr ausspricht | 1–4 |
 | Paare finden | Gedächtnis | 1–4 |
 | Vier gewinnt, Tic-Tac-Toe | Logik | 2 |
 | Ludo | Zählen, Regeln, fair verlieren | 2–4 |
@@ -44,7 +47,7 @@ Gegen Robo antworten in den Lernspielen alle gleichzeitig. Teilen sich mehrere K
 4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen.
 5. Der Gastgeber startet, alle spielen auf ihrem Gerät. „Nochmal“ startet die nächste Runde für alle.
 
-Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
+Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
 
 **Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus, übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
 
@@ -114,4 +117,4 @@ Konzept und Plan: [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
 ## Wie geht es weiter?
 
-Phase 4 (Ideen aus dem Konzept): weitere Spiele aus Arta (Schach, Dame, Mühle, Wer ist es?, Bewegungs-Würfel), ein Wettkampf-Modus für die Arcade-Spiele im Spielzimmer und neue Lernspiele (Welt-Quiz, Wort-Baumeister, English Words).
+Phase 4 läuft: Die neuen Lernspiele Welt-Quiz, Wort-Baumeister und English Words sind da. Als Nächstes kommen Mühle und Dame (Schach später), danach ein Wettkampf-Modus für die Arcade-Spiele im Spielzimmer.
