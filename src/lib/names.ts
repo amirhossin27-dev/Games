@@ -52,19 +52,27 @@ export const NAME_MAX = 16;
 
 /**
  * Kleiner Wortfilter für Spielernamen. Kein Anspruch auf Vollständigkeit – er fängt die
- * üblichen Schimpfwörter ab, damit niemand im Spielzimmer beleidigt wird.
+ * üblichen Schimpfwörter ab, damit niemand im Spielzimmer beleidigt wird, und Apps, über die
+ * Fremde Kontakt suchen könnten. Dieselben Regeln prüft auch die Datenbank (database.rules.json)
+ * – beim Ändern bitte beide anpassen, ein Test vergleicht sie.
  */
-const BAD = ['arsch', 'scheiß', 'scheiss', 'fick', 'fuck', 'shit', 'hure', 'wichser', 'fotze', 'nazi', 'hitler', 'bitch', 'penis', 'vagina', 'sex', 'idiot', 'depp', 'spast', 'behindert', 'schlampe', 'kacke', 'pisse', 'dumm'];
+export const BAD_WORDS = [
+  'arsch', 'scheiß', 'scheiss', 'fick', 'fuck', 'shit', 'hure', 'wichser', 'fotze', 'nazi', 'hitler', 'bitch', 'penis', 'vagina', 'sex', 'idiot', 'depp', 'spast', 'behindert', 'schlampe', 'kacke', 'pisse', 'dumm',
+  'insta', 'tiktok', 'snapchat', 'whatsapp', 'telegram', 'discord',
+];
 
 export function nameProblem(raw: string): string | null {
   const name = raw.trim();
   if (name.length < 2) return 'Dein Name braucht mindestens 2 Buchstaben.';
   if (name.length > NAME_MAX) return `Höchstens ${NAME_MAX} Zeichen.`;
   const folded = name.toLowerCase().replace(/[^a-zäöüß]/g, '');
-  if (BAD.some((w) => folded.includes(w))) return 'Such dir bitte einen netten Namen aus.';
-  if (/\d{4,}|@|https?:/i.test(name)) return 'Bitte keine Telefonnummern, E-Mails oder Links.';
+  if (BAD_WORDS.some((w) => folded.includes(w))) return 'Such dir bitte einen netten Namen aus.';
+  if (/\d{4,}|@|http|www/i.test(name)) return 'Bitte keine Telefonnummern, E-Mails oder Links.';
   return null;
 }
+
+/** Name im Spielzimmer und in der Rangliste. Passt ein alter Name nicht (mehr) durch den Filter, steht dort ein Würfel-Name. */
+export const onlineName = (name: string, avatar: AvatarKind) => (nameProblem(name) ? generatedName(ADJECTIVES[0], avatar) : name.trim());
 
 export function isGeneratedName(name: string): boolean {
   return ADJECTIVES.some((adj) => ANIMALS.some((a) => generatedName(adj, a.kind) === name.trim()));

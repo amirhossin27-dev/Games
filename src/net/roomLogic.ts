@@ -54,10 +54,18 @@ export const ROBO_NAMES = ['Robo', 'Robbi', 'Roboto'];
 
 export const isAway = (doc: SeatDoc | undefined, now: number) => !doc || now - doc.at > AWAY_MS;
 
+/** Gastgeber oder reingelassen? Nur wer drin ist, darf das ganze Zimmer sehen (database.rules.json). */
+export const isMember = (info: RoomInfo, uid: string | null | undefined) => !!uid && (info.host === uid || info.allowed?.[uid] !== undefined);
+
+/** Reingelassene Kinder, die noch da sind – wer das Zimmer verlässt, löscht seinen Platz. */
+const guestsIn = (info: RoomInfo, seats: Record<string, SeatDoc>) => Object.entries(info.allowed ?? {}).filter(([uid]) => uid !== info.host && seats[uid]);
+
+/** Reingelassene Kinder, die gegangen sind: Der Gastgeber gibt ihre Plätze wieder frei. */
+export const leftRoom = (info: RoomInfo, seats: Record<string, SeatDoc>) => Object.keys(info.allowed ?? {}).filter((uid) => uid !== info.host && !seats[uid]);
+
 /** Wer ist drin? Gastgeber zuerst, dann die reingelassenen Kinder nach Platznummer. */
 export function members(info: RoomInfo, seats: Record<string, SeatDoc>): { uid: string; doc?: SeatDoc; host: boolean }[] {
-  const guests = Object.entries(info.allowed ?? {})
-    .filter(([uid]) => uid !== info.host)
+  const guests = guestsIn(info, seats)
     .sort((a, b) => a[1] - b[1])
     .map(([uid]) => ({ uid, doc: seats[uid], host: false }));
   return [{ uid: info.host, doc: seats[info.host], host: true }, ...guests];
@@ -71,16 +79,30 @@ export function knocking(info: RoomInfo, seats: Record<string, SeatDoc>): { uid:
 }
 
 /** Wie viele Plätze sind belegt (Kinder + Robo)? */
-export const taken = (info: RoomInfo) => 1 + Object.keys(info.allowed ?? {}).filter((u) => u !== info.host).length + (info.robos ?? 0);
+export const taken = (info: RoomInfo, seats: Record<string, SeatDoc>) => 1 + guestsIn(info, seats).length + (info.robos ?? 0);
 
 export const maxPlayers = (info: RoomInfo) => GAME_BY_ID[info.game]?.players[1] ?? 4;
 
 /** Nächste freie Platznummer (1–3) – oder `null`, wenn das Zimmer voll ist. */
-export function nextSlot(info: RoomInfo): number | null {
-  if (taken(info) >= maxPlayers(info)) return null;
-  const used = new Set(Object.values(info.allowed ?? {}));
+export function nextSlot(info: RoomInfo, seats: Record<string, SeatDoc>): number | null {
+  if (taken(info, seats) >= maxPlayers(info)) return null;
+  const used = new Set(guestsIn(info, seats).map(([, slot]) => slot));
   for (let i = 1; i <= 3; i++) if (!used.has(i)) return i;
   return null;
+}
+
+/**
+ * Der Gastgeber ist weg, `uid` übernimmt. Der bisherige Gastgeber bekommt dessen Platznummer –
+ * so bleibt er Mitspieler und kann zurückkommen, statt vor der eigenen Tür zu stehen.
+ */
+export function takeOver(info: RoomInfo, uid: string): Record<string, unknown> {
+  return { host: uid, [`allowed/${uid}`]: null, [`allowed/${info.host}`]: info.allowed?.[uid] ?? 1, [`denied/${info.host}`]: null };
+}
+
+/** Robos fürs neue Spiel: nicht mehr, als neben den Kindern Platz haben (und keine, wenn es keinen Robo gibt). */
+export function robosFor(game: GameId, robos: number, kids: number): number {
+  const meta = GAME_BY_ID[game];
+  return meta?.robo ? Math.max(0, Math.min(robos, meta.players[1] - kids)) : 0;
 }
 
 /** Plätze für eine neue Runde: Gastgeber, reingelassene Kinder, dann Robos. */

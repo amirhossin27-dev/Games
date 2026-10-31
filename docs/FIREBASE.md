@@ -39,7 +39,7 @@ Damit jedes Kind seinen eigenen, geschützten Spielstand hat – ganz ohne E-Mai
 
 Die beiden Werte (`apiKey` und `databaseURL`) einfach in den Chat kopieren.
 
-> **Ist das sicher?** Ja. Der API-Key ist kein Geheimnis – er steckt in jeder Web-App und kennzeichnet nur das Projekt. Geschützt wird alles durch die Regeln aus Schritt 2: Jedes Kind kann nur seinen eigenen Spielstand und seinen eigenen Platz im Spielzimmer schreiben, nur der Gastgeber den Spielstand, und Zimmer sind nur mit dem passenden Zimmer-Code lesbar.
+> **Ist das sicher?** Ja. Der API-Key ist kein Geheimnis – er steckt in jeder Web-App und kennzeichnet nur das Projekt. Geschützt wird alles durch die Regeln aus Schritt 2: Jedes Kind kann nur seinen eigenen Spielstand und seinen eigenen Platz im Spielzimmer schreiben, nur der Gastgeber den Spielstand, und ein Zimmer sehen nur der Gastgeber und die Kinder, die er hereingelassen hat. Wer klingelt, sieht nur, ob er reindarf, und Name und Tier des Gastgebers. Namen und Tiere prüft auch die Datenbank (derselbe Wortfilter wie in der App).
 
 Optional, für mehr Schutz vor Missbrauch des Keys: In der [Google Cloud Console](https://console.cloud.google.com/apis/credentials) beim Key „Browser key (auto created by Firebase)“ unter **Anwendungseinschränkungen → Websites** die Adresse `https://amirhossin27-dev.github.io/*` eintragen (und für lokale Tests `http://localhost:*`).
 
@@ -47,9 +47,13 @@ Optional, für mehr Schutz vor Missbrauch des Keys: In der [Google Cloud Console
 
 | Bereich | Lesen | Schreiben |
 | --- | --- | --- |
-| `profiles/<Kind>/public` – Name, Avatar, Sterne für die Rangliste | alle angemeldeten Geräte | nur das Kind selbst |
+| `profiles/<Kind>/public` – Name, Avatar, Sterne für die Rangliste | alle angemeldeten Geräte | nur das Kind selbst, Name und Tier werden geprüft |
 | `profiles/<Kind>/private` – Spielstand, Einstellungen | nur das Kind selbst | nur das Kind selbst |
-| `rooms/<Code>/info` – Gastgeber, Spiel, wer reingelassen wurde | wer den Code kennt | nur der Gastgeber; ist er 20 s weg, übernimmt ein Mitspieler |
-| `rooms/<Code>/seats/<Kind>` – eigener Platz, Züge, Herzschlag | wer den Code kennt | nur das Kind selbst |
-| `rooms/<Code>/state` – Spielstand der Runde | wer den Code kennt | nur der Gastgeber |
+| `rooms/<Code>/info` – Gastgeber, Spiel, wer reingelassen wurde | alle im Zimmer und wer geklingelt hat | nur der Gastgeber; ist er 20 s weg, übernimmt ein reingelassenes Kind |
+| `rooms/<Code>/seats/<Kind>` – eigener Platz, Züge, Herzschlag | alle im Zimmer; wer klingelt, nur den eigenen und den des Gastgebers | nur das Kind selbst, Name und Tier werden geprüft |
+| `rooms/<Code>/state` – Spielstand der Runde | alle im Zimmer | nur der Gastgeber |
 | neues Zimmer | – | nur, wenn der Code frei oder seit 2 Stunden unbenutzt ist |
+
+## Regeln ändern
+
+`database.rules.json` wird mit `npm run rules` gebaut – die Wortliste für Namen und die Tiere kommen dabei aus `src/lib/names.ts`. Ein Test meldet sich, wenn die Datei nicht mehr zur Wortliste passt. Nach jeder Änderung den neuen Inhalt in der Firebase-Konsole unter **Realtime Database → Regeln** einfügen und **Veröffentlichen**, sonst gelten auf dem Server noch die alten Regeln.

@@ -36,6 +36,9 @@ function save() {
 
 export const accountOf = (profileId: string): Account | undefined => accounts[profileId];
 
+/** Profile, für die es ein Konto gibt */
+export const accountIds = () => Object.keys(accounts);
+
 export function setAccount(profileId: string, acc: Account | undefined) {
   if (acc) accounts = { ...accounts, [profileId]: acc };
   else {
@@ -66,6 +69,11 @@ async function signUp(): Promise<Account> {
 export async function refreshAccount(refresh: string): Promise<Account> {
   const d = await post(`https://securetoken.googleapis.com/v1/token?key=${API_KEY}`, { grant_type: 'refresh_token', refresh_token: refresh }, true);
   return { uid: d.user_id, refresh: d.refresh_token, token: d.id_token, exp: Date.now() + Number(d.expires_in) * 1000 };
+}
+
+/** Anonymes Konto ganz löschen */
+export async function deleteAccount(acc: Account): Promise<void> {
+  await post(`https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${API_KEY}`, { idToken: acc.token! });
 }
 
 const pending = new Map<string, Promise<Account>>();

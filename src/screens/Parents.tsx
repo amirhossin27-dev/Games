@@ -10,7 +10,9 @@ import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
 import { Joy } from '../ui/Joy';
 import { toast } from '../ui/parts';
-import { deleteCloudProfile, makePass } from '../net/cloud';
+import { deleteAllCloudData, deleteCloudProfile, hasCloudData, makePass } from '../net/cloud';
+import { onlineConfigured } from '../net/config';
+import { onlineAllowed } from '../net/consent';
 
 function PasswordSetup({ onDone, title }: { onDone: () => void; title: string }) {
   const [a, setA] = useState('');
@@ -126,6 +128,60 @@ function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) =
   );
 }
 
+/** Online-Funktionen gibt es erst, wenn die Eltern sie hier erlauben (net/consent.ts). */
+function OnlineSection() {
+  const data = useData();
+  const on = onlineAllowed(data.settings);
+  const [confirm, setConfirm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const wipe = async () => {
+    setBusy(true);
+    actions.settings({ online: false });
+    const ok = await deleteAllCloudData();
+    setBusy(false);
+    setConfirm(false);
+    toast(ok ? 'Die Online-Daten sind gelöscht.' : 'Das hat nicht ganz geklappt. Ist das Internet an? Versuch es gleich nochmal.');
+  };
+  return (
+    <section className="card col" aria-label="Online">
+      <div className="row">
+        <Icon name="globe" size={26} />
+        <h2 className="grow">Online</h2>
+      </div>
+      <p className="small">
+        Mit Online spielen die Kinder im <b>Spielzimmer</b> mit Freunden, jedes am eigenen Gerät, und sehen die Wochensterne ihrer Spielfreunde. Außerdem sichert Joyboy die
+        Spielstände in der Cloud – mit dem Spielerpass nehmt ihr sie auf ein neues Gerät mit.
+      </p>
+      <Switch label="Online erlauben" on={on} onChange={(v) => actions.settings({ online: v })} />
+      <p className="small muted">
+        Dafür speichert Joyboy Spitzname, Tier, Farbe, Altersgruppe, Sterne, Spielstand und Spielfreunde bei Google Firebase (Datenbank in Europa). Jedes Kind bekommt dort ein
+        anonymes Konto ohne E-Mail. Ins Spielzimmer kommt nur, wen das Kind selbst hereinlässt. Einen Chat gibt es nicht.
+      </p>
+      {hasCloudData() &&
+        (confirm ? (
+          <div className="card stitched col" style={{ gap: 8, padding: 12 }}>
+            <p className="small">Online wird dabei ausgeschaltet, und alte Spielerpässe gelten nicht mehr. Die Spielstände auf diesem Gerät bleiben.</p>
+            <div className="row wrap">
+              <button type="button" className="btn small warm" disabled={busy} onClick={() => void wipe()}>
+                Wirklich löschen
+              </button>
+              <button type="button" className="btn small secondary" disabled={busy} onClick={() => setConfirm(false)}>
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {!on && <p className="small">Online ist aus. Schon gesicherte Spielstände bleiben in der Cloud, bis du sie löschst.</p>}
+            <button type="button" className="btn small secondary" onClick={() => setConfirm(true)}>
+              <Icon name="trash" size={18} /> Online-Daten löschen
+            </button>
+          </>
+        ))}
+    </section>
+  );
+}
+
 function ParentPanel({ onClose }: { onClose: () => void }) {
   const data = useData();
   const { play, status } = usePlaytime();
@@ -141,6 +197,7 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
     }
   };
   const set = (s: Partial<Settings>) => actions.settings(s);
+  const online = onlineAllowed(data.settings);
 
   if (newPw) return <PasswordSetup title="Passwort ändern" onDone={() => setNewPw(false)} />;
 
@@ -152,7 +209,8 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
           <h2 className="grow">Spielzeit</h2>
         </div>
         <p className="small">
-          Ist die eingestellte Zeit aufgebraucht, macht Joyboy <b>12 Stunden Pause</b>. Oben in der App läuft die Restzeit mit.
+          Ist die eingestellte Zeit aufgebraucht, macht Joyboy <b>12 Stunden Pause</b>. Oben in der App läuft die Restzeit mit. Die Zeit gilt für alle Kinder auf diesem
+          Gerät zusammen.
         </p>
         <div className="limit-grid" role="group" aria-label="Spielzeit-Limit">
           <button type="button" aria-pressed={play.limitMin === null} onClick={() => playActions.setLimit(null)}>
@@ -166,7 +224,11 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
           ))}
         </div>
         <div className="card stitched col" style={{ gap: 6, padding: 12 }}>
-          {status.locked ? (
+          {status.waitingForTime ? (
+            <p>
+              <b>Gesperrt</b> – die Pause ist um, sobald Joyboy die Uhrzeit über das Internet geprüft hat.
+            </p>
+          ) : status.locked ? (
             <p>
               <b>Gesperrt</b> – wieder frei in {formatClock(((status.unlockAt ?? 0) - nowMs()) / 1000)} (um{' '}
               {new Date((status.unlockAt ?? 0) - (nowMs() - Date.now())).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr).
@@ -192,7 +254,10 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
             {status.locked ? 'Sperre aufheben' : 'Zeit zurücksetzen'}
           </button>
         </div>
-        <p className="small muted">Tipp: Lass Datum und Uhrzeit am Gerät automatisch einstellen. Joyboy gleicht die Zeit zusätzlich über das Internet ab.</p>
+        <p className="small muted">
+          Joyboy prüft die Uhrzeit über das Internet, damit niemand die Pause mit der Geräte-Uhr abkürzt. Ohne Internet endet eine Pause deshalb erst, wenn das Gerät wieder
+          online ist – oder wenn du sie hier aufhebst.
+        </p>
       </section>
 
       <section className="card col" aria-label="Erst lernen, dann spielen">
@@ -256,6 +321,8 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
         <Switch label="Nur Namen vom Namens-Würfel erlauben" on={data.settings.onlyGeneratedNames} onChange={(v) => set({ onlyGeneratedNames: v })} />
       </section>
 
+      {onlineConfigured() && <OnlineSection />}
+
       <section className="card col" aria-label="Kinder auf diesem Gerät">
         <h2>Kinder auf diesem Gerät</h2>
         {data.profiles.map((p) => (
@@ -276,9 +343,11 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
               </button>
             ) : (
               <>
-                <button type="button" className="icon-btn soft" aria-label={`Spielerpass für ${p.name}`} onClick={() => void showPass(p.id, p.name)}>
-                  <Icon name="key" size={20} />
-                </button>
+                {online && (
+                  <button type="button" className="icon-btn soft" aria-label={`Spielerpass für ${p.name}`} onClick={() => void showPass(p.id, p.name)}>
+                    <Icon name="key" size={20} />
+                  </button>
+                )}
                 <button type="button" className="icon-btn soft" aria-label={`${p.name} löschen`} onClick={() => setConfirm(p.id)}>
                   <Icon name="trash" size={20} />
                 </button>
@@ -286,7 +355,7 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
             )}
           </div>
         ))}
-        {pass && (
+        {pass && online && (
           <div className="card stitched col" style={{ padding: 12 }}>
             <b className="display">Spielerpass für {pass.name}</b>
             <p className="small">Öffne diesen Link auf dem neuen Gerät – dann ist der Spielstand von {pass.name} dort. Behandle ihn wie einen Schlüssel und gib ihn nicht weiter.</p>
@@ -315,7 +384,10 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
         <p className="small muted">
-          Die Spielstände liegen auf diesem Gerät und – sobald Internet da ist – zusätzlich gesichert in der Cloud (nur Spitzname, Tier, Sterne und Spielstand). Mit dem Spielerpass nehmt ihr sie auf ein neues Gerät mit. Joyboy hat keine Werbung, keine Käufe und keinen Chat.
+          {online
+            ? 'Die Spielstände liegen auf diesem Gerät und – sobald Internet da ist – zusätzlich gesichert in der Cloud. Mit dem Spielerpass (Schlüssel) nehmt ihr sie auf ein neues Gerät mit.'
+            : 'Die Spielstände liegen nur auf diesem Gerät.'}{' '}
+          Joyboy hat keine Werbung, keine Käufe und keinen Chat.
         </p>
       </section>
 
@@ -373,11 +445,17 @@ export function LockScreen() {
       <Joy size={130} mood="sleep" />
       <h1>Spielpause!</h1>
       <p>Die Spielzeit ist für heute aufgebraucht. Joy ruht sich aus – du auch?</p>
-      <p className="small">Weiter geht's in</p>
-      <div className="lock-countdown" role="timer">
-        {formatClock(left)}
-      </div>
-      <p className="small">um {at} Uhr</p>
+      {status.waitingForTime ? (
+        <p className="small">Gleich geht's weiter! Joy muss nur noch kurz im Internet nachschauen, wie spät es ist.</p>
+      ) : (
+        <>
+          <p className="small">Weiter geht's in</p>
+          <div className="lock-countdown" role="timer">
+            {formatClock(left)}
+          </div>
+          <p className="small">um {at} Uhr</p>
+        </>
+      )}
       <div className="row" style={{ gap: 6 }}>
         {kids.map((p) => (
           <Avatar key={p.id} kind={p.avatar} size={34} bg={p.color} />

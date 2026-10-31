@@ -1,15 +1,18 @@
 import { useSyncExternalStore } from 'react';
 import { defFor } from '../games/defs';
 import { GAME_BY_ID, type GameId } from '../games/registry';
+import { onlineName } from '../lib/names';
 import type { Level, Profile } from '../lib/store';
 import { ensureAuth } from './auth';
 import { isCode, randomCode } from './codes';
+import { onlineAllowed } from './consent';
 import { DbError, dbRequest, openStream, SERVER_TIME } from './db';
-import { buildSeats, nextSlot, parseActs, type NetSeat, type ReactionId, type RoomInfo, type SeatDoc, type StateDoc } from './roomLogic';
+import { buildSeats, isMember, leftRoom, members, nextSlot, parseActs, robosFor, takeOver, type NetSeat, type ReactionId, type RoomInfo, type SeatDoc, type StateDoc } from './roomLogic';
 
 /**
- * Online-Spielzimmer: Alle Geräte hören live auf rooms/<Code>. Jedes Kind schreibt nur seinen
+ * Online-Spielzimmer: Wer drin ist, hört live auf rooms/<Code>. Jedes Kind schreibt nur seinen
  * eigenen Platz (Name, Herzschlag, Züge), der Gastgeber das Zimmer und den Spielstand.
+ * Wer nur geklingelt hat, sieht bloß die Tür (rooms/<Code>/info) und den Namen des Gastgebers.
  * Fällt der Gastgeber aus, übernimmt automatisch das Kind mit der kleinsten Platznummer.
  */
 
@@ -94,10 +97,14 @@ let myActs: { n: number; r: number; a: unknown }[] = [];
 
 const token = async (force = false) => (await ensureAuth(view.profileId!, force)).token!;
 
+const denied = (e: unknown) => e instanceof DbError && (e.status === 401 || e.status === 403);
+
+const GONE = 'Dieses Zimmer gibt es nicht mehr.';
+
 function onTree(tree: Record<string, unknown> | null) {
   if (!tree || !tree.info) {
     // Zimmer gelöscht
-    set({ conn: 'online', info: null, seats: {}, game: null, error: 'Dieses Zimmer gibt es nicht mehr.' });
+    set({ conn: 'online', info: null, seats: {}, game: null, error: GONE });
     return;
   }
   const info = tree.info as RoomInfo;
@@ -127,10 +134,39 @@ function onTree(tree: Record<string, unknown> | null) {
   set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats, game });
 }
 
-async function connect(force = false) {
-  if (!view.code) return;
+/** Vor der Tür: Wer geklingelt hat, sieht nur, ob er reindarf. */
+function onDoor(info: RoomInfo | null) {
+  if (!info) {
+    set({ conn: 'online', info: null, seats: {}, game: null, error: GONE });
+    return;
+  }
+  const hostDoc = view.seats[info.host];
+  set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats: hostDoc ? { [info.host]: hostDoc } : {}, game: null });
+  // Reingelassen → ab jetzt das ganze Zimmer
+  if (isMember(info, view.uid)) void connect();
+  else if (!hostDoc) void loadHost(info.host);
+}
+
+/** Name und Tier des Gastgebers für die Wartenden */
+async function loadHost(host: string) {
+  const code = view.code;
+  try {
+    const doc = await dbRequest<SeatDoc | null>('GET', `rooms/${code}/seats/${host}`, await token());
+    if (doc && view.code === code && view.info?.host === host) set({ seats: { ...view.seats, [host]: doc } });
+  } catch {
+    // dann eben ohne Namen
+  }
+}
+
+function closeNow() {
   closeStream?.();
   closeStream = null;
+}
+
+async function connect(force = false) {
+  const code = view.code;
+  if (!code) return;
+  closeNow();
   window.clearTimeout(retry);
   if (document.visibilityState === 'hidden') return;
   set({ conn: navigator.onLine === false ? 'offline' : 'connecting' });
@@ -142,13 +178,27 @@ async function connect(force = false) {
     retry = window.setTimeout(() => void connect(), 5000);
     return;
   }
-  const code = view.code;
-  closeStream = openStream(`rooms/${code}`, t, {
+  if (view.code !== code) return;
+  // Wer drin ist, hört auf das ganze Zimmer – wer nur geklingelt hat, auf die Tür.
+  const full = !view.info || isMember(view.info, view.uid);
+  // Lief inzwischen ein zweites connect(), steht dessen Verbindung schon – die zählt nicht mehr.
+  closeNow();
+  closeStream = openStream(full ? `rooms/${code}` : `rooms/${code}/info`, t, {
     onOpen: () => undefined,
-    onData: (tree) => code === view.code && onTree(tree),
+    onData: (tree) => {
+      if (code !== view.code) return;
+      if (full) onTree(tree);
+      else onDoor(tree as RoomInfo | null);
+    },
     onExpired: () => void connect(true),
     onDenied: () => {
-      set({ error: 'Kein Zugang zu diesem Zimmer.' });
+      const { info, uid } = view;
+      if (full && info && uid && info.host !== uid) {
+        // Nicht mehr drin (z. B. kurz gegangen und der Platz wurde frei) → wieder vor die Tür
+        const { [uid]: _me, ...allowed } = info.allowed ?? {};
+        set({ info: { ...info, allowed } });
+        void connect();
+      } else set({ error: 'Kein Zugang zu diesem Zimmer.' });
     },
     onError: () => {
       set({ conn: 'offline' });
@@ -171,12 +221,15 @@ function startHeartbeat() {
       const info = view.info;
       if (!info) return;
       if (info.host === view.uid) {
-        // Gastgeber: Zimmer als „benutzt“ markieren, damit niemand es übernimmt
-        if (Date.now() - hostBeat > 60_000) {
+        // Gastgeber: Plätze von Kindern freigeben, die gegangen sind, und das Zimmer als
+        // „benutzt“ markieren, damit niemand es übernimmt. Die Plätze erst prüfen, wenn das
+        // Zimmer geladen ist – sonst sähe es nach dem Neustart so aus, als wären alle weg.
+        const left = view.conn === 'online' ? leftRoom(info, view.seats) : [];
+        if (left.length || Date.now() - hostBeat > 60_000) {
           hostBeat = Date.now();
-          await dbRequest('PATCH', `rooms/${view.code}/info`, t, { at: SERVER_TIME });
+          await dbRequest('PATCH', `rooms/${view.code}/info`, t, { ...Object.fromEntries(left.map((u) => [`allowed/${u}`, null])), at: SERVER_TIME });
         }
-      } else if (info.status !== 'closed') await maybeTakeOver(t);
+      } else if (info.status !== 'closed' && isMember(info, view.uid)) await maybeTakeOver(t);
     } catch {
       // nächster Versuch beim nächsten Herzschlag
     }
@@ -196,12 +249,11 @@ async function maybeTakeOver(t: string) {
     .filter(([u]) => seats[u] && now - seats[u].at < 15_000)
     .sort((a, b) => a[1] - b[1]);
   if (present[0]?.[0] !== uid) return;
-  await dbRequest('PATCH', `rooms/${view.code}/info`, t, { host: uid, at: SERVER_TIME });
+  await dbRequest('PATCH', `rooms/${view.code}/info`, t, { ...takeOver(info, uid), at: SERVER_TIME });
 }
 
 function stopAll() {
-  closeStream?.();
-  closeStream = null;
+  closeNow();
   window.clearInterval(heartbeat);
   window.clearTimeout(retry);
   lastStateRaw = '';
@@ -212,8 +264,7 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
     if (!view.code) return;
     if (document.visibilityState === 'hidden') {
-      closeStream?.();
-      closeStream = null;
+      closeNow();
       window.clearInterval(heartbeat);
     } else void connect();
   });
@@ -222,29 +273,39 @@ if (typeof document !== 'undefined') {
 
 // ───── Zimmer öffnen, beitreten, verlassen ─────
 
-const seatDocOf = (p: Profile) => ({ name: p.name, avatar: p.avatar, color: p.color, at: SERVER_TIME });
+const seatDocOf = (p: Profile) => ({ name: onlineName(p.name, p.avatar), avatar: p.avatar, color: p.color, at: SERVER_TIME });
 
 export class RoomError extends Error {}
 
+export const ONLINE_OFF = 'Online-Spielen ist ausgeschaltet. Deine Eltern können es im Elternbereich erlauben.';
+
+const NO_ROOM = 'Dieses Zimmer gibt es nicht. Stimmt der Code?';
+
 function friendly(e: unknown): RoomError {
   if (e instanceof RoomError) return e;
-  if (e instanceof DbError && (e.status === 401 || e.status === 403)) return new RoomError('Das hat nicht geklappt – kein Zugang.');
+  if (denied(e)) return new RoomError('Das hat nicht geklappt – kein Zugang.');
   return new RoomError('Keine Verbindung. Ist das Internet an?');
 }
 
 export async function createRoom(profile: Profile, game: GameId, level: Level): Promise<string> {
   try {
+    if (!onlineAllowed()) throw new RoomError(ONLINE_OFF);
     if (view.code) await leaveRoom();
     const acc = await ensureAuth(profile.id);
-    let code: string | null = null;
-    for (let i = 0; i < 8 && !code; i++) {
-      const c = randomCode();
-      const info = await dbRequest<RoomInfo | null>('GET', `rooms/${c}/info`, acc.token!);
-      if (!info || info.at < Date.now() - 2 * 3600_000) code = c;
-    }
-    if (!code) throw new RoomError('Gerade ist kein Zimmer frei. Versuch es gleich nochmal.');
     const info = { host: acc.uid, game, level, status: 'lobby', robos: 0, round: 0, at: SERVER_TIME };
-    await dbRequest('PUT', `rooms/${code}`, acc.token!, { info, seats: { [acc.uid]: seatDocOf(profile) } });
+    // Nachschauen, ob ein Code frei ist, geht nicht (Fremde sollen keine Zimmer finden) – also
+    // einfach anlegen. Ist der Code belegt, lehnt die Datenbank ab, und wir nehmen einen anderen.
+    let code: string | null = null;
+    for (let i = 0; i < 5 && !code; i++) {
+      const c = randomCode();
+      try {
+        await dbRequest('PUT', `rooms/${c}`, acc.token!, { info, seats: { [acc.uid]: seatDocOf(profile) } });
+        code = c;
+      } catch (e) {
+        if (!denied(e)) throw e;
+      }
+    }
+    if (!code) throw new RoomError('Das Zimmer ließ sich gerade nicht öffnen. Versuch es gleich nochmal.');
     set({ ...EMPTY, code, uid: acc.uid, profileId: profile.id, conn: 'connecting' });
     saveResume();
     void connect();
@@ -256,16 +317,26 @@ export async function createRoom(profile: Profile, game: GameId, level: Level): 
 
 export async function joinRoom(profile: Profile, code: string) {
   try {
+    if (!onlineAllowed()) throw new RoomError(ONLINE_OFF);
     if (!isCode(code)) throw new RoomError('Diesen Zimmer-Code gibt es nicht.');
     if (view.code === code && view.profileId === profile.id) return;
     if (view.code) await leaveRoom();
     const acc = await ensureAuth(profile.id);
-    const info = await dbRequest<RoomInfo | null>('GET', `rooms/${code}/info`, acc.token!);
-    if (!info || info.status === 'closed') throw new RoomError('Dieses Zimmer gibt es nicht. Stimmt der Code?');
-    const member = info.host === acc.uid || info.allowed?.[acc.uid] !== undefined;
-    if (info.status === 'playing' && !member) throw new RoomError('Dort wird gerade gespielt. Probier es nach der Runde nochmal.');
-    await dbRequest('PUT', `rooms/${code}/seats/${acc.uid}`, acc.token!, seatDocOf(profile));
-    set({ ...EMPTY, code, uid: acc.uid, profileId: profile.id, conn: 'connecting' });
+    const t = acc.token!;
+    // Erst klingeln (den eigenen Platz eintragen) – nur wer geklingelt hat, darf durch die Tür schauen.
+    // Gibt es das Zimmer nicht, lehnt die Datenbank schon das ab.
+    await dbRequest('PATCH', `rooms/${code}/seats/${acc.uid}`, t, seatDocOf(profile)).catch((e) => {
+      throw denied(e) ? new RoomError(NO_ROOM) : e;
+    });
+    const info = await dbRequest<RoomInfo | null>('GET', `rooms/${code}/info`, t);
+    let problem: string | null = null;
+    if (!info || info.status === 'closed') problem = NO_ROOM;
+    else if (info.status === 'playing' && !isMember(info, acc.uid)) problem = 'Dort wird gerade gespielt. Probier es nach der Runde nochmal.';
+    if (problem) {
+      await dbRequest('DELETE', `rooms/${code}/seats/${acc.uid}`, t).catch(() => undefined);
+      throw new RoomError(problem);
+    }
+    set({ ...EMPTY, code, uid: acc.uid, profileId: profile.id, info, conn: 'connecting' });
     saveResume();
     void connect();
   } catch (e) {
@@ -276,16 +347,16 @@ export async function joinRoom(profile: Profile, code: string) {
 /** Nach dem Neustart der App ins letzte Zimmer zurück (wenn es noch läuft). */
 export async function resumeRoom(profile: Profile) {
   const saved = readResume();
-  if (!saved || saved.profileId !== profile.id || view.code) return;
+  if (!saved || saved.profileId !== profile.id || view.code || !onlineAllowed()) return;
   try {
     const acc = await ensureAuth(profile.id);
-    const info = await dbRequest<RoomInfo | null>('GET', `rooms/${saved.code}/info`, acc.token!);
-    const member = info && (info.host === acc.uid || info.allowed?.[acc.uid] !== undefined);
-    if (!info || info.status === 'closed' || !member) {
+    // Kein Zugang mehr (oder ein alter, kurzer Code) heißt: Das Zimmer ist für uns vorbei.
+    const info = isCode(saved.code) ? await dbRequest<RoomInfo | null>('GET', `rooms/${saved.code}/info`, acc.token!).catch((e) => (denied(e) ? null : Promise.reject(e))) : null;
+    if (!info || info.status === 'closed' || !isMember(info, acc.uid)) {
       localStorage.removeItem(RESUME_KEY);
       return;
     }
-    set({ ...EMPTY, code: saved.code, uid: acc.uid, profileId: profile.id, conn: 'connecting' });
+    set({ ...EMPTY, code: saved.code, uid: acc.uid, profileId: profile.id, info, conn: 'connecting' });
     void connect();
   } catch {
     // offline – beim nächsten Start wieder versuchen
@@ -326,7 +397,7 @@ async function patchInfo(changes: Record<string, unknown>) {
 export async function admit(uid: string) {
   const info = view.info;
   if (!info) return;
-  const slot = nextSlot(info);
+  const slot = nextSlot(info, view.seats);
   if (slot === null) return;
   await patchInfo({ [`allowed/${uid}`]: slot, [`denied/${uid}`]: null });
 }
@@ -335,7 +406,12 @@ export const deny = (uid: string) => patchInfo({ [`denied/${uid}`]: true });
 
 export const setRobos = (robos: number) => patchInfo({ robos });
 
-export const setGame = (game: GameId, level: Level) => patchInfo({ game, level });
+/** Anderes Spiel: Robos, für die kein Platz mehr ist, gehen mit. */
+export function setGame(game: GameId, level: Level) {
+  const info = view.info;
+  const kids = info ? members(info, view.seats).length : 1;
+  return patchInfo({ game, level, robos: robosFor(game, info?.robos ?? 0, kids) });
+}
 
 export async function startRound(round: number) {
   const { info, seats, code } = view;
@@ -372,10 +448,12 @@ export function publishState(seq: number, st: unknown, ack: Record<string, numbe
         const q: Pub = queued;
         queued = null;
         const code = view.code;
-        if (!code) break;
+        // Den Spielstand schreibt nur der Gastgeber – wer es nicht mehr ist, hört auf.
+        if (!code || view.info?.host !== view.uid) break;
         try {
           await dbRequest('PATCH', `rooms/${code}/state`, await token(), { seq: q.seq, st: JSON.stringify(q.st), ack: q.ack });
-        } catch {
+        } catch (e) {
+          if (denied(e)) break;
           // Verbindung weg: den Stand beim nächsten Zug erneut schicken
           if (!queued) queued = q;
           await new Promise((r) => window.setTimeout(r, 1500));
