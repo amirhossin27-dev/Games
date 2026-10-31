@@ -17,7 +17,7 @@ import {
   type SolState,
   type Target,
   type Where,
-} from './solitaire';
+} from './solitaire-logic';
 import type { GameProps } from './types';
 
 const FACE: Record<number, string> = { 11: '🤵', 12: '👸', 13: '🤴' };

@@ -19,7 +19,7 @@ import { ChatPanel } from './Chat';
 import { CallFriends, FriendRooms, InviteFriends } from './Friends';
 
 /**
- * Spielzimmer, die über „Neues Kind dazuholen“ aufgemacht wurden: Dort steht der Tier-Code gleich
+ * Spielzimmer, die über „Neuen Freund dazuholen“ aufgemacht wurden: Dort steht der Tier-Code gleich
  * offen. Sonst (Anruf, Freund dazu) braucht ihn keiner und er bleibt hinter einem Knopf.
  */
 const codeOpen = new Set<string>();
@@ -377,7 +377,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
             <div className="grow">
               <b className="display">Spielzimmer von {hostName}</b>
               <p className="small muted">
-                {meta.name} · {inside === 1 ? 'noch allein' : `schon ${inside} Kinder drin`}
+                {meta.name} · {inside === 1 ? 'noch allein' : `schon ${inside} Freunde drin`}
                 {playing ? ' · spielen gerade' : ''}
               </p>
             </div>
@@ -442,12 +442,12 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
                 </div>
               </div>
               <CodeAnimals code={code} />
-              <p className="small muted center">Laut sagen oder teilen – das neue Kind tippt unter „Ich habe einen Code“ die Tiere.</p>
+              <p className="small muted center">Laut sagen oder teilen – dein Freund tippt unter „Ich habe einen Code“ die Tiere.</p>
             </section>
           ) : (
             count < max && (
               <button type="button" className="btn secondary block" onClick={() => setCodeTapped(true)}>
-                <Icon name="plus" /> Neues Kind dazuholen
+                <Icon name="plus" /> Neuen Freund dazuholen
               </button>
             )
           )}
@@ -598,7 +598,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
       <div className="topbar">
         <h1>Spielzimmer</h1>
       </div>
-      <JoySays text={hasFriends ? 'Tipp auf einen Spielfreund, dann rufe ich ihn an!' : 'Spielt zusammen, jedes Kind an seinem eigenen Gerät – bis zu vier!'} mood="happy" size={72} />
+      <JoySays text={hasFriends ? 'Tipp auf einen Spielfreund, dann rufe ich ihn an!' : 'Spielt zusammen, jeder Freund an seinem eigenen Gerät – bis zu vier!'} mood="happy" size={72} />
       {!onlineConfigured() ? (
         <p className="card">Online-Spielen ist noch nicht eingerichtet.</p>
       ) : !allowed ? (
@@ -613,16 +613,16 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
         <>
           <FriendRooms profile={profile} />
           <CallFriends profile={profile} onCall={setCalling} />
-          <section className="card tape col" aria-label="Neues Kind dazuholen" style={{ gap: 10 }}>
-            <p className="muted">Mit einem Kind, das noch nicht dein Spielfreund ist? Such ein Spiel aus und sag ihm die sechs Tiere. Nach dem ersten Spiel seid ihr Spielfreunde.</p>
+          <section className="card tape col" aria-label="Neuen Freund dazuholen" style={{ gap: 10 }}>
+            <p className="muted">Mit einem Freund, der noch nicht in deiner Spielfreund-Liste steht? Such ein Spiel aus und sag ihm die sechs Tiere. Nach dem ersten Spiel seid ihr Spielfreunde.</p>
             <button type="button" className={cls('btn big block', hasFriends ? 'secondary' : 'primary')} onClick={() => setSheet('create')}>
-              <Icon name="plus" /> Neues Kind dazuholen
+              <Icon name="plus" /> Neuen Freund dazuholen
             </button>
             <button type="button" className="btn ghost block" onClick={() => setSheet('join')}>
               Ich habe einen Code
             </button>
           </section>
-          <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Spielfreunde und Kinder, die schon einmal im Spielzimmer waren, kommen gleich rein. Im Chat gibt es fertige Sätze und einen Wortfilter.</p>
+          <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Freunde aus deiner Spielfreund-Liste und Freunde, die schon einmal im Spielzimmer waren, kommen gleich rein. Im Chat gibt es fertige Sätze und einen Wortfilter.</p>
         </>
       )}
       {allowed && sheet === 'create' && (

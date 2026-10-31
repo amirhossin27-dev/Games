@@ -124,6 +124,26 @@ export function Me({ profile }: { profile: Profile }) {
         {favorite && <p className="small muted">Lieblingsspiel: {GAMES.find((g) => g.id === favorite[0])?.name}</p>}
       </section>
 
+      {ranking.length > 1 && (
+        <section className="card col" aria-label="Rangliste der Woche">
+          <div className="row between">
+            <h2>Rangliste der Woche</h2>
+            <span className="tag">{friends.length ? 'mit Spielfreunden' : 'dieses Gerät'}</span>
+          </div>
+          <div className="rank-list">
+            {ranking.map((r, i) => (
+              <div key={r.key} className={r.me ? 'rank-row me' : 'rank-row'}>
+                <span className="place">{i + 1}</span>
+                <Avatar kind={r.avatar} size={36} bg={r.color} />
+                <span className="grow display">{r.me ? 'Du' : r.name}</span>
+                {r.friend && <span className="small muted">online</span>}
+                <span className="display">{r.stars} ★</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="col" aria-label="Abzeichen" style={{ gap: 12 }}>
         <div className="row between">
           <h2>Abzeichen</h2>
@@ -148,26 +168,6 @@ export function Me({ profile }: { profile: Profile }) {
           })}
         </div>
       </section>
-
-      {ranking.length > 1 && (
-        <section className="card col" aria-label="Rangliste der Woche">
-          <div className="row between">
-            <h2>Rangliste der Woche</h2>
-            <span className="tag">{friends.length ? 'mit Spielfreunden' : 'dieses Gerät'}</span>
-          </div>
-          <div className="rank-list">
-            {ranking.map((r, i) => (
-              <div key={r.key} className={r.me ? 'rank-row me' : 'rank-row'}>
-                <span className="place">{i + 1}</span>
-                <Avatar kind={r.avatar} size={36} bg={r.color} />
-                <span className="grow display">{r.me ? 'Du' : r.name}</span>
-                {r.friend && <span className="small muted">online</span>}
-                <span className="display">{r.stars} ★</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       <button
         type="button"

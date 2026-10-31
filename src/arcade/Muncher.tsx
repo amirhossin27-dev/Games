@@ -25,7 +25,7 @@ import {
   TUNNEL_ROW,
   type Dir,
   type GhostId,
-} from './muncher';
+} from './muncher-logic';
 import type { GameProps } from './types';
 
 const CS = 16;
