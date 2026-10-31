@@ -401,6 +401,9 @@ function ParentPanel({ onClose }: { onClose: () => void }) {
       <button type="button" className="btn primary big block" onClick={onClose}>
         Fertig
       </button>
+      <p className="small muted" style={{ textAlign: 'center' }}>
+        App-Stand: {__APP_STAND__}
+      </p>
     </div>
   );
 }
