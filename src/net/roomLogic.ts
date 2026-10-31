@@ -64,6 +64,8 @@ export interface ChatMsg {
 
 export interface NetSeat extends SeatInfo {
   uid?: string;
+  /** Wer vorher auf diesem Platz saß (Robo oder ein Kind, das gegangen ist) – für „Mia spielt für Robbi weiter“ */
+  was?: string;
 }
 
 export const AWAY_MS = 20_000;
@@ -95,17 +97,39 @@ export function knocking(info: RoomInfo, seats: Record<string, SeatDoc>): { uid:
     .map(([uid, doc]) => ({ uid, doc }));
 }
 
+/** Wie viele Kinder sind drin (Gastgeber + reingelassene)? */
+export const kidsIn = (info: RoomInfo, seats: Record<string, SeatDoc>) => 1 + guestsIn(info, seats).length;
+
 /** Wie viele Plätze sind belegt (Kinder + Robo)? */
-export const taken = (info: RoomInfo, seats: Record<string, SeatDoc>) => 1 + guestsIn(info, seats).length + (info.robos ?? 0);
+export const taken = (info: RoomInfo, seats: Record<string, SeatDoc>) => kidsIn(info, seats) + (info.robos ?? 0);
 
 export const maxPlayers = (info: RoomInfo) => GAME_BY_ID[info.game]?.players[1] ?? 4;
 
-/** Nächste freie Platznummer (1–3) – oder `null`, wenn das Zimmer voll ist. */
+/** Ist noch Platz für ein Kind? Robos machen Platz – Kinder gehen vor. */
+export const roomForKid = (info: RoomInfo, seats: Record<string, SeatDoc>) => kidsIn(info, seats) < maxPlayers(info);
+
+/** Nächste freie Platznummer (1–3) – oder `null`, wenn schon so viele Kinder drin sind, wie mitspielen können. */
 export function nextSlot(info: RoomInfo, seats: Record<string, SeatDoc>): number | null {
-  if (taken(info, seats) >= maxPlayers(info)) return null;
+  if (!roomForKid(info, seats)) return null;
   const used = new Set(guestsIn(info, seats).map(([, slot]) => slot));
   for (let i = 1; i <= 3; i++) if (!used.has(i)) return i;
   return null;
+}
+
+/**
+ * Änderungen an rooms/<Code>/info, um Kinder reinzulassen: Platznummer, „kennt das Zimmer“ und –
+ * wenn es sonst zu voll wäre – ein Robo weniger.
+ */
+export function admitChanges(info: RoomInfo, seats: Record<string, SeatDoc>, uids: string[]): Record<string, unknown> {
+  const slots = slotsFor(info, seats, uids);
+  const ids = Object.keys(slots);
+  if (!ids.length) return {};
+  const changes: Record<string, unknown> = {};
+  for (const [u, slot] of Object.entries(slots)) Object.assign(changes, { [`allowed/${u}`]: slot, [`denied/${u}`]: null, [`known/${u}`]: true });
+  const robos = info.robos ?? 0;
+  const fit = Math.max(0, maxPlayers(info) - kidsIn(info, seats) - ids.length);
+  if (robos > fit) changes.robos = fit;
+  return changes;
 }
 
 /**
@@ -179,7 +203,7 @@ export function chatToPrune(list: { id: string }[], keep = CHAT_KEEP): string[] 
  * Spielfreunde des Gastgebers – solange Platz ist. Alle anderen müssen weiter klingeln.
  */
 export function autoAdmit(info: RoomInfo, seats: Record<string, SeatDoc>, friends: Record<string, unknown>): string[] {
-  const free = maxPlayers(info) - taken(info, seats);
+  const free = maxPlayers(info) - kidsIn(info, seats);
   if (free <= 0) return [];
   return knocking(info, seats)
     .filter(({ uid }) => info.known?.[uid] || friends[uid])
@@ -198,4 +222,38 @@ export function slotsFor(info: RoomInfo, seats: Record<string, SeatDoc>, uids: s
     cur = { ...cur, allowed: { ...cur.allowed, [uid]: slot } };
   }
   return out;
+}
+
+/** Platz in der laufenden Runde, den ein neues Kind übernehmen kann: erst ein Robo, dann ein Kind, das gegangen ist. */
+export function openSeat(players: NetSeat[], info: RoomInfo, seats: Record<string, SeatDoc>, taken: Set<number> = new Set()): number {
+  const robo = players.findIndex((p, i) => p.robo && !taken.has(i));
+  if (robo >= 0) return robo;
+  return players.findIndex((p, i) => !taken.has(i) && !!p.uid && !p.robo && !isMember(info, p.uid) && !seats[p.uid]);
+}
+
+/** Kinder im Zimmer, die in der laufenden Runde (noch) keinen Platz haben – nach Platznummer. */
+export function waitingKids(info: RoomInfo, seats: Record<string, SeatDoc>, players: NetSeat[]): { uid: string; doc: SeatDoc }[] {
+  const inRound = new Set(players.map((p) => p.uid).filter(Boolean));
+  return members(info, seats)
+    .filter((m) => m.doc && !inRound.has(m.uid))
+    .map((m) => ({ uid: m.uid, doc: m.doc! }));
+}
+
+/**
+ * Wer neu ins Zimmer kommt, während eine Runde läuft, übernimmt einen freien Platz (Robo oder ein
+ * Kind, das gegangen ist) und spielt sofort mit. Gibt die neuen Plätze zurück – oder `null`,
+ * wenn sich nichts ändert (dann warten die Kinder auf die nächste Runde).
+ */
+export function fillSeats(players: NetSeat[], info: RoomInfo, seats: Record<string, SeatDoc>): NetSeat[] | null {
+  const waiting = waitingKids(info, seats, players);
+  if (!waiting.length) return null;
+  const next = [...players];
+  const used = new Set<number>();
+  for (const { uid, doc } of waiting) {
+    const i = openSeat(players, info, seats, used);
+    if (i < 0) break;
+    used.add(i);
+    next[i] = { uid, name: doc.name, avatar: doc.avatar, color: doc.color, robo: false, was: players[i].name };
+  }
+  return used.size ? next : null;
 }

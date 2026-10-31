@@ -104,6 +104,8 @@ export function useGame<S, A>(def: GameDef<S, A>, props: PlayProps): GameHandle<
   // Robo-Züge (auch als Vertretung für Kinder, deren Gerät gerade weg ist)
   const absent = net?.absent ?? [];
   const absentKey = absent.join(',');
+  // Online kann ein neues Kind mitten in der Runde einen Robo-Platz übernehmen – dann neu planen.
+  const roboKey = seats.map((x) => (x.robo ? 1 : 0)).join('');
   const timers = useRef(new Map<number, { key: string; t: number }>());
   useEffect(() => {
     const map = timers.current;
@@ -136,7 +138,7 @@ export function useGame<S, A>(def: GameDef<S, A>, props: PlayProps): GameHandle<
       }, delay);
       map.set(seat, { key, t });
     }
-  }, [version, authority, absentKey]);
+  }, [version, authority, absentKey, roboKey]);
 
   useEffect(
     () => () => {

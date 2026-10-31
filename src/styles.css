@@ -3116,3 +3116,84 @@ p {
     transition: none !important;
   }
 }
+
+/* Gastgeber im laufenden Spiel: Wer klingelt, wer wartet auf die nächste Runde */
+.host-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.host-bar-card {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--sticky);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow: 3px 4px 0 var(--ink);
+  animation: pop-in 0.25s ease;
+  color: var(--ink);
+}
+
+/* Vor der Tür: Die Klingel wackelt, solange man wartet */
+.knock-wait span {
+  display: inline-block;
+  font-size: 2.6rem;
+  animation: knock-ring 1.6s ease-in-out infinite;
+  transform-origin: 50% 10%;
+}
+
+@keyframes knock-ring {
+  0%,
+  55%,
+  100% {
+    transform: rotate(0);
+  }
+  10%,
+  30% {
+    transform: rotate(14deg);
+  }
+  20%,
+  40% {
+    transform: rotate(-14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knock-wait span {
+    animation: none;
+  }
+}
+
+/* Ludo online: „Du bist Blau“ */
+.ludo-me {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.ludo-me .ludo-piece {
+  width: 22px;
+  height: 22px;
+}
+
+.host-bar.at-end {
+  position: static;
+  padding: 0;
+}

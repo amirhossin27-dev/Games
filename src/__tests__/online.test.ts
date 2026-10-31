@@ -40,10 +40,12 @@ describe('Spielzimmer', () => {
     expect(knocking(info, seats).map((k) => k.uid)).toEqual(['k']);
   });
 
-  it('höchstens so viele Plätze wie das Spiel erlaubt', () => {
+  it('höchstens so viele Kinder wie das Spiel erlaubt – Robos machen Platz', () => {
     expect(taken(info, seats)).toBe(4);
-    expect(nextSlot(info, seats)).toBeNull();
+    // Ein Robo sitzt auf dem letzten Platz, aber Kinder gehen vor
+    expect(nextSlot(info, seats)).toBe(3);
     expect(nextSlot({ ...info, robos: 0 }, seats)).toBe(3);
+    expect(nextSlot({ ...info, allowed: { a: 1, b: 2, k: 3 } }, seats)).toBeNull();
     expect(nextSlot({ ...info, game: 'vier', allowed: {}, robos: 0 }, seats)).toBe(1);
     expect(nextSlot({ ...info, game: 'vier', allowed: { a: 1 }, robos: 0 }, seats)).toBeNull();
   });

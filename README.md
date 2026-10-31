@@ -46,9 +46,11 @@ Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktione
 
 1. Ein Kind tippt **Zimmer → Zimmer öffnen** (oder auf einer Spielseite „Online“) und wählt ein Spiel.
 2. Es bekommt einen **Zimmer-Code aus sechs Tieren**, z. B. „Fuchs, Panda, Schildkröte, Löwe, Hase, Wal“. Den sagt es laut oder teilt den Link.
-3. Die anderen tippen **Zimmer → Code eingeben** und die sechs Tiere – oder öffnen den Link – und **klingeln**.
-4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen.
-5. Der Gastgeber startet, alle spielen auf ihrem Gerät. „Nochmal“ startet die nächste Runde für alle.
+3. Die anderen tippen **Zimmer → Code eingeben** und die sechs Tiere – beim sechsten Tier klingelt es von selbst – oder öffnen den Link und **klingeln**.
+4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen. Kinder gehen vor: Ist das Zimmer mit Robos voll, macht beim Reinlassen ein Robo Platz.
+5. Der Gastgeber startet, alle spielen auf ihrem Gerät. Jedes Kind sieht seine Farbe („Du bist Blau“) und wer dran ist. „Nochmal“ startet die nächste Runde für alle.
+
+**Mitten in der Runde dazukommen:** Wer klingelt, während schon gespielt wird, wartet vor der Tür („Die anderen spielen gerade Ludo …“). Der Gastgeber sieht im Spiel unten „Mia möchte mitspielen!“ und lässt mit einem Tipp rein. Spielt ein Robo mit (oder ist ein Kind gegangen), übernimmt das neue Kind sofort diesen Platz mit allen Figuren – alle sehen „Mia spielt jetzt für Robo weiter!“. Sonst spielt es ab der nächsten Runde mit; der Gastgeber kann mit **Neu starten mit allen** auch gleich eine neue Runde beginnen.
 
 **Schneller wieder zusammen:**
 
@@ -60,7 +62,7 @@ Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktione
 
 Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
 
-**Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus, übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
+**Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus (länger als 45 Sekunden weg, damit er kurz den Code in einer anderen App verschicken kann), übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
 
 Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK) und anonyme Anmeldung pro Kind. Der Gastgeber rechnet mit denselben Regel-Funktionen wie offline und veröffentlicht jeden Stand; die anderen schicken nur ihre Züge. Regeln: [`database.rules.json`](database.rules.json) (gebaut mit `npm run rules`, getestet mit `npm run test:rules` gegen den Firebase-Emulator), Einrichtung: [`docs/FIREBASE.md`](docs/FIREBASE.md).
 

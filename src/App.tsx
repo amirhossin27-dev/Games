@@ -61,7 +61,7 @@ function redeem(pass: string) {
  * Hinweise aus dem Spielzimmer, wenn man gerade nicht hinschaut (anderer Reiter, Spiel für sich):
  * neue Chat-Nachrichten, wer klingelt und wer reingekommen ist.
  */
-function useRoomNotes(watching: boolean) {
+function useRoomNotes(watching: boolean, inGame: boolean) {
   const room = useRoom();
   const data = useData();
   const seenChat = useRef<string | null>(null);
@@ -102,9 +102,10 @@ function useRoomNotes(watching: boolean) {
     for (const k of knocking(info, seats)) {
       if (seenKnock.current.has(k.uid) || welcome.has(k.uid)) continue;
       seenKnock.current.add(k.uid);
-      if (!watching) toast(`${k.doc.name} klingelt im Spielzimmer!`, <Avatar kind={k.doc.avatar} size={30} bg={k.doc.color} />, 5000);
+      // Im laufenden Spiel zeigt die Leiste unten, wer klingelt (mit „Reinlassen“)
+      if (!watching && !inGame) toast(`${k.doc.name} klingelt im Spielzimmer!`, <Avatar kind={k.doc.avatar} size={30} bg={k.doc.color} />, 5000);
     }
-    if (before && !watching)
+    if (before && !watching && !inGame)
       for (const u of inside) {
         const doc = seats[u];
         if (!before.has(u) && doc) toast(`${doc.name} ist im Spielzimmer!`, <Avatar kind={doc.avatar} size={30} bg={doc.color} />, 3600);
@@ -240,7 +241,7 @@ export function App() {
   const onlineActive = inRoom && room.info?.status === 'playing' && !!room.game?.seats.some((s) => s.uid === room.uid);
   // Schaut das Kind gerade ins Spielzimmer?
   const watching = route.name === 'rooms' && !state.session && !state.tutorial && !onlineActive;
-  useRoomNotes(watching);
+  useRoomNotes(watching, onlineActive);
 
   // Freunde sehen, in welchem Zimmer man ist
   useEffect(() => presenceChanged(), [room.code, room.info?.status, room.info?.game, member]);
