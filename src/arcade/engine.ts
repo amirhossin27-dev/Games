@@ -107,19 +107,149 @@ function melody(notes: number[], step = 110, ms = 140, type: OscillatorType = 's
   notes.forEach((f, i) => window.setTimeout(() => tone(f, ms, type), i * step));
 }
 
+// ───────────────────────── Weiche Klänge ─────────────────────────
+// Xylofon, Glöckchen und Holz für die Lern- und Brettspiele. Die Arcade-Spiele behalten den 8-Bit-Klang.
+
+/** Ein Ton aus mehreren Sinus-Teiltönen: [Vielfaches der Frequenz, Lautstärke, Anteil der Ausklingzeit]. */
+function partials(freq: number, at: number, dur: number, vol: number, parts: [number, number, number][]) {
+  if (!soundEnabled()) return;
+  try {
+    const c = audioCtx();
+    if (!c) return;
+    const t = c.currentTime + at;
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 5200;
+    lp.connect(c.destination);
+    for (const [mul, amp, decay] of parts) {
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq * mul, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol * amp, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur * decay);
+      o.connect(g).connect(lp);
+      o.start(t);
+      o.stop(t + dur * decay + 0.05);
+    }
+  } catch {
+    // Kein Ton – das Spiel läuft trotzdem.
+  }
+}
+
+const marimba = (f: number, at = 0, vol = 0.22, dur = 0.55) =>
+  partials(f, at, dur, vol, [
+    [1, 1, 1],
+    [3.93, 0.28, 0.35],
+    [9.2, 0.07, 0.15],
+  ]);
+const bell = (f: number, at = 0, vol = 0.12, dur = 1.3) =>
+  partials(f, at, dur, vol, [
+    [1, 1, 1],
+    [2, 0.45, 0.7],
+    [3.01, 0.25, 0.5],
+    [4.16, 0.12, 0.35],
+  ]);
+const sparkle = (at = 0, vol = 0.05) => [2093, 2637, 3136, 4186].forEach((f, i) => bell(f, at + i * 0.045, vol, 0.5));
+
+/** Kurzes Holz-Klopfen (Tippen, Steine setzen). */
+function wood(at = 0, vol = 0.16, from = 1150, to = 720) {
+  if (!soundEnabled()) return;
+  try {
+    const c = audioCtx();
+    if (!c) return;
+    const t = c.currentTime + at;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(from, t);
+    o.frequency.exponentialRampToValueAtTime(to, t + 0.05);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+    o.connect(g).connect(c.destination);
+    o.start(t);
+    o.stop(t + 0.1);
+  } catch {
+    // Kein Ton – das Spiel läuft trotzdem.
+  }
+}
+
+/** Die weichen Klänge einzeln – so wie Amir sie auf der Hörprobe-Seite freigegeben hat. */
+export const soft = {
+  right: () => {
+    marimba(784);
+    marimba(1047, 0.1);
+    sparkle(0.2, 0.035);
+  },
+  wrong: () => {
+    marimba(392, 0, 0.2, 0.45);
+    marimba(330, 0.17, 0.2, 0.6);
+  },
+  tap: () => wood(),
+  flip: () => wood(0, 0.12, 1500, 1000),
+  star: () => {
+    bell(1319, 0, 0.1);
+    bell(1760, 0.08, 0.09);
+    sparkle(0.16, 0.04);
+  },
+  win: () => {
+    [523, 659, 784, 1047].forEach((f, i) => marimba(f, i * 0.11, 0.2));
+    [1047, 1319, 1568].forEach((f) => bell(f, 0.48, 0.07, 1.8));
+    sparkle(0.55, 0.035);
+  },
+  lose: () => {
+    marimba(784, 0, 0.18);
+    marimba(659, 0.16, 0.18);
+    marimba(523, 0.32, 0.2, 0.9);
+  },
+  draw: () => {
+    marimba(523, 0, 0.18);
+    marimba(523, 0.14, 0.18);
+    marimba(659, 0.28, 0.2, 0.8);
+  },
+  /** Würfeln: ein paar schnelle Holz-Klicks */
+  dice: () => [0, 0.06, 0.13, 0.21].forEach((at, i) => wood(at, 0.12 - i * 0.015, 900 + Math.random() * 500, 600)),
+  /** Karte ziehen */
+  take: () => wood(0, 0.12, 800, 520),
+  /** Schiffe versenken: Treffer */
+  hit: () => {
+    marimba(196, 0, 0.26, 0.5);
+    noise(120, 0.05, 400, 120);
+  },
+  /** Schiffe versenken: ins Wasser */
+  splash: () => noise(160, 0.05, 1400, 380),
+};
+
+export type SoundStyle = 'soft' | 'retro';
+let style: SoundStyle = 'soft';
+
+/** Welcher Klang gerade gilt: „soft“ (Lern- und Brettspiele, Menüs) oder „retro“ (Arcade). Setzt der Spiel-Bildschirm. */
+export function setSoundStyle(s: SoundStyle) {
+  style = s;
+}
+export const soundStyle = () => style;
+
+const pick = (softSound: () => void, retroSound: () => void) => () => (style === 'soft' ? softSound() : retroSound());
+
 export const sfx = {
-  tap: () => tone(660, 45),
-  flip: () => tone(520, 35, 'triangle', 0.06),
+  tap: pick(soft.tap, () => tone(660, 45)),
+  flip: pick(soft.flip, () => tone(520, 35, 'triangle', 0.06)),
   bounce: () => tone(440, 40),
   wall: () => tone(250, 35),
   brick: () => tone(700 + Math.random() * 300, 45),
   eat: () => tone(880, 70, 'square', 0.05, 1320),
-  point: () => melody([660, 990], 80, 90),
-  match: () => melody([784, 1047], 90, 110, 'triangle'),
-  miss: () => tone(240, 320, 'sawtooth', 0.04, 70),
-  win: () => melody([523, 659, 784, 1047, 1319], 100, 150),
-  lose: () => melody([392, 330, 262, 196], 130, 170, 'triangle'),
-  draw: () => melody([523, 523, 659], 120, 120, 'triangle'),
+  point: pick(soft.star, () => melody([660, 990], 80, 90)),
+  match: pick(soft.right, () => melody([784, 1047], 90, 110, 'triangle')),
+  miss: pick(soft.wrong, () => tone(240, 320, 'sawtooth', 0.04, 70)),
+  win: pick(soft.win, () => melody([523, 659, 784, 1047, 1319], 100, 150)),
+  lose: pick(soft.lose, () => melody([392, 330, 262, 196], 130, 170, 'triangle')),
+  draw: pick(soft.draw, () => melody([523, 523, 659], 120, 120, 'triangle')),
+  dice: pick(soft.dice, () => tone(480 + Math.random() * 240, 60, 'triangle', 0.05)),
+  take: pick(soft.take, () => tone(300, 60, 'triangle', 0.05)),
+  hit: pick(soft.hit, () => tone(220, 160, 'sawtooth', 0.05, 90)),
+  splash: pick(soft.splash, () => tone(700, 70, 'sine', 0.04, 400)),
 };
 
 export function buzz(ms: number | number[] = 18) {

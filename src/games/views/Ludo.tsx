@@ -1,5 +1,5 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
-import { buzz, sfx, tone } from '../../arcade/engine';
+import { buzz, sfx } from '../../arcade/engine';
 import { SEAT_COLORS, type PlayProps } from '../../engine/game';
 import { useGame } from '../../engine/useGame';
 import { cls } from '../../lib/util';
@@ -21,7 +21,7 @@ export function Ludo(props: PlayProps) {
   useOnChange(s.rolls, () => {
     setRolling(true);
     window.setTimeout(() => setRolling(false), 400);
-    tone(520 + Math.random() * 200, 60, 'triangle', 0.05);
+    sfx.dice();
   });
   useOnChange(s.last?.note, (_, note) => {
     if (note === 'Rausgeworfen!') {

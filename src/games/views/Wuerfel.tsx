@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { buzz, sfx, tone } from '../../arcade/engine';
+import { buzz, sfx } from '../../arcade/engine';
 import type { PlayProps } from '../../engine/game';
 import { useGame } from '../../engine/useGame';
 import { cls } from '../../lib/util';
@@ -22,7 +22,7 @@ export function Wuerfel(props: PlayProps) {
   useOnChange(s.dice, () => {
     setRolling(true);
     window.setTimeout(() => setRolling(false), 400);
-    tone(480, 50, 'triangle', 0.05);
+    sfx.dice();
     buzz(15);
   });
   useOnChange(s.last, (_, last) => {
