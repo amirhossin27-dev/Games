@@ -40,25 +40,87 @@ function numberDistractors(x: number, max: number, rnd: Rnd): string[] {
   return out.map(String);
 }
 
-export function mathTask(level: Level, rnd: Rnd = Math.random): Task {
-  if (level === 2 && rnd() < 0.4) {
-    const a = int(2, 10, rnd);
-    const b = int(2, 10, rnd);
-    const x = a * b;
+/** Einmaleins: mal oder geteilt (Schwer) */
+function timesTask(rnd: Rnd): Task {
+  const a = int(3, 9, rnd);
+  const b = int(3, 9, rnd);
+  const x = a * b;
+  if (rnd() < 0.4) {
     return {
-      prompt: `${a} · ${b} = ?`,
-      say: `Wie viel ist ${a} mal ${b}?`,
-      ...withOptions(String(x), [String(x + a), String(x - a), String(x + b), String(x - b), String(x + 1)], rnd),
-      explain: `${a} mal ${b} heißt: ${b}-mal die ${a}.`,
+      prompt: `${x} : ${a} = ?`,
+      say: `Wie viel ist ${x} geteilt durch ${a}?`,
+      ...withOptions(String(b), [b + 1, b - 1, b + 2, a, b - 2].filter((v) => v > 0).map(String), rnd),
+      explain: `${a} mal ${b} ist ${x}. Also ist ${x} geteilt durch ${a} gleich ${b}.`,
     };
   }
-  const max = level === 0 ? 10 : level === 1 ? 20 : 100;
+  return {
+    prompt: `${a} · ${b} = ?`,
+    say: `Wie viel ist ${a} mal ${b}?`,
+    ...withOptions(String(x), [String(x + a), String(x - a), String(x + b), String(x - b), String(x + 1)], rnd),
+    explain: `${a} mal ${b} heißt: ${b}-mal die ${a}.`,
+  };
+}
+
+/** Plus und Minus bis 100 – immer über den Zehner (Schwer) */
+function hundredTask(rnd: Rnd): Task {
+  const minus = rnd() < 0.5;
+  let a: number;
+  let b: number;
+  if (minus) {
+    // Die Einer unten sind größer als oben: man muss einen Zehner aufmachen.
+    a = int(3, 9, rnd) * 10 + int(0, 7, rnd);
+    b = int(1, Math.floor(a / 10) - 1, rnd) * 10 + int((a % 10) + 1, 9, rnd);
+  } else {
+    // Die Einer zusammen sind mehr als 9: es gibt einen neuen Zehner.
+    a = int(1, 7, rnd) * 10 + int(2, 9, rnd);
+    const ones = int(Math.max(1, 10 - (a % 10)), 9, rnd);
+    b = int(1, Math.max(1, Math.floor((99 - a - ones) / 10)), rnd) * 10 + ones;
+  }
+  const x = minus ? a - b : a + b;
+  const op = minus ? '−' : '+';
+  const tens = Math.floor(b / 10) * 10;
+  const explain = minus
+    ? `Erst ${tens} weg: ${a - tens}. Dann noch ${b - tens} weg: ${x}.`
+    : `Erst ${tens} dazu: ${a + tens}. Dann noch ${b - tens} dazu: ${x}.`;
+  return {
+    prompt: `${a} ${op} ${b} = ?`,
+    say: `Wie viel ist ${a} ${minus ? 'minus' : 'plus'} ${b}?`,
+    // Typischer Fehler: den Zehner vergessen (±10)
+    ...withOptions(String(x), [String(minus ? x + 10 : x - 10), ...numberDistractors(x, 100, rnd)], rnd),
+    explain,
+  };
+}
+
+/** Platzhalter: Welche Zahl fehlt? (Mittel bis 20, Schwer bis 100) */
+function missingTask(max: number, rnd: Rnd): Task {
+  const minus = rnd() < 0.4;
+  const c = int(Math.ceil(max / 2), max, rnd);
+  const b = int(2, c - 2, rnd);
+  const a = c - b;
+  // a + ? = c   oder   c − ? = a
+  const prompt = minus ? `${c} − ? = ${a}` : `${a} + ? = ${c}`;
+  return {
+    prompt,
+    hint: 'Welche Zahl fehlt?',
+    say: minus ? `${c} minus wie viel ist ${a}?` : `${a} plus wie viel ist ${c}?`,
+    ...withOptions(String(b), [String(c), ...numberDistractors(b, max, rnd)].filter((v) => v !== '0'), rnd),
+    explain: minus ? `Rechne umgekehrt: ${c} − ${a} = ${b}.` : `Rechne umgekehrt: ${c} − ${a} = ${b}. Probe: ${a} + ${b} = ${c}.`,
+  };
+}
+
+export function mathTask(level: Level, rnd: Rnd = Math.random): Task {
+  if (level === 2) {
+    const r = rnd();
+    return r < 0.35 ? timesTask(rnd) : r < 0.55 ? missingTask(100, rnd) : hundredTask(rnd);
+  }
+  if (level === 1 && rnd() < 0.2) return missingTask(20, rnd);
+  const max = level === 0 ? 10 : 20;
   const minus = rnd() < (level === 0 ? 0.3 : 0.45);
   let a: number;
   let b: number;
   if (minus) {
     a = int(level === 0 ? 2 : 6, max, rnd);
-    b = int(1, Math.min(a, level === 2 ? 60 : 10), rnd);
+    b = int(1, Math.min(a, 10), rnd);
   } else if (level === 1) {
     // Mittel: meistens über die Zehn
     a = int(3, 9, rnd);
@@ -113,6 +175,14 @@ export const WORDS: { w: string; e: string; anlaut?: false }[] = [
 ];
 
 const LETTERS = [...'ABDEFGHIKLMNOPRSTUWZ'];
+
+/** Buchstaben, die Kinder leicht verwechseln (für „Welcher Buchstabe fehlt?“ auf Schwer) */
+const CONFUSE: Record<string, string[]> = {
+  b: ['d', 'p'], d: ['b', 't'], p: ['b', 'd'], t: ['d', 'k'], g: ['k', 'j'], k: ['g', 'c'], c: ['k', 'z'],
+  a: ['ä', 'e'], e: ['i', 'ä'], i: ['e', 'ü'], o: ['ö', 'u'], u: ['ü', 'o'], ä: ['a', 'e'], ö: ['o', 'ü'], ü: ['u', 'i'],
+  m: ['n', 'w'], n: ['m', 'u'], f: ['v', 'w'], v: ['f', 'w'], w: ['v', 'f'], s: ['z', 'ß'], z: ['s', 'c'],
+  r: ['l', 'n'], l: ['r', 'i'], h: ['k', 'n'], ß: ['s', 'z'],
+};
 const initial = (w: string) => w[0].toUpperCase().replace('Ä', 'A').replace('Ö', 'O').replace('Ü', 'U');
 
 export function letterTask(level: Level, rnd: Rnd = Math.random): Task {
@@ -132,14 +202,16 @@ export function letterTask(level: Level, rnd: Rnd = Math.random): Task {
     };
   }
   if (level === 2) {
-    // Fehlender Buchstabe
+    // Fehlender Buchstabe – zur Auswahl stehen Buchstaben, die ähnlich klingen oder aussehen (b/d/p, e/i, m/n …).
     const long = WORDS.filter((x) => x.w.length >= 4);
     const target = pick(long, rnd);
     const pos = int(1, target.w.length - 1, rnd);
     const missing = target.w[pos];
     const gap = `${target.w.slice(0, pos)}_${target.w.slice(pos + 1)}`;
-    const abc = [...'aeiounrstlmdbkghfpwz'].filter((c) => c !== missing.toLowerCase());
-    const opts = withOptions(missing, shuffle(abc, rnd).slice(0, 3), rnd);
+    const low = missing.toLowerCase();
+    const near = shuffle(CONFUSE[low] ?? [], rnd);
+    const abc = shuffle([...'aeiounrstlmdbkghfpwz'], rnd);
+    const opts = withOptions(missing, [...near, ...abc].filter((c) => c !== low), rnd);
     return {
       prompt: gap,
       say: `Welcher Buchstabe fehlt bei ${target.w}?`,
@@ -201,15 +273,45 @@ export function clockTask(level: Level, rnd: Rnd = Math.random): Task {
       explain: m === 30 ? 'Halb heißt: eine halbe Stunde bis zur nächsten vollen Stunde.' : 'Der lange Zeiger zeigt die Minuten: unten ist halb, rechts Viertel nach, links Viertel vor.',
     };
   }
-  const m = int(0, 11, rnd) * 5;
+  if (rnd() < 0.45) return durationTask(h, rnd);
+  const m = int(1, 11, rnd) * 5;
   const label = digital(h, m);
-  const cand = [digital(h, (m + 5) % 60), digital(h, (m + 55) % 60), digital(hour12(h + 1), m), digital(hour12(m / 5 || 12), h * 5 === 60 ? 0 : (h * 5) % 60)];
+  // Typische Fehler: 5 Minuten daneben, falsche Stunde (der kurze Zeiger steht schon fast bei der nächsten),
+  // Zeiger vertauscht.
+  const cand = [
+    digital(h, (m + 5) % 60),
+    digital(h, (m + 55) % 60),
+    digital(m > 30 ? hour12(h + 1) : hour12(h - 1), m),
+    digital(hour12(m / 5 || 12), (h * 5) % 60),
+    digital(h, (m + 10) % 60),
+  ];
   return {
     prompt: 'Wie spät ist es?',
     say: 'Wie spät ist es?',
     ...withOptions(label, shuffle(cand, rnd), rnd),
     visual: { k: 'clock', h, m },
-    explain: 'Jede Zahl auf der Uhr sind 5 Minuten für den langen Zeiger.',
+    explain: m >= 40 ? `Jede Zahl sind 5 Minuten. Der kurze Zeiger ist schon fast bei der ${hour12(h + 1)}, aber es ist noch ${hour12(h)} Uhr und ${m} Minuten.` : 'Jede Zahl auf der Uhr sind 5 Minuten für den langen Zeiger.',
+  };
+}
+
+/** Zeitspanne: Wie spät ist es in (oder vor) 25 Minuten? (Schwer) */
+function durationTask(h: number, rnd: Rnd): Task {
+  const m = int(0, 11, rnd) * 5;
+  const d = pick([10, 15, 20, 25, 30, 35, 40, 45, 50, 70, 90], rnd);
+  const later = rnd() < 0.7;
+  const at = (delta: number) => {
+    const t = (((h % 12) * 60 + m + delta) % 720 + 720) % 720;
+    return digital(Math.floor(t / 60) || 12, t % 60);
+  };
+  const span = d >= 60 ? `${Math.floor(d / 60)} Stunde${d % 60 ? ` und ${d % 60} Minuten` : ''}` : `${d} Minuten`;
+  const sign = later ? 1 : -1;
+  return {
+    prompt: later ? `Wie spät ist es in ${span}?` : `Wie spät war es vor ${span}?`,
+    hint: 'Schau zuerst, wie spät es jetzt ist.',
+    say: later ? `Schau auf die Uhr. Wie spät ist es in ${span}?` : `Schau auf die Uhr. Wie spät war es vor ${span}?`,
+    ...withOptions(at(sign * d), shuffle([at(sign * (d + 5)), at(sign * (d - 5)), at(-sign * d), at(sign * d + 60), at(sign * d - 60)], rnd), rnd),
+    visual: { k: 'clock', h, m },
+    explain: `Jetzt ist es ${digital(h, m)}. ${later ? `${span} später` : `${span} früher`} ist es ${at(sign * d)}.`,
   };
 }
 

@@ -9,7 +9,8 @@ import { redeemPass, startCloudSync } from './net/cloud';
 import { isCode } from './net/codes';
 import { onlineAllowed } from './net/consent';
 import { onFriendOnline, presenceChanged, startPresence, usePresence } from './net/presence';
-import { leaveRoom, resumeRoom, setSolo, useRoom } from './net/room';
+import { callReady, endCall, useCall } from './net/call';
+import { leaveRoom, resumeRoom, setSolo, startGame, useRoom } from './net/room';
 import { autoAdmit, isMember, knocking } from './net/roomLogic';
 import { chatSheetOpen } from './screens/Chat';
 import { InvitePop } from './screens/Friends';
@@ -140,6 +141,26 @@ function useReactions() {
   }, [room.seats]);
 }
 
+/**
+ * Spielfreund angerufen: Sobald er „Ja, los!“ gesagt hat und drin ist, startet das Spiel beim
+ * Gastgeber von selbst. Spielzimmer verlassen oder Runde schon gestartet → Anruf vorbei.
+ */
+function useCallStart() {
+  const room = useRoom();
+  const call = useCall();
+  useEffect(() => {
+    if (!call) return;
+    if (room.code !== call.code || (room.info && room.info.status !== 'lobby')) {
+      endCall();
+      return;
+    }
+    if (callReady(call, room.code, room.uid, room.info, room.seats)) {
+      endCall();
+      void startGame();
+    }
+  }, [call, room.code, room.uid, room.info, room.seats]);
+}
+
 export function App() {
   const data = useData();
   const state = useNav();
@@ -152,6 +173,7 @@ export function App() {
   if (hash.current === null) hash.current = typeof location === 'undefined' ? {} : readHash();
 
   useReactions();
+  useCallStart();
 
   useEffect(() => {
     startPlaytime(counting);

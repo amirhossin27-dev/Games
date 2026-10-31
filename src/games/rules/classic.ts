@@ -63,7 +63,8 @@ export function tttBestMove(board: Cell[], me: number, rnd: Rnd = Math.random): 
 /** Robo spielt je nach Stufe mal perfekt, mal zufällig – damit Kinder auch gewinnen können. */
 export function tttRoboMove(board: Cell[], me: number, level: Level, rnd: Rnd = Math.random): number {
   const free = board.map((c, i) => (c === null ? i : -1)).filter((i) => i >= 0);
-  const smart = [0.35, 0.65, 0.9][level];
+  // Auf „Schwer“ macht Robo kaum noch Fehler – dann ist ein Unentschieden schon richtig gut.
+  const smart = [0.3, 0.65, 0.97][level];
   return rnd() < smart ? tttBestMove(board, me, rnd) : pick(free, rnd);
 }
 
@@ -186,9 +187,9 @@ function c4Negamax(b: Cell[], seat: number, depth: number, alpha: number, beta: 
   return best;
 }
 
-/** Robo denkt je nach Stufe 1, 2 oder 4 Züge voraus. */
+/** Robo denkt je nach Stufe 1, 3 oder 6 Züge voraus. */
 export function c4RoboMove(b: Cell[], me: number, level: Level, rnd: Rnd = Math.random): number {
-  const depth = [1, 2, 4][level];
+  const depth = [1, 3, 6][level];
   let best = -Infinity;
   let moves: number[] = [];
   for (const col of C4_ORDER) {
@@ -231,7 +232,7 @@ export const c4Def: GameDef<C4State, number> = {
 // ───────────────────────── Paare finden ─────────────────────────
 
 export const MEMORY_PICS = ['🐶', '🐱', '🦊', '🐸', '🐼', '🦁', '🐵', '🐧', '🦋', '🐞', '🍓', '🍉', '🌻', '🚀', '🎈', '⚽', '🍦', '🦄', '🐢', '🐳'];
-export const MEMORY_PAIRS: Record<Level, number> = { 0: 6, 1: 8, 2: 10 };
+export const MEMORY_PAIRS: Record<Level, number> = { 0: 6, 1: 8, 2: 12 };
 
 export interface MemoryState {
   deck: string[];
@@ -288,7 +289,7 @@ export const memoryDef: GameDef<MemoryState, MemoryAction> = {
   },
   robo(s, seat, level, rnd) {
     if (s.turn !== seat || s.open.length === 2) return null;
-    const memory = [0.45, 0.65, 0.85][level];
+    const memory = [0.4, 0.65, 0.92][level];
     const remembered = s.seen.filter((i) => s.owner[i] === null && !s.open.includes(i) && rnd() < memory);
     const hidden = s.deck.map((_, i) => i).filter((i) => s.owner[i] === null && !s.open.includes(i));
     const unknown = hidden.filter((i) => !s.seen.includes(i));

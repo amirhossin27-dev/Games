@@ -309,7 +309,7 @@ function ResultCard({
           </button>
         )}
         <button type="button" className="btn secondary block" onClick={onClose}>
-          {online ? (online.host ? 'Zurück ins Spielzimmer' : 'Zimmer verlassen') : 'Anderes Spiel'}
+          {online ? (online.host ? 'Zurück ins Spielzimmer' : 'Spielzimmer verlassen') : 'Anderes Spiel'}
         </button>
       </div>
     </div>

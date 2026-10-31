@@ -147,7 +147,7 @@ export const mauDef: GameDef<MauState, MauAction> = {
     const playable = hand.filter((c) => mauPlayable(s, c));
     if (!playable.length) return s.drawn !== null ? { t: 'pass' } : { t: 'draw' };
     const nextCards = s.hands[after(s, seat)].length;
-    const sloppy = [3, 1.5, 0.5][level as Level];
+    const sloppy = [4, 1.5, 0][level as Level];
     const score = (c: Card) => {
       let v = c.r === 11 ? -8 : 2;
       if (c.r === 7) v += nextCards <= 2 ? 9 : 3;

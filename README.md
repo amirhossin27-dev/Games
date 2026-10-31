@@ -46,25 +46,29 @@ Gegen Robo antworten in den Lernspielen alle gleichzeitig. Teilen sich mehrere K
 
 Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktionen (Standard: aus).
 
-1. Ein Kind tippt **Zimmer → Zimmer öffnen** (oder auf einer Spielseite „Online“) und wählt ein Spiel.
-2. Es bekommt einen **Zimmer-Code aus sechs Tieren**, z. B. „Fuchs, Panda, Schildkröte, Löwe, Hase, Wal“. Den sagt es laut oder teilt den Link.
-3. Die anderen tippen **Zimmer → Code eingeben** und die sechs Tiere – beim sechsten Tier klingelt es von selbst – oder öffnen den Link und **klingeln**.
-4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen. Kinder gehen vor: Ist das Zimmer mit Robos voll, macht beim Reinlassen ein Robo Platz.
+**Spielfreund anrufen (am schnellsten):** Unter **Spielzimmer → Wer spielt mit?** stehen die Spielfreunde groß als Bilder, wer online ist, hat einen grünen Punkt. Ein Tipp auf den Freund, ein Tipp aufs Spiel (die Stufe passt Joyboy dem Alter an, zuletzt gewählte Spiele stehen vorn) – Joyboy öffnet ein Spielzimmer und ruft den Freund an. Bei ihm erscheint groß in der Mitte „Lea möchte mit dir Vier gewinnt spielen!“, egal wo er gerade in der App ist. Sagt er **Ja, los!**, startet das Spiel bei beiden von selbst – ohne Code, Klingeln oder Start-Knopf. Geht er nicht ran, zeigt Joyboy nach 45 Sekunden **Nochmal anrufen**, **Auflegen** oder **Spielzimmer mit Code zeigen**. Wartet ein Freund schon in seinem Spielzimmer, führt ein Tipp auf ihn direkt dorthin.
+
+Mit Kindern, die noch keine Spielfreunde sind, geht es über den Tier-Code:
+
+1. Ein Kind tippt **Spielzimmer → Spielzimmer öffnen** (oder auf einer Spielseite „Online“) und wählt ein Spiel.
+2. Es bekommt einen **Spielzimmer-Code aus sechs Tieren**, z. B. „Fuchs, Panda, Schildkröte, Löwe, Hase, Wal“. Den sagt es laut oder teilt den Link.
+3. Die anderen tippen **Spielzimmer → Code eingeben** und die sechs Tiere – beim sechsten Tier klingelt es von selbst – oder öffnen den Link und **klingeln**.
+4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen. Kinder gehen vor: Ist das Spielzimmer mit Robos voll, macht beim Reinlassen ein Robo Platz.
 5. Der Gastgeber startet, alle spielen auf ihrem Gerät. Jedes Kind sieht seine Farbe („Du bist Blau“) und wer dran ist. „Nochmal“ startet die nächste Runde für alle.
 
 **Mitten in der Runde dazukommen:** Wer klingelt, während schon gespielt wird, wartet vor der Tür („Die anderen spielen gerade Ludo …“). Der Gastgeber sieht im Spiel unten „Mia möchte mitspielen!“ und lässt mit einem Tipp rein. Spielt ein Robo mit (oder ist ein Kind gegangen), übernimmt das neue Kind sofort diesen Platz mit allen Figuren – alle sehen „Mia spielt jetzt für Robo weiter!“. Sonst spielt es ab der nächsten Runde mit; der Gastgeber kann mit **Neu starten mit allen** auch gleich eine neue Runde beginnen.
 
 **Schneller wieder zusammen:**
 
-- **Zuletzt im Zimmer:** Unter **Zimmer** stehen die letzten Zimmer (3 Tage lang). Ein Tipp auf **Wieder rein** genügt, kein Code. Das eigene Zimmer lässt sich nach dem Schließen mit **Wieder öffnen** und demselben Code wieder aufmachen.
-- **Ohne Klingeln rein:** Wer schon einmal im Zimmer war oder Spielfreund des Gastgebers ist, kommt beim Klingeln gleich rein (solange Platz ist). Alle anderen müssen weiter klingeln.
-- **Spielfreunde mit Online-Punkt:** Unter **Zimmer → Spielfreunde** sieht ein Kind, wer gerade online ist (grüner Punkt) und wer in einem Zimmer wartet. **Mitspielen** führt direkt dorthin, **Einladen** öffnet ein Zimmer und schickt eine Einladung. Im Zimmer lädt der Bereich **Spielfreunde einladen** mit einem Tipp ein. Die Einladung erscheint unten auf dem Bildschirm, egal wo das Kind gerade ist, und gilt 10 Minuten.
+- **Zuletzt im Spielzimmer:** Unter **Spielzimmer** stehen die letzten Spielzimmer (3 Tage lang). Ein Tipp auf **Wieder rein** genügt, kein Code. Das eigene Spielzimmer lässt sich nach dem Zumachen mit **Wieder öffnen** und demselben Code wieder aufmachen.
+- **Ohne Klingeln rein:** Wer schon einmal im Spielzimmer war oder Spielfreund des Gastgebers ist, kommt beim Klingeln gleich rein (solange Platz ist). Alle anderen müssen weiter klingeln.
+- **Noch jemand dazu:** Im Spielzimmer lädt der Bereich **Spielfreunde einladen** weitere Freunde mit einem Tipp ein. Einladungen erscheinen wie ein Anruf groß in der Mitte und gelten 10 Minuten.
 - **Chat:** 13 fertige Sätze zum Antippen („Hallo!“, „Gut gemacht!“, „Noch eine Runde?“ …) und ein Feld zum Selbstschreiben (höchstens 60 Zeichen). Der Wortfilter blockt Schimpfwörter, Telefonnummern, E-Mails, Links und Fragen nach Adresse oder Nummer – in der App und noch einmal in der Datenbank. Während der Runde öffnet das Sprechblasen-Symbol oben den Chat. Neue Nachrichten erscheinen als kleiner Hinweis, wenn man gerade woanders ist.
-- **Allein spielen, während man im Zimmer ist:** geht. Joyboy sagt dazu „Du bleibst im Spielzimmer …“, die anderen sehen „spielt kurz allein“. Startet der Gastgeber die Runde, schließt das Einzelspiel und es geht im Zimmer weiter. Läuft die Runde schon, startet kein Spiel daneben, sondern ein Hinweis erklärt, warum.
+- **Allein spielen, während man im Spielzimmer ist:** geht. Joyboy sagt dazu „Du bleibst im Spielzimmer …“, die anderen sehen „spielt kurz allein“. Startet der Gastgeber die Runde, schließt das Einzelspiel und es geht im Spielzimmer weiter. Läuft die Runde schon, startet kein Spiel daneben, sondern ein Hinweis erklärt, warum.
 
 Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Zahlen-Spur, Schwung-Strecke, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten (bzw. spuren) alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
 
-**Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus (länger als 45 Sekunden weg, damit er kurz den Code in einer anderen App verschicken kann), übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
+**Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus (länger als 45 Sekunden weg, damit er kurz den Code in einer anderen App verschicken kann), übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Spielzimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
 
 Technik: Firebase Realtime Database über REST und Server-Sent Events (kein SDK) und anonyme Anmeldung pro Kind. Der Gastgeber rechnet mit denselben Regel-Funktionen wie offline und veröffentlicht jeden Stand; die anderen schicken nur ihre Züge. Regeln: [`database.rules.json`](database.rules.json) (gebaut mit `npm run rules`, getestet mit `npm run test:rules` gegen den Firebase-Emulator), Einrichtung: [`docs/FIREBASE.md`](docs/FIREBASE.md).
 
