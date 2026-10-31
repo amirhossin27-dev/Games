@@ -126,7 +126,7 @@ const token = async (force = false) => {
 
 const denied = (e: unknown) => e instanceof DbError && (e.status === 401 || e.status === 403);
 
-const GONE = 'Dieses Zimmer gibt es nicht mehr.';
+const GONE = 'Dieses Spielzimmer gibt es nicht mehr.';
 
 let lastChatRaw: unknown = null;
 
@@ -166,7 +166,7 @@ function onTree(tree: Record<string, unknown> | null) {
     lastChatRaw = tree.chat;
     chat = chatOf(tree.chat);
   }
-  set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats, game, chat });
+  set({ conn: 'online', error: info.status === 'closed' ? 'Das Spielzimmer wurde zugemacht.' : null, info, seats, game, chat });
   if (info.status !== 'closed') {
     remember();
     if (info.host === view.uid) void hostChores();
@@ -219,7 +219,7 @@ function onDoor(info: RoomInfo | null) {
     return;
   }
   const hostDoc = view.seats[info.host];
-  set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats: hostDoc ? { [info.host]: hostDoc } : {}, game: null });
+  set({ conn: 'online', error: info.status === 'closed' ? 'Das Spielzimmer wurde zugemacht.' : null, info, seats: hostDoc ? { [info.host]: hostDoc } : {}, game: null });
   // Reingelassen → ab jetzt das ganze Zimmer
   if (isMember(info, view.uid)) void connect();
   else if (!hostDoc) void loadHost(info.host);
@@ -276,7 +276,7 @@ async function connect(force = false) {
         const { [uid]: _me, ...allowed } = info.allowed ?? {};
         set({ info: { ...info, allowed } });
         void connect();
-      } else set({ error: 'Kein Zugang zu diesem Zimmer.' });
+      } else set({ error: 'Kein Zugang zu diesem Spielzimmer.' });
     },
     onError: () => {
       set({ conn: 'offline' });
@@ -366,9 +366,9 @@ export class RoomError extends Error {}
 
 export const ONLINE_OFF = 'Online-Spielen ist ausgeschaltet. Deine Eltern können es im Elternbereich erlauben.';
 
-export const NO_ROOM = 'Dieses Zimmer gibt es nicht. Stimmt der Code?';
+export const NO_ROOM = 'Dieses Spielzimmer gibt es nicht. Stimmt der Code?';
 
-export const CLOSED = 'Dieses Zimmer ist gerade zu.';
+export const CLOSED = 'Dieses Spielzimmer ist gerade zu.';
 
 function friendly(e: unknown): RoomError {
   if (e instanceof RoomError) return e;
@@ -394,7 +394,7 @@ export async function createRoom(profile: Profile, game: GameId, level: Level): 
         if (!denied(e)) throw e;
       }
     }
-    if (!code) throw new RoomError('Das Zimmer ließ sich gerade nicht öffnen. Versuch es gleich nochmal.');
+    if (!code) throw new RoomError('Das Spielzimmer ließ sich gerade nicht öffnen. Versuch es gleich nochmal.');
     set({ ...EMPTY, code, uid: acc.uid, profileId: profile.id, conn: 'connecting' });
     saveResume();
     void connect();
@@ -407,7 +407,7 @@ export async function createRoom(profile: Profile, game: GameId, level: Level): 
 export async function joinRoom(profile: Profile, code: string) {
   try {
     if (!onlineAllowed()) throw new RoomError(ONLINE_OFF);
-    if (!isCode(code)) throw new RoomError('Diesen Zimmer-Code gibt es nicht.');
+    if (!isCode(code)) throw new RoomError('Diesen Spielzimmer-Code gibt es nicht.');
     if (view.code === code && view.profileId === profile.id) return;
     if (view.code) await leaveRoom();
     const acc = await ensureAuth(profile.id);
