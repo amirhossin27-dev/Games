@@ -6,7 +6,9 @@ import { activeProfile, getData, useData } from './lib/store';
 import { cls } from './lib/util';
 import { redeemPass, startCloudSync } from './net/cloud';
 import { isCode } from './net/codes';
+import { onlineAllowed } from './net/consent';
 import { leaveRoom, resumeRoom, useRoom } from './net/room';
+import { isMember } from './net/roomLogic';
 import { GameDetail } from './screens/GameDetail';
 import { GameScreen } from './screens/GameScreen';
 import { Home, TabBar } from './screens/Home';
@@ -33,11 +35,31 @@ function readHash(): { join?: string; pass?: string } {
   return { join: join && isCode(join) ? join : undefined, pass };
 }
 
+/** Spielerpass, der noch auf die Erlaubnis der Eltern wartet */
+let pendingPass: string | null = null;
+
+function redeem(pass: string) {
+  if (!onlineAllowed()) {
+    pendingPass = pass;
+    toast('Für den Spielerpass müssen die Eltern erst Online erlauben.');
+    nav.go({ name: 'parents' });
+    return;
+  }
+  redeemPass(pass)
+    .then((p) => {
+      toast(`Willkommen zurück, ${p.name}! Dein Spielstand ist da.`);
+      nav.go({ name: 'home' });
+    })
+    .catch(() => toast('Der Spielerpass hat nicht geklappt. Ist das Internet an?'));
+}
+
 /** Reaktionen der anderen Kinder im Spielzimmer als kleine Hinweise zeigen */
 function useReactions() {
   const room = useRoom();
   const seen = useRef(new Map<string, number>());
   useEffect(() => {
+    // Wer nur geklingelt hat, bekommt die Reaktionen im Zimmer nicht mit
+    if (!room.info || !isMember(room.info, room.uid)) return;
     for (const [uid, doc] of Object.entries(room.seats)) {
       const at = doc.react?.at ?? 0;
       const before = seen.current.get(uid);
@@ -74,18 +96,11 @@ export function App() {
   useEffect(() => {
     startPlaytime(counting);
     startCloudSync();
-    const redeem = (pass: string) =>
-      redeemPass(pass)
-        .then((p) => {
-          toast(`Willkommen zurück, ${p.name}! Dein Spielstand ist da.`);
-          nav.go({ name: 'home' });
-        })
-        .catch(() => toast('Der Spielerpass hat nicht geklappt. Ist das Internet an?'));
-    if (hash.current?.pass) void redeem(hash.current.pass);
+    if (hash.current?.pass) redeem(hash.current.pass);
     // Link geöffnet, während Joyboy schon offen ist
     const onHash = () => {
       const h = readHash();
-      if (h.pass) void redeem(h.pass);
+      if (h.pass) redeem(h.pass);
       if (h.join) {
         if (activeProfile(getData())) nav.go({ name: 'rooms', join: h.join });
         else hash.current = h;
@@ -118,6 +133,22 @@ export function App() {
     if (room.code && room.profileId && room.profileId !== profile?.id) void leaveRoom();
   }, [profile?.id, room.code]);
 
+  // Eltern haben Online erlaubt → den wartenden Spielerpass einlösen, sobald sie fertig sind
+  const online = onlineAllowed(data.settings);
+  useEffect(() => {
+    if (!online) return;
+    if (pendingPass && route.name !== 'parents') {
+      const pass = pendingPass;
+      pendingPass = null;
+      redeem(pass);
+    }
+  }, [online, route.name]);
+
+  // Eltern haben Online ausgeschaltet → raus aus dem Spielzimmer
+  useEffect(() => {
+    if (!online && room.code) void leaveRoom();
+  }, [online, room.code]);
+
   // Zeit um → laufendes Spiel beenden
   useEffect(() => {
     if (!status.locked) return;
@@ -138,12 +169,21 @@ export function App() {
   const tabName = route.name === 'home' || route.name === 'rooms' || route.name === 'me' ? route.name : null;
   const tabs = !!profile && !!tabName && data.profiles.length > 0;
   const inRoom = !!profile && room.profileId === profile.id && !!room.code;
+  // Läuft gerade eine Runde im Spielzimmer, in der dieses Kind mitspielt?
+  const onlineActive = inRoom && room.info?.status === 'playing' && !!room.game?.seats.some((s) => s.uid === room.uid);
+
+  // Die Runde im Spielzimmer beginnt → ein Spiel für sich allein schließen
+  useEffect(() => {
+    if (!onlineActive || !getNav().session) return;
+    nav.closeGame();
+    toast('Im Spielzimmer geht es los!');
+  }, [onlineActive]);
 
   return (
     <div className={cls('app', tabs && 'with-tabs')}>
       {screen}
       {tabs && <TabBar active={tabName!} />}
-      {!locked && state.session && !inRoom && <GameScreen session={state.session} />}
+      {!locked && state.session && !onlineActive && <GameScreen session={state.session} />}
       {!locked && inRoom && <OnlineGame profileId={profile!.id} />}
       {!locked && state.tutorial && <Tutorial key={`tut-${state.tutorial.game}`} game={state.tutorial.game} />}
       {locked && <LockScreen />}

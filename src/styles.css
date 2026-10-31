@@ -1204,7 +1204,7 @@ p {
 
 .code-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -1316,6 +1316,10 @@ p {
 .pick-game[aria-pressed='true'] {
   border: 2px solid var(--ink);
   box-shadow: 2px 3px 0 var(--ink);
+}
+
+.pick-game:disabled {
+  opacity: 0.45;
 }
 
 .room-banner {

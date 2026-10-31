@@ -1,17 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { codeAnimals, codeFromIndexes, isCode } from '../net/codes';
+import dbRules from '../../database.rules.json';
+import { ANIMALS, BAD_WORDS, nameProblem, onlineName } from '../lib/names';
+import { CODE_LEN, codeAnimals, codeFromIndexes, isCode, randomCode } from '../net/codes';
 import { applyStreamEvent } from '../net/db';
-import { absentSeats, buildSeats, guestActs, knocking, members, nextSlot, parseActs, taken, type RoomInfo, type SeatDoc } from '../net/roomLogic';
+import { absentSeats, buildSeats, guestActs, isMember, knocking, leftRoom, members, nextSlot, parseActs, robosFor, takeOver, taken, type RoomInfo, type SeatDoc } from '../net/roomLogic';
 
 const seat = (name: string, at = 1000, extra: Partial<SeatDoc> = {}): SeatDoc => ({ name, avatar: 'fuchs', color: '#fff', at, ...extra });
 
 describe('Zimmer-Code', () => {
-  it('besteht aus vier Tieren', () => {
-    expect(isCode('0a3f')).toBe(true);
-    expect(isCode('0A3F')).toBe(false);
-    expect(isCode('0a3')).toBe(false);
-    expect(codeAnimals('0a3f').map((a) => a.name)).toEqual(['Fuchs', 'Elefant', 'Panda', 'Einhorn']);
-    expect(codeFromIndexes([0, 10, 3, 15])).toBe('0a3f');
+  it('besteht aus sechs Tieren', () => {
+    expect(isCode('0a3f7c')).toBe(true);
+    expect(isCode('0A3F7C')).toBe(false);
+    // alte, kurze Codes gelten nicht mehr
+    expect(isCode('0a3f')).toBe(false);
+    expect(codeAnimals('0a3f7c').map((a) => a.name)).toEqual(['Fuchs', 'Elefant', 'Panda', 'Einhorn', 'Dino', 'Schildkröte']);
+    expect(codeFromIndexes([0, 10, 3, 15, 7, 12])).toBe('0a3f7c');
+    for (let i = 0; i < 20; i++) expect(isCode(randomCode())).toBe(true);
   });
 });
 
@@ -37,11 +41,43 @@ describe('Spielzimmer', () => {
   });
 
   it('höchstens so viele Plätze wie das Spiel erlaubt', () => {
-    expect(taken(info)).toBe(4);
-    expect(nextSlot(info)).toBeNull();
-    expect(nextSlot({ ...info, robos: 0 })).toBe(3);
-    expect(nextSlot({ ...info, game: 'vier', allowed: {}, robos: 0 })).toBe(1);
-    expect(nextSlot({ ...info, game: 'vier', allowed: { a: 1 }, robos: 0 })).toBeNull();
+    expect(taken(info, seats)).toBe(4);
+    expect(nextSlot(info, seats)).toBeNull();
+    expect(nextSlot({ ...info, robos: 0 }, seats)).toBe(3);
+    expect(nextSlot({ ...info, game: 'vier', allowed: {}, robos: 0 }, seats)).toBe(1);
+    expect(nextSlot({ ...info, game: 'vier', allowed: { a: 1 }, robos: 0 }, seats)).toBeNull();
+  });
+
+  it('wer gegangen ist, gibt seinen Platz frei', () => {
+    const { b: _ben, ...rest } = seats;
+    expect(members(info, rest).map((m) => m.uid)).toEqual(['h', 'a']);
+    expect(taken(info, rest)).toBe(3);
+    expect(nextSlot(info, rest)).toBe(2);
+    expect(leftRoom(info, rest)).toEqual(['b']);
+    expect(leftRoom(info, seats)).toEqual([]);
+  });
+
+  it('nur Gastgeber und reingelassene Kinder sind drin', () => {
+    expect(isMember(info, 'h')).toBe(true);
+    expect(isMember(info, 'a')).toBe(true);
+    expect(isMember(info, 'k')).toBe(false);
+    expect(isMember(info, null)).toBe(false);
+  });
+
+  it('nach der Übernahme bleibt der alte Gastgeber Mitspieler', () => {
+    const tree = applyStreamEvent({ info }, 'patch', '/info', takeOver(info, 'a')) as { info: RoomInfo };
+    expect(tree.info.host).toBe('a');
+    expect(tree.info.allowed).toEqual({ b: 2, h: 1 });
+    expect(isMember(tree.info, 'h')).toBe(true);
+    expect(members(tree.info, seats).map((m) => m.uid)).toEqual(['a', 'h', 'b']);
+    expect(knocking(tree.info, seats).map((k) => k.uid)).toEqual(['k']);
+  });
+
+  it('beim Spielwechsel gehen Robos, für die kein Platz mehr ist', () => {
+    expect(robosFor('vier', 1, 2)).toBe(0);
+    expect(robosFor('ludo', 2, 3)).toBe(1);
+    expect(robosFor('ludo', 1, 1)).toBe(1);
+    expect(robosFor('vier', 3, 1)).toBe(1);
   });
 
   it('baut die Plätze der Runde: Kinder, dann Robo', () => {
@@ -73,5 +109,47 @@ describe('Spielzimmer', () => {
     expect(absentSeats(players, seats, 1000 + 25_000, 0)).toEqual([1, 2]);
     expect(absentSeats(players, seats, 1000 + 5_000, 0)).toEqual([]);
     expect(absentSeats(players, seats, 500 + 20_500, 1)).toEqual([2]);
+  });
+});
+
+describe('Namen online', () => {
+  it('lässt keine Kontakt-Apps, Links und langen Zahlen durch', () => {
+    for (const bad of ['insta_lena', 'TikTokStar', 'Snap Chat', 'www.lena', 'Lena1234', 'lena@web'])
+      expect(nameProblem(bad), bad).not.toBeNull();
+    expect(nameProblem('Lena')).toBeNull();
+    expect(nameProblem('Flinker Fuchs')).toBeNull();
+  });
+
+  it('zeigt statt eines unpassenden Namens einen Würfel-Namen', () => {
+    expect(onlineName('Lena', 'fuchs')).toBe('Lena');
+    for (const a of ANIMALS) {
+      const name = onlineName('insta_lena', a.kind);
+      expect(nameProblem(name), name).toBeNull();
+      expect(name.length).toBeLessThanOrEqual(16);
+    }
+  });
+});
+
+describe('Datenbank-Regeln', () => {
+  const { rules } = dbRules;
+
+  it('prüfen dieselben Wörter und Tiere wie die App (sonst: npm run rules)', () => {
+    const seat = rules.rooms.$code.seats.$uid['.validate'];
+    const pub = rules.profiles.$uid.public['.validate'];
+    for (const check of [seat, pub]) {
+      for (const w of BAD_WORDS) expect(check).toContain(`.contains('${w}')`);
+      // dazu @, http und www
+      expect(check.match(/\.contains\('/g)).toHaveLength(BAD_WORDS.length + 3);
+      for (const a of ANIMALS) expect(check).toContain(`=== '${a.kind}'`);
+      expect(check.match(/child\('avatar'\)\.val\(\) === '/g)).toHaveLength(ANIMALS.length);
+    }
+  });
+
+  it('kennen nur Codes mit sechs Tieren und lassen nur Mitglieder ins Zimmer schauen', () => {
+    const room = rules.rooms.$code;
+    expect(room['.read']).toContain(`[0-9a-f]{${CODE_LEN}}`);
+    expect(room['.write']).toContain(`[0-9a-f]{${CODE_LEN}}`);
+    expect(room['.read']).toContain("info/allowed/' + auth.uid");
+    expect(room.info['.read']).toContain("seats/' + auth.uid");
   });
 });

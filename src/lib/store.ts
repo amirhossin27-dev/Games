@@ -81,6 +81,8 @@ export interface Settings {
   onlyGeneratedNames: boolean;
   /** Arcade-Spiele erst nach so vielen Lernspielen am Tag (0 = aus, fehlt = Standard aus unlock.ts) */
   arcadeAfter?: number;
+  /** Online-Funktionen von den Eltern erlaubt (fehlt = aus, siehe net/consent.ts) */
+  online?: boolean;
 }
 
 export interface ParentLock {

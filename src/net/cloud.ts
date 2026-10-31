@@ -1,14 +1,17 @@
+import { onlineName } from '../lib/names';
 import { levelOf } from '../lib/progress';
 import { getData, normalizeProfile, setData, subscribe, type Friend, type Profile } from '../lib/store';
 import { weekKey } from '../lib/util';
-import { accountOf, ensureAuth, refreshAccount, setAccount } from './auth';
+import { accountIds, accountOf, deleteAccount, ensureAuth, refreshAccount, setAccount } from './auth';
 import { onlineConfigured } from './config';
+import { onlineAllowed } from './consent';
 import { dbRequest, SERVER_TIME } from './db';
 
 /**
  * Spielstände in der Cloud: Jedes Profil liegt unter profiles/<Konto>. „public“ (Name, Avatar,
  * Sterne der Woche) dürfen Spielfreunde für die Rangliste lesen, „private“ (der ganze Spielstand)
  * nur das Kind selbst. Abgeglichen wird nach Zeitstempel – der neuere Stand gewinnt.
+ * Das alles erst, wenn die Eltern Online erlaubt haben (consent.ts).
  */
 
 export interface PublicProfile {
@@ -22,7 +25,7 @@ export interface PublicProfile {
 
 function publicOf(p: Profile) {
   return {
-    name: p.name.slice(0, 16),
+    name: onlineName(p.name, p.avatar).slice(0, 16),
     avatar: p.avatar,
     color: p.color,
     stars: p.stars,
@@ -34,7 +37,7 @@ function publicOf(p: Profile) {
 
 const pushed = new Map<string, number>();
 let timer: number | undefined;
-let syncing = false;
+let syncing: Promise<void> | null = null;
 
 async function pushProfile(p: Profile) {
   const acc = await ensureAuth(p.id);
@@ -45,18 +48,20 @@ async function pushProfile(p: Profile) {
 }
 
 async function pushChanged() {
-  if (syncing || !navigator.onLine) return;
-  syncing = true;
-  try {
+  if (syncing || !navigator.onLine || !onlineAllowed()) return;
+  syncing = (async () => {
     for (const p of getData().profiles) {
+      // Eltern haben Online gerade ausgeschaltet
+      if (!onlineAllowed()) break;
       if (pushed.get(p.id) === p.updatedAt) continue;
       await pushProfile(p).catch(() => {
         // offline oder Fehler – beim nächsten Mal wieder versuchen
       });
     }
-  } finally {
-    syncing = false;
-  }
+  })().finally(() => {
+    syncing = null;
+  });
+  await syncing;
 }
 
 function schedule(delay = 3000) {
@@ -66,6 +71,7 @@ function schedule(delay = 3000) {
 
 /** Neuere Stände aus der Cloud holen (z. B. vom selben Kind auf einem anderen Gerät). */
 async function pullNewer() {
+  if (!onlineAllowed()) return;
   for (const p of getData().profiles) {
     if (!accountOf(p.id)) continue;
     try {
@@ -92,28 +98,61 @@ export function startCloudSync() {
   if (started || !onlineConfigured()) return;
   started = true;
   window.setTimeout(() => {
+    void deleteLeftovers();
     void pullNewer().then(() => schedule(500));
   }, 1500);
-  subscribe(() => schedule());
-  window.addEventListener('online', () => schedule(500));
+  let allowed = onlineAllowed();
+  subscribe(() => {
+    // Eltern haben Online gerade erlaubt: erst neuere Stände holen, dann sichern
+    if (onlineAllowed() && !allowed) void pullNewer().then(() => schedule(500));
+    else schedule();
+    allowed = onlineAllowed();
+  });
+  window.addEventListener('online', () => {
+    void deleteLeftovers();
+    schedule(500);
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') void pushChanged();
   });
 }
 
-/** Profil auch in der Cloud löschen (wenn Eltern ein Kind entfernen). */
-export async function deleteCloudProfile(profileId: string) {
-  const acc = accountOf(profileId);
-  if (!acc) return;
+/**
+ * Spielstand und Konto eines Kindes in der Cloud löschen (Kind entfernt oder Online-Daten
+ * gelöscht). Klappt es nicht (offline), bleibt das Konto gemerkt und wird später gelöscht.
+ */
+export async function deleteCloudProfile(profileId: string): Promise<boolean> {
+  if (!accountOf(profileId)) return true;
+  // Erst eine laufende Sicherung abwarten – sonst legt sie die Daten gleich wieder an.
+  await syncing;
   try {
     const fresh = await ensureAuth(profileId);
     await dbRequest('DELETE', `profiles/${fresh.uid}/public`, fresh.token!);
     await dbRequest('DELETE', `profiles/${fresh.uid}/private`, fresh.token!);
-  } catch {
-    // offline – die Daten bleiben dann in der Cloud liegen
+    // Danach auch das anonyme Konto – damit gilt auch ein alter Spielerpass nicht mehr.
+    await deleteAccount(fresh).catch(() => undefined);
+  } catch (e) {
+    // Gibt es das Konto schon nicht mehr, ist nichts mehr zu löschen.
+    if (!(e instanceof Error && /USER_NOT_FOUND|USER_DISABLED|INVALID_REFRESH_TOKEN|TOKEN_EXPIRED/.test(e.message))) return false;
   }
   setAccount(profileId, undefined);
+  pushed.delete(profileId);
+  return true;
 }
+
+/** Alle Online-Daten der Kinder auf diesem Gerät löschen. Ergebnis: hat alles geklappt? */
+export async function deleteAllCloudData(): Promise<boolean> {
+  const results = await Promise.all(accountIds().map((id) => deleteCloudProfile(id)));
+  return results.every(Boolean);
+}
+
+/** Konten von Kindern, die es hier nicht mehr gibt, nachträglich löschen (z. B. offline entfernt). */
+async function deleteLeftovers() {
+  const ids = new Set(getData().profiles.map((p) => p.id));
+  for (const id of accountIds()) if (!ids.has(id)) await deleteCloudProfile(id);
+}
+
+export const hasCloudData = () => accountIds().length > 0;
 
 // ───── Spielfreunde ─────
 
@@ -139,7 +178,7 @@ export function rememberFriends(profileId: string, friends: Record<string, Frien
 /** Wochensterne der Spielfreunde (für die Rangliste) */
 export async function loadFriends(profileId: string): Promise<{ uid: string; info: PublicProfile }[]> {
   const p = getData().profiles.find((x) => x.id === profileId);
-  if (!p || !Object.keys(p.friends).length) return [];
+  if (!p || !Object.keys(p.friends).length || !onlineAllowed()) return [];
   const acc = await ensureAuth(profileId);
   const out: { uid: string; info: PublicProfile }[] = [];
   await Promise.all(
@@ -162,6 +201,7 @@ const unb64url = (s: string) => decodeURIComponent(escape(atob(s.replace(/-/g, '
 
 /** Link, mit dem ein Kind seinen Spielstand auf ein anderes Gerät mitnimmt. */
 export async function makePass(profileId: string): Promise<string> {
+  if (!onlineAllowed()) throw new Error('Online ist aus');
   const p = getData().profiles.find((x) => x.id === profileId);
   if (p) await pushProfile(p);
   const acc = accountOf(profileId);
@@ -171,6 +211,7 @@ export async function makePass(profileId: string): Promise<string> {
 
 /** Spielerpass einlösen: Profil aus der Cloud holen und auf diesem Gerät anlegen. */
 export async function redeemPass(code: string): Promise<Profile> {
+  if (!onlineAllowed()) throw new Error('Online ist aus');
   const { r } = JSON.parse(unb64url(code)) as { r: string };
   const acc = await refreshAccount(r);
   const raw = await dbRequest<string | null>('GET', `profiles/${acc.uid}/private`, acc.token!);
