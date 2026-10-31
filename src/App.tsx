@@ -145,7 +145,7 @@ export function App() {
       {tabs && <TabBar active={tabName!} />}
       {!locked && state.session && !inRoom && <GameScreen session={state.session} />}
       {!locked && inRoom && <OnlineGame profileId={profile!.id} />}
-      {!locked && state.tutorial && <Tutorial key={`tut-${state.tutorial.game}`} game={state.tutorial.game} start={state.tutorial.start} />}
+      {!locked && state.tutorial && <Tutorial key={`tut-${state.tutorial.game}`} game={state.tutorial.game} />}
       {locked && <LockScreen />}
       <ToastHost />
     </div>

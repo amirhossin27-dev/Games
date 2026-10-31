@@ -132,7 +132,6 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
   const [level, setLevel] = useState<Level>(levelForAge(profile.age));
   const [setup, setSetup] = useState<null | 'together' | 'robo'>(null);
   const stat = profile.games[id];
-  const seen = profile.tutorials.includes(id) || profile.skipped.includes(id);
   const sub = LEVEL_SUB[id];
   // Erst lernen, dann spielen
   const left = learnLeft(meta, profile, data.settings);
@@ -143,10 +142,8 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
 
   const start = (seats: SeatInfo[]) => {
     setSetup(null);
-    const s = { game: id, seats, level };
-    // Beim ersten Mal erklärt Joy erst die Regeln.
-    if (!seen) nav.tutorial(id, s);
-    else nav.play(s);
+    // Das Tutorial kommt nur, wenn man es selbst über „So geht's“ oder das ? öffnet.
+    nav.play({ game: id, seats, level });
   };
 
   const [min, max] = meta.players;

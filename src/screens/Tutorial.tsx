@@ -3,10 +3,10 @@ import { sfx } from '../arcade/engine';
 import type { TutArt, TutorialStep } from '../engine/tutorial';
 import { GAME_BY_ID, type GameId } from '../games/registry';
 import { AnswerGrid, TaskCard } from '../games/views/Quiz';
-import { nav, type Session } from '../lib/nav';
+import { nav } from '../lib/nav';
 import { finishTutorial } from '../lib/progress';
 import { speak, speakIfAuto, stopSpeaking, VOICE_ENABLED } from '../lib/speech';
-import { actions, useProfile } from '../lib/store';
+import { useProfile } from '../lib/store';
 import { cls } from '../lib/util';
 import { GameArt } from '../ui/GameArt';
 import { Icon } from '../ui/Icon';
@@ -117,7 +117,7 @@ function Art({ art, onSolved }: { art: TutArt; onSolved: (ok: boolean) => void }
   }
 }
 
-export function Tutorial({ game, start }: { game: GameId; start?: Omit<Session, 'round'> }) {
+export function Tutorial({ game }: { game: GameId }) {
   const meta = GAME_BY_ID[game];
   const profile = useProfile();
   const steps: TutorialStep[] = meta.tutorial;
@@ -144,16 +144,15 @@ export function Tutorial({ game, start }: { game: GameId; start?: Omit<Session, 
     if (profile && completed) {
       const earned = finishTutorial(profile.id, game);
       earned.forEach((b) => toast(`Neues Abzeichen: ${b.name}!`));
-    } else if (profile) actions.skipTutorial(profile.id, game);
-    if (start) nav.play(start);
-    else nav.closeTutorial();
+    }
+    nav.closeTutorial();
   };
 
   return (
     <div className="tut" role="dialog" aria-label={`So geht's: ${meta.name}`}>
       <div className="tut-inner">
         <div className="row between">
-          <button type="button" className="icon-btn" aria-label="Tutorial schließen" onClick={() => (start ? finish(false) : nav.closeTutorial())}>
+          <button type="button" className="icon-btn" aria-label="Tutorial schließen" onClick={() => finish(false)}>
             <Icon name="close" />
           </button>
           <div className="col" style={{ alignItems: 'center', gap: 0 }}>
@@ -163,7 +162,7 @@ export function Tutorial({ game, start }: { game: GameId; start?: Omit<Session, 
             </span>
           </div>
           <button type="button" className="btn ghost small" onClick={() => finish(false)}>
-            {start ? 'Los' : 'Fertig'}
+            Fertig
           </button>
         </div>
         <div className="tut-progress" aria-hidden="true">
@@ -191,7 +190,7 @@ export function Tutorial({ game, start }: { game: GameId; start?: Omit<Session, 
             </button>
           ) : (
             <button type="button" className="btn primary" disabled={needsTry && solved !== true} onClick={() => finish(true)}>
-              {needsTry && solved !== true ? 'Tippe die Antwort' : start ? "Los geht's!" : 'Verstanden!'}
+              {needsTry && solved !== true ? 'Tippe die Antwort' : 'Verstanden!'}
             </button>
           )}
         </div>

@@ -118,7 +118,7 @@ Jedes Spiel bringt eine kleine Tutorial-Beschreibung mit (3–5 Schritte). Ein S
 
 Ablauf:
 
-- Beim ersten Öffnen eines Spiels startet das Tutorial automatisch (überspringbar).
+- Das Tutorial startet nur, wenn man es bewusst öffnet („So geht's“ auf der Spielseite, ? im Spiel, „Spielregeln ansehen“ im Spielzimmer) – nie von selbst beim Spielstart.
 - In jedem Spiel gibt es oben einen **?-Knopf**.
 - Im Spielzimmer sehen die anderen „**Lernt die Regeln**“ – man kann trotzdem starten.
 - Für die Kleinsten zeigt der **Robo-Tipp** auf Wunsch einen möglichen Zug (kommt aus der vorhandenen KI-Funktion).
