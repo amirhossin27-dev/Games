@@ -46,7 +46,7 @@ Gegen Robo antworten in den Lernspielen alle gleichzeitig. Teilen sich mehrere K
 
 Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktionen (Standard: aus).
 
-**Spielfreund anrufen (am schnellsten):** Unter **Spielzimmer → Wer spielt mit?** stehen die Spielfreunde groß als Bilder, wer online ist, hat einen grünen Punkt. Ein Tipp auf den Freund, ein Tipp aufs Spiel (die Stufe passt Joyboy dem Alter an, zuletzt gewählte Spiele stehen vorn) – Joyboy öffnet ein Spielzimmer und ruft den Freund an. Bei ihm erscheint groß in der Mitte „Lea möchte mit dir Vier gewinnt spielen!“, egal wo er gerade in der App ist. Sagt er **Ja, los!**, startet das Spiel bei beiden von selbst – ohne Code, Klingeln oder Start-Knopf. Geht er nicht ran, zeigt Joyboy nach 45 Sekunden **Nochmal anrufen**, **Auflegen** oder **Spielzimmer mit Code zeigen**. Wartet ein Freund schon in seinem Spielzimmer, führt ein Tipp auf ihn direkt dorthin.
+**Spielfreund anrufen (am schnellsten):** Unter **Spielzimmer → Wer spielt mit?** stehen die Spielfreunde groß als Bilder, wer online ist, hat einen grünen Punkt. Ein Tipp auf den Freund, ein Tipp aufs Spiel (die Stufe passt Joyboy dem Alter an, zuletzt gewählte Spiele stehen vorn) – Joyboy öffnet ein Spielzimmer und ruft den Freund an. Bei ihm erscheint groß in der Mitte „Lea möchte mit dir Vier gewinnt spielen!“, egal wo er gerade in der App ist. Sagt er **Ja, los!**, startet das Spiel bei beiden von selbst – ohne Code, Klingeln oder Start-Knopf. Geht er nicht ran, zeigt Joyboy nach 45 Sekunden **Nochmal anrufen**, **Auflegen** oder **Spielzimmer mit Code zeigen**. Ist ein Freund schon in einem Spielzimmer (wartend oder mitten in der Runde), führt ein Tipp auf ihn direkt dorthin.
 
 Mit Kindern, die noch keine Spielfreunde sind, geht es über den Tier-Code:
 
@@ -60,7 +60,7 @@ Mit Kindern, die noch keine Spielfreunde sind, geht es über den Tier-Code:
 
 **Schneller wieder zusammen:**
 
-- **Zuletzt im Spielzimmer:** Unter **Spielzimmer** stehen die letzten Spielzimmer (3 Tage lang). Ein Tipp auf **Wieder rein** genügt, kein Code. Das eigene Spielzimmer lässt sich nach dem Zumachen mit **Wieder öffnen** und demselben Code wieder aufmachen.
+- **Hier spielen deine Freunde:** Ganz oben unter **Spielzimmer** stehen die Spielzimmer, in denen gerade mindestens ein Spielfreund ist – egal ob er dort wartet oder schon spielt. Ein Tipp auf **Rein!** genügt, kein Code. Läuft die Runde schon, übernimmt man einen Robo-Platz oder spielt ab der nächsten Runde mit. Ist gerade kein Freund in einem Spielzimmer, ist der Bereich nicht da.
 - **Ohne Klingeln rein:** Wer schon einmal im Spielzimmer war oder Spielfreund des Gastgebers ist, kommt beim Klingeln gleich rein (solange Platz ist). Alle anderen müssen weiter klingeln.
 - **Noch jemand dazu:** Im Spielzimmer lädt der Bereich **Spielfreunde einladen** weitere Freunde mit einem Tipp ein. Einladungen erscheinen wie ein Anruf groß in der Mitte und gelten 10 Minuten.
 - **Chat:** 13 fertige Sätze zum Antippen („Hallo!“, „Gut gemacht!“, „Noch eine Runde?“ …) und ein Feld zum Selbstschreiben (höchstens 60 Zeichen). Der Wortfilter blockt Schimpfwörter, Telefonnummern, E-Mails, Links und Fragen nach Adresse oder Nummer – in der App und noch einmal in der Datenbank. Während der Runde öffnet das Sprechblasen-Symbol oben den Chat. Neue Nachrichten erscheinen als kleiner Hinweis, wenn man gerade woanders ist.

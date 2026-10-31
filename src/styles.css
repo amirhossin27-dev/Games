@@ -1466,13 +1466,14 @@ p {
   opacity: 0.4;
 }
 
-/* Spielfreunde und zuletzt besuchte Zimmer */
-.code-mini {
+/* Spielfreunde und Spielzimmer, in denen gerade Freunde sind */
+.friend-stack {
   display: inline-flex;
-  gap: 1px;
-  font-size: 0.85rem;
-  letter-spacing: 0;
-  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.friend-stack > * + * {
+  margin-left: -14px;
 }
 
 .friend-ava {

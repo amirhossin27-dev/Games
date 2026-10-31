@@ -8,7 +8,6 @@ import { ensureAuth } from './auth';
 import { isCode, randomCode } from './codes';
 import { onlineAllowed } from './consent';
 import { DbError, dbRequest, openStream, SERVER_TIME } from './db';
-import { rememberRoom } from './recent';
 import {
   admitChanges,
   autoAdmit,
@@ -167,23 +166,7 @@ function onTree(tree: Record<string, unknown> | null) {
     chat = chatOf(tree.chat);
   }
   set({ conn: 'online', error: info.status === 'closed' ? 'Das Spielzimmer wurde zugemacht.' : null, info, seats, game, chat });
-  if (info.status !== 'closed') {
-    remember();
-    if (info.host === view.uid) void hostChores();
-  }
-}
-
-/** Zimmer in „Zuletzt im Zimmer“ merken (nur wenn sich etwas geändert hat) */
-let remembered = '';
-function remember() {
-  const { code, info, seats, uid, profileId } = view;
-  if (!code || !info || !profileId) return;
-  const host = seats[info.host];
-  if (!host) return;
-  const key = `${profileId}|${code}|${info.game}|${info.host}|${host.name}`;
-  if (key === remembered) return;
-  remembered = key;
-  rememberRoom(profileId, { code, game: info.game, host: { name: host.name, avatar: host.avatar, color: host.color }, mine: info.host === uid });
+  if (info.status !== 'closed' && info.host === view.uid) void hostChores();
 }
 
 /**
@@ -343,7 +326,6 @@ function stopAll() {
   window.clearTimeout(retry);
   lastStateRaw = '';
   lastChatRaw = null;
-  remembered = '';
   myActs = [];
 }
 
