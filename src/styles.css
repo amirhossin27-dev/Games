@@ -3197,3 +3197,74 @@ p {
   position: static;
   padding: 0;
 }
+
+/* ───── Nachspuren (Zahlen-Spur, Schwung-Strecke) ───── */
+
+.trace {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.trace-canvas {
+  display: block;
+  background: #fffdf8;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: crosshair;
+}
+
+.trace-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.trace-card .display {
+  font-size: 1.3rem;
+}
+
+.trace-prompt.display {
+  font-size: clamp(1.8rem, 9vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.trace-hint {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.trace-count {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 330px;
+  font-size: 1.55rem;
+  line-height: 1.15;
+}
+
+.trace-count .gap {
+  margin-right: 10px;
+}
+
+.trace-note {
+  font-weight: 700;
+  color: var(--terra-d);
+  text-align: center;
+  min-height: 1.3em;
+}
+
+.trace-tools {
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}

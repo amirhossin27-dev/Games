@@ -7,10 +7,10 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 ## Was Joyboy kann
 
 - **Profile ohne Konto:** Spielername (mit Namens-Würfel, z. B. „Flinker Fuchs“), Tier-Avatar, Lieblingsfarbe und Alter. Mehrere Kinder können sich ein Gerät teilen („Wer spielt?“).
-- **29 Spiele**, davon 14 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
+- **31 Spiele**, davon 16 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
 - **Tutorials mit Joy:** Das Maskottchen erklärt jedes Spiel in 2–4 Schritten, liest alles vor (für 4–7-Jährige automatisch) und lässt bei den Lernspielen einen Probezug machen. Das Tutorial startet nur auf Wunsch: über „So geht's“ auf der Spielseite oder das ? im Spiel.
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
-- **Belohnungen:** Sterne (0–3 pro Spiel), Level, 12 Abzeichen, Rekorde und eine Wochen-Rangliste der Kinder auf dem Gerät.
+- **Belohnungen:** Sterne (0–3 pro Spiel), Level, 13 Abzeichen, Rekorde und eine Wochen-Rangliste der Kinder auf dem Gerät.
 - **Mut-mach-Sprüche:** Bei jedem Start zeigt Joy auf der Startseite einen neuen Spruch, zum Beispiel „Fehler sind deine Helfer“. Erst wenn alle 30 Sprüche dran waren, kommt einer wieder.
 - **Spielzeit-Limit für Eltern:** siehe unten.
 - **Erst lernen, dann spielen:** Die Arcade-Spiele sind jeden Tag erst nach ein paar Lernspielen frei. Die Anzahl stellen die Eltern ein, siehe unten.
@@ -28,6 +28,8 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 | Welt-Quiz | Tiere, Natur, Körper (Leicht mit Bild-Antworten), Länder, Hauptstädte, Flaggen und Planeten | 1–4 |
 | Wort-Baumeister | Buchstaben und Silben zum Wort ordnen, Silben zählen, Wörter zusammensetzen, Rechtschreibung | 1–4 |
 | English Words | erste englische Wörter mit Bild (Tiere, Essen, Farben, Zahlen, Körper) und kurze Sätze; nach jeder Frage steht, wie man das Wort ungefähr ausspricht | 1–4 |
+| Zahlen-Spur | Ziffern 0–9 und Zahlen bis 20 mit dem Finger nachspuren (Startpunkt, Richtung, Strichreihenfolge); auf Schwer ohne Vorlage nach Rechenaufgaben selbst schreiben | 1–4 |
+| Schwung-Strecke | Schreibvorbereitung: Linien, Bögen, Wellen, Zickzack, Schlaufen und Spiralen nachfahren | 1–4 |
 | Paare finden | Gedächtnis | 1–4 |
 | Vier gewinnt, Tic-Tac-Toe | Logik | 2 |
 | Ludo | Zählen, Regeln, fair verlieren | 2–4 |
@@ -60,7 +62,7 @@ Zuerst erlauben die Eltern unter **Für Eltern → Online** die Online-Funktione
 - **Chat:** 13 fertige Sätze zum Antippen („Hallo!“, „Gut gemacht!“, „Noch eine Runde?“ …) und ein Feld zum Selbstschreiben (höchstens 60 Zeichen). Der Wortfilter blockt Schimpfwörter, Telefonnummern, E-Mails, Links und Fragen nach Adresse oder Nummer – in der App und noch einmal in der Datenbank. Während der Runde öffnet das Sprechblasen-Symbol oben den Chat. Neue Nachrichten erscheinen als kleiner Hinweis, wenn man gerade woanders ist.
 - **Allein spielen, während man im Zimmer ist:** geht. Joyboy sagt dazu „Du bleibst im Spielzimmer …“, die anderen sehen „spielt kurz allein“. Startet der Gastgeber die Runde, schließt das Einzelspiel und es geht im Zimmer weiter. Läuft die Runde schon, startet kein Spiel daneben, sondern ein Hinweis erklärt, warum.
 
-Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
+Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Zahlen-Spur, Schwung-Strecke, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten (bzw. spuren) alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
 
 **Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus (länger als 45 Sekunden weg, damit er kurz den Code in einer anderen App verschicken kann), übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
 
@@ -118,7 +120,7 @@ Jeder Push auf `main` oder den Entwicklungs-Branch testet, baut und veröffentli
 src/
   engine/   Spiele-Engine für 1–4 Plätze (useGame, auch online), Robo, Tutorial-Typen
   net/      Firebase: Anmeldung, REST/Live-Stream, Cloud-Spielstände, Spielzimmer
-  learn/    Aufgaben-Generatoren und Lernspiel-Engine
+  learn/    Aufgaben-Generatoren und Lernspiel-Engine; trace/ = Nachspuren (Strich-Daten, Strichprüfung)
   games/    Spielekatalog, Regeln (rules/) und Ansichten (views/)
   arcade/   Arcade-Spiele aus Arta (fast unverändert übernommen)
   lib/      Speicher, Spielzeit, Eltern-Passwort, Vorlesen, Fortschritt, Navigation

@@ -1,5 +1,6 @@
 import type { GameDef } from '../engine/game';
 import { quizDef } from '../learn/quiz';
+import { traceDef } from '../learn/trace/game';
 import { GAMES, type GameId } from './registry';
 import { c4Def, memoryDef, tttDef } from './rules/classic';
 import { ludoDef } from './rules/ludo';
@@ -16,6 +17,7 @@ const QUIZ = {
   woerter: quizDef('woerter'),
   englisch: quizDef('englisch'),
 };
+const TRACE = { zahlenspur: traceDef('zahlen'), schwung: traceDef('schwung') };
 
 /** Regel-Funktionen eines Spiels – damit legt der Gastgeber im Spielzimmer die Runde an. */
 export function defFor(id: GameId, robos: boolean[]): GameDef<unknown, unknown> | null {
@@ -28,6 +30,9 @@ export function defFor(id: GameId, robos: boolean[]): GameDef<unknown, unknown> 
     case 'woerter':
     case 'englisch':
       return any(QUIZ[id]);
+    case 'zahlenspur':
+    case 'schwung':
+      return any(TRACE[id]);
     case 'paare':
       return any(memoryDef);
     case 'vier':

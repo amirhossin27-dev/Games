@@ -1,4 +1,6 @@
 import type { Task } from '../learn/tasks';
+import type { TraceTask } from '../learn/trace/game';
+import type { Level } from '../lib/store';
 import type { ArtKind } from '../ui/GameArt';
 
 /**
@@ -16,7 +18,9 @@ export type TutArt =
   | { k: 'cards'; cards: { t: string; red?: boolean; dim?: boolean }[]; point?: number }
   | { k: 'dice'; values: number[]; held?: boolean[] }
   | { k: 'clock'; h: number; m: number; label?: string }
-  | { k: 'quiz'; task: Task; point?: number; tryIt?: boolean };
+  | { k: 'quiz'; task: Task; point?: number; tryIt?: boolean }
+  /** Nachspuren: zeigt die Vorlage (die Hand spielt sie vor) oder lässt sie selbst spuren */
+  | { k: 'trace'; task: TraceTask; level: Level; tryIt?: boolean };
 
 export interface TutorialStep {
   say: string;
