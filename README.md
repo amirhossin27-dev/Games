@@ -12,6 +12,7 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
 - **Belohnungen:** Sterne (0–3 pro Spiel), Level, 13 Abzeichen, Rekorde und eine Wochen-Rangliste der Kinder auf dem Gerät.
 - **Mut-mach-Sprüche:** Bei jedem Start zeigt Joy auf der Startseite einen neuen Spruch, zum Beispiel „Fehler sind deine Helfer“. Erst wenn alle 30 Sprüche dran waren, kommt einer wieder.
+- **Automatischer Darkmode:** Von 20:00 bis 07:00 Uhr (lokale Gerätezeit) verwendet die gesamte App eine warme, gedämpfte Nachtpalette. Der Wechsel erfolgt auch bei geöffneter App und nach dem Zurückkehren aus dem Hintergrund.
 - **Spielzeit-Limit für Eltern:** siehe unten.
 - **Erst lernen, dann spielen:** Die Arcade-Spiele sind jeden Tag erst nach ein paar Lernspielen frei. Die Anzahl stellen die Eltern ein, siehe unten.
 - **Online-Spielzimmer** für bis zu 4 Kinder, siehe unten.

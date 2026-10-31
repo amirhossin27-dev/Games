@@ -196,7 +196,7 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
           <br />
           <span className="small muted">Joy erklärt das Spiel in {meta.tutorial.length} Schritten</span>
         </span>
-        <span className="icon-btn" style={{ background: '#F2C94C' }} aria-hidden="true">
+        <span className="icon-btn" style={{ background: 'var(--butter)', color: 'var(--on-butter)' }} aria-hidden="true">
           <Icon name="play" />
         </span>
       </button>
