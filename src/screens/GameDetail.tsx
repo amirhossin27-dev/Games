@@ -26,6 +26,8 @@ const LEVEL_SUB: Record<string, [string, string, string]> = {
   paare: ['12 Karten', '16 Karten', '20 Karten'],
   wuerfel: ['kurzer Block', 'ganzer Block', 'ganzer Block'],
   schiffe: ['8 × 8', '10 × 10', '10 × 10'],
+  muehle: ['Robo übt', 'Robo denkt mit', 'Robo-Profi'],
+  dame: ['6 × 6', '8 × 8', '8 × 8 · Profi'],
   slf: ['3 Spalten', '4 Spalten', '6 Spalten'],
 };
 

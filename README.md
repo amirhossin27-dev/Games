@@ -7,7 +7,7 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 ## Was Joyboy kann
 
 - **Profile ohne Konto:** Spielername (mit Namens-Würfel, z. B. „Flinker Fuchs“), Tier-Avatar, Lieblingsfarbe und Alter. Mehrere Kinder können sich ein Gerät teilen („Wer spielt?“).
-- **29 Spiele**, davon 14 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
+- **31 Spiele**, davon 16 Lern- und Brettspiele für 1–4 Spieler und 15 Arcade-Spiele aus Arta.
 - **Tutorials mit Joy:** Das Maskottchen erklärt jedes Spiel in 2–4 Schritten, liest alles vor (für 4–7-Jährige automatisch) und lässt bei den Lernspielen einen Probezug machen. Beim ersten Spielen startet das Tutorial von selbst, danach über das ?.
 - **Mit dem Alter mitwachsen:** Das Alter wählt die passende Schwierigkeit (Leicht, Mittel, Schwer). Robo spielt je nach Stufe schwächer oder stärker.
 - **Belohnungen:** Sterne (0–3 pro Spiel), Level, 12 Abzeichen, Rekorde, eine Tagesaufgabe und eine Wochen-Rangliste der Kinder auf dem Gerät.
@@ -33,6 +33,8 @@ Lern-Spiele-App für Kinder von 4 bis 12 Jahren: spielerisch rechnen, lesen, die
 | Mau-Mau | Farben und Zahlen vergleichen | 2–4 |
 | Würfelglück (Kniffel-Regeln) | Addieren, Entscheiden | 1–4 |
 | Schiffe versenken | Koordinaten (z. B. C5) | 2 |
+| Mühle | Vorausdenken, Muster erkennen; 9 Steine setzen, ziehen, mit 3 Steinen springen | 2 |
+| Dame | Vorausdenken, Regeln einhalten; Schlagpflicht, Mehrfachsprung, Dame zieht beliebig weit. Leicht auf 6 × 6, sonst 8 × 8 | 2 |
 | Stadt-Land-Fluss | Wortschatz, Rechtschreibung | 2–4 |
 | Arcade: Schlange, Klötzchen, 2048, Flatter-Vogel, Hüpfer, Mampfer, Mauer-Brecher, Tempel-Lauf, Weltraum-Abwehr, Ball-Blitz, Ton-Echo, Minen-Detektiv, Solitär | Reaktion, Raumvorstellung, Logik | 1 (Rekordjagd) |
 | Pong-Duell, Blitz-Duell | Reaktion | 2 an einem Gerät oder gegen Robo |
@@ -47,7 +49,7 @@ Gegen Robo antworten in den Lernspielen alle gleichzeitig. Teilen sich mehrere K
 4. Der Gastgeber lässt jedes Kind mit einem Tipp rein (**Klingel-Prinzip**) und kann freie Plätze mit Robo füllen.
 5. Der Gastgeber startet, alle spielen auf ihrem Gerät. „Nochmal“ startet die nächste Runde für alle.
 
-Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
+Online spielbar: Rechen-Rallye, Buchstaben-Jagd, Uhr-Profi, Welt-Quiz, Wort-Baumeister, English Words, Paare finden, Vier gewinnt, Tic-Tac-Toe, Ludo, Mau-Mau, Würfelglück, Schiffe versenken, Mühle, Dame und Stadt-Land-Fluss. Bei den Lernspielen und Stadt-Land-Fluss antworten alle gleichzeitig, sonst geht es reihum. Jedes Gerät sieht nur die eigenen Karten.
 
 **Wenn etwas wegfällt:** Ist ein Kind länger als 20 Sekunden weg (App zu, kein Netz), spielt Robo seine Züge, bis es zurück ist. Fällt der Gastgeber aus, übernimmt automatisch ein anderes Gerät. Wird die App geschlossen, geht es beim nächsten Öffnen im Zimmer weiter. Wer zusammen gespielt hat, wird **Spielfreund** und taucht in der Wochen-Rangliste auf.
 
@@ -117,4 +119,4 @@ Konzept und Plan: [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
 ## Wie geht es weiter?
 
-Phase 4 läuft: Die neuen Lernspiele Welt-Quiz, Wort-Baumeister und English Words sind da. Als Nächstes kommen Mühle und Dame (Schach später), danach ein Wettkampf-Modus für die Arcade-Spiele im Spielzimmer.
+Phase 4 läuft: Die neuen Lernspiele Welt-Quiz, Wort-Baumeister und English Words sowie Mühle und Dame sind da. Als Nächstes kommt ein Wettkampf-Modus für die Arcade-Spiele im Spielzimmer, später Schach.
