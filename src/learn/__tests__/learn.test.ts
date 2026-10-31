@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { BankItem } from '../choice';
-import { EN_PHRASES, EN_WORDS, englishTask } from '../english';
+import { EN_GAPS, EN_PHRASES, EN_WORDS, englishTask } from '../english';
 import { quizDef } from '../quiz';
 import { makeTask, type Subject } from '../tasks';
-import { COMPOUNDS, SHORT_WORDS, SPELLING, SYLLABLES, wordTask } from '../words';
+import { COMPOUNDS, PLURALS, SHORT_WORDS, SPELLING, SYLLABLES, wordTask } from '../words';
 import { WORLD_EASY, WORLD_HARD, WORLD_MEDIUM, worldTask } from '../world';
 import type { Level } from '../../lib/store';
 
@@ -32,7 +32,7 @@ function checkBank(bank: BankItem[]) {
 describe('Neue Lernspiele', () => {
   it('jede Aufgabe hat vier verschiedene Antworten und genau eine richtige', () => {
     const rnd = seeded(3);
-    for (const subject of ['welt', 'woerter', 'englisch'] as Subject[])
+    for (const subject of ['rechnen', 'buchstaben', 'uhr', 'welt', 'woerter', 'englisch'] as Subject[])
       for (const level of LEVELS)
         for (let k = 0; k < 300; k++) {
           const t = makeTask(subject, level, rnd);
@@ -89,7 +89,16 @@ describe('Neue Lernspiele', () => {
       expect(c.wrong).not.toContain(c.w);
       expect(c.wrong.length).toBeGreaterThanOrEqual(3);
     }
-    for (const [w, , wrong] of SPELLING) expect(wrong).not.toContain(w);
+    for (const [w, , wrong] of SPELLING) {
+      expect(wrong).not.toContain(w);
+      expect(new Set(wrong).size, w).toBe(3);
+    }
+    for (const [one, , many, wrong] of PLURALS) {
+      expect(wrong, one).not.toContain(many);
+      expect(new Set(wrong).size, one).toBe(3);
+    }
+    // Schwer: auch die Mehrzahl kommt dran
+    expect(Array.from({ length: 200 }, () => wordTask(2, rnd).hint).filter((h) => h === 'Wie heißt die Mehrzahl?').length).toBeGreaterThan(20);
   });
 
   it('English Words: jedes Wort hat Bild und Aussprache, Sätze sind sauber', () => {
@@ -100,6 +109,8 @@ describe('Neue Lernspiele', () => {
       expect(EN_WORDS.filter((o) => o.cat === w.cat).length).toBeGreaterThanOrEqual(4);
     }
     checkBank(EN_PHRASES);
+    checkBank(EN_GAPS);
+    for (const g of EN_GAPS) expect(g.q, g.q).toContain('___');
     // Leicht und Mittel zeigen nach der Antwort, wie man das Wort ausspricht
     const rnd = seeded(9);
     for (const level of [0, 1] as Level[])

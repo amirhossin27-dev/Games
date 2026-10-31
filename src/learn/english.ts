@@ -7,7 +7,7 @@ import type { Task } from './tasks';
  * English Words: erste englische Wörter mit Bild. Weil Joy (noch) nicht vorliest, steht bei jedem Wort,
  * wie man es ungefähr ausspricht – in deutscher Schreibweise.
  * Leicht: Bild → englisches Wort · Mittel: englisches Wort → Bild und deutsches Wort → englisch ·
- * Schwer: kurze Sätze, Wochentage und Familie.
+ * Schwer: kurze Sätze, Wochentage, Familie und Lückensätze (I am / he has, mice, children …).
  */
 
 export interface EnWord {
@@ -85,6 +85,39 @@ export const EN_PHRASES: BankItem[] = [
   { q: 'Schwester', e: '👧', a: 'sister', w: ['brother', 'mother', 'sweater'] },
   { q: 'heute', e: '📆', a: 'today', w: ['tomorrow', 'yesterday', 'toy'] },
   { q: 'Wetter', e: '🌦️', a: 'weather', w: ['water', 'winter', 'wetter'] },
+  // Kniffliger
+  { q: 'Ich habe einen Bruder.', e: '👦', a: 'I have a brother.', w: ['I am a brother.', 'I has a brother.', 'I have brother.'] },
+  { q: 'Wo ist die Katze?', e: '🐱', a: 'Where is the cat?', w: ['Who is the cat?', 'What is the cat?', 'Where are the cat?'] },
+  { q: 'Ich kann schwimmen.', e: '🏊', a: 'I can swim.', w: ['I can swimming.', 'I swim can.', 'I am swim.'] },
+  { q: 'Er spielt Fußball.', e: '⚽', a: 'He plays football.', w: ['He play football.', 'He is play football.', 'He playing football.'], x: 'Bei he, she und it bekommt das Verb ein s: he plays.' },
+  { q: 'Wir sind Freunde.', e: '🤝', a: 'We are friends.', w: ['We is friends.', 'We are friend.', 'We have friends.'] },
+  { q: 'Mittwoch', e: '📅', a: 'Wednesday', w: ['Thursday', 'Tuesday', 'Weekend'] },
+  { q: 'Donnerstag', e: '📅', a: 'Thursday', w: ['Tuesday', 'Thunderday', 'Wednesday'] },
+  { q: 'Dienstag', e: '📅', a: 'Tuesday', w: ['Thursday', 'Monday', 'Wednesday'] },
+  { q: 'gestern', e: '📆', a: 'yesterday', w: ['today', 'tomorrow', 'yes'] },
+  { q: 'morgen (der nächste Tag)', e: '📆', a: 'tomorrow', w: ['morning', 'today', 'yesterday'], x: '„morning“ ist der Morgen, also die Zeit am Vormittag.' },
+  { q: 'Großmutter', e: '👵', a: 'grandmother', w: ['grandfather', 'great mother', 'godmother'] },
+  { q: 'Winter', e: '❄️', a: 'winter', w: ['summer', 'spring', 'water'] },
+  { q: 'Frühling', e: '🌷', a: 'spring', w: ['summer', 'autumn', 'early'] },
+];
+
+/** Schwer: Welches Wort passt in die Lücke? (kleine Grammatik) */
+export const EN_GAPS: BankItem[] = [
+  { q: 'Do you ___ a pet?', e: '🐶', a: 'have', w: ['has', 'are', 'is'], x: 'I have, you have – aber: he has, she has.' },
+  { q: 'She ___ got a cat.', e: '🐱', a: 'has', w: ['have', 'is', 'are'], x: 'Bei he, she und it heißt es „has“.' },
+  { q: 'We ___ friends.', e: '🤝', a: 'are', w: ['is', 'am', 'be'], x: 'I am, he/she/it is, we/you/they are.' },
+  { q: 'He ___ ten years old.', e: '🔟', a: 'is', w: ['are', 'am', 'has'], x: 'Für das Alter sagt man „be“: He is ten years old.' },
+  { q: 'I ___ happy.', e: '😄', a: 'am', w: ['is', 'are', 'have'], x: 'I am – ich bin.' },
+  { q: 'They ___ playing.', e: '🧒', a: 'are', w: ['is', 'am', 'has'] },
+  { q: 'My sister ___ to school.', e: '🏫', a: 'goes', w: ['go', 'going', 'gos'], x: 'Bei he, she und it bekommt das Verb ein s – bei „go“ sogar „es“: goes.' },
+  { q: 'Where ___ you live?', e: '🏠', a: 'do', w: ['does', 'are', 'is'] },
+  { q: '___ is your name?', e: '🙂', a: 'What', w: ['Who', 'Where', 'How'] },
+  { q: '___ old are you?', e: '🎂', a: 'How', w: ['What', 'Who', 'Where'] },
+  { q: 'one mouse, two ___', e: '🐭', a: 'mice', w: ['mouses', 'mices', 'mouse'], x: 'Eine Ausnahme: one mouse, two mice.' },
+  { q: 'one child, two ___', e: '🧒', a: 'children', w: ['childs', 'childrens', 'childes'], x: 'Eine Ausnahme: one child, two children.' },
+  { q: 'one foot, two ___', e: '🦶', a: 'feet', w: ['foots', 'feets', 'footes'], x: 'Eine Ausnahme: one foot, two feet.' },
+  { q: 'one box, two ___', e: '📦', a: 'boxes', w: ['boxs', 'boxen', 'boxies'], x: 'Nach x, s, sh und ch hängt man „es“ an: boxes.' },
+  { q: 'one apple, two ___', e: '🍎', a: 'apples', w: ['apple', 'applen', 'appless'] },
 ];
 
 const sayHint = (w: EnWord) => `„${w.en}“ heißt „${w.de}“. Man sagt ungefähr: „${w.say}“.`;
@@ -146,8 +179,21 @@ function phrase(rnd: Rnd): Task {
   };
 }
 
+function gap(rnd: Rnd): Task {
+  const it = pick(EN_GAPS, rnd);
+  return {
+    prompt: it.q,
+    hint: 'Welches Wort passt in die Lücke?',
+    say: 'Welches englische Wort passt in die Lücke?',
+    ...withOptions(it.a, shuffle(it.w, rnd), rnd),
+    visual: it.e ? { k: 'picture', e: it.e } : undefined,
+    explain: it.x,
+  };
+}
+
 export function englishTask(level: Level, rnd: Rnd = Math.random): Task {
   if (level === 0) return pictureToWord(rnd);
-  if (level === 1) return rnd() < 0.5 ? wordToPicture(rnd) : germanToEnglish(rnd);
-  return rnd() < 0.7 ? phrase(rnd) : germanToEnglish(rnd);
+  const r = rnd();
+  if (level === 1) return r < 0.5 ? wordToPicture(rnd) : germanToEnglish(rnd);
+  return r < 0.5 ? phrase(rnd) : r < 0.85 ? gap(rnd) : germanToEnglish(rnd);
 }

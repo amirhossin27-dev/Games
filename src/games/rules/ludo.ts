@@ -198,7 +198,7 @@ export const ludoDef: GameDef<LudoState, LudoAction> = {
 };
 
 function ludoBest(s: LudoState, seat: number, moves: number[], level: Level, rnd: Rnd): number {
-  const noise = [14, 7, 3][level];
+  const noise = [18, 8, 0][level];
   let best = moves[0];
   let bestScore = -Infinity;
   for (const i of moves) {

@@ -3,8 +3,8 @@ import type { Level } from '../../lib/store';
 import type { Rnd } from '../../lib/util';
 
 /**
- * Schiffe versenken (nach Arta) für zwei. Auf „Leicht“ 8 × 8 Felder mit vier Schiffen, sonst
- * 10 × 10 mit fünf. Schiffe berühren sich nicht. Wer trifft, darf nochmal. Nebenbei lernt man
+ * Schiffe versenken (nach Arta) für zwei. Auf „Leicht“ 8 × 8 Felder mit vier Schiffen, auf „Mittel“
+ * 10 × 10 mit fünf. Auf „Schwer“ sind die fünf Schiffe auf 10 × 10 kleiner und darum schwerer zu finden. Schiffe berühren sich nicht. Wer trifft, darf nochmal. Nebenbei lernt man
  * Koordinaten wie „C5“.
  */
 
@@ -16,7 +16,7 @@ export interface SeaSetup {
 export const SEA_FOR: Record<Level, SeaSetup> = {
   0: { size: 8, fleet: [4, 3, 2, 2] },
   1: { size: 10, fleet: [5, 4, 3, 3, 2] },
-  2: { size: 10, fleet: [5, 4, 3, 3, 2] },
+  2: { size: 10, fleet: [4, 3, 3, 2, 2] },
 };
 
 export const SHIP_NAME: Record<number, string> = { 5: 'Großes Schiff', 4: 'Segelschiff', 3: 'Fischerboot', 2: 'Ruderboot' };
@@ -115,8 +115,8 @@ export function roboShot(fleet: Fleet, shots: number[], size: number, level: Lev
   const row = (x: number) => Math.floor(x / size);
   const col = (x: number) => x % size;
   const all = Array.from({ length: size * size }, (_, i) => i).filter(open);
-  // Auf „Leicht“ schießt Robo öfter einfach drauflos.
-  if (rnd() < [0.45, 0.15, 0][level]) return all[Math.floor(rnd() * all.length)];
+  // Auf „Leicht“ schießt Robo öfter einfach drauflos, auf „Schwer“ nie.
+  if (rnd() < [0.5, 0.2, 0][level]) return all[Math.floor(rnd() * all.length)];
   const hits = shots.filter((x) => fleet.some((s) => s.includes(x) && !isSunk(s, shots)));
   if (hits.length) {
     const sorted = hits.slice().sort((a, b) => a - b);
@@ -151,7 +151,9 @@ export function roboShot(fleet: Fleet, shots: number[], size: number, level: Lev
           const cells = Array.from({ length: len }, (_, k) => (horiz ? r * size + c + k : (r + k) * size + c));
           if (cells.every(open)) cells.forEach((x) => heat[x]++);
         }
-  const options = heat.map((h, i) => ({ i, h: h * (0.75 + rnd() * 0.5) })).filter((o) => open(o.i) && o.h > 0);
+  // Auf „Schwer“ nimmt Robo genau das Feld, auf dem am wahrscheinlichsten ein Schiff liegt.
+  const wobble = level === 2 ? 0.1 : 0.5;
+  const options = heat.map((h, i) => ({ i, h: h * (1 - wobble / 2 + rnd() * wobble) })).filter((o) => open(o.i) && o.h > 0);
   if (!options.length) return all[Math.floor(rnd() * all.length)];
   return options.reduce((a, b) => (b.h > a.h ? b : a)).i;
 }

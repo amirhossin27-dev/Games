@@ -21,7 +21,7 @@ export function Memory(props: PlayProps) {
   const { seats } = props;
   const g = useGame(memoryDef, props);
   const s: MemoryState = g.s;
-  const cols = s.deck.length <= 12 ? 4 : s.deck.length <= 16 ? 4 : 5;
+  const cols = s.deck.length <= 16 ? 4 : s.deck.length <= 20 ? 5 : 6;
   const scores = seats.map((_, p) => s.owner.filter((o) => o === p).length / 2);
 
   useOnChange(s.open.length, (a, b) => {
