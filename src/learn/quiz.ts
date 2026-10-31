@@ -51,7 +51,9 @@ export function quizPoints(ms: number): number {
 }
 
 /** Wie sicher Robo antwortet – je nach Stufe. */
-const ROBO_SKILL: Record<Level, number> = { 0: 0.6, 1: 0.72, 2: 0.84 };
+const ROBO_SKILL: Record<Level, number> = { 0: 0.5, 1: 0.72, 2: 0.9 };
+/** Wie lange Robo (für die Punkte) überlegt: auf „Schwer“ ist er flinker. */
+const ROBO_MS: Record<Level, [number, number]> = { 0: [3500, 6000], 1: [2500, 5000], 2: [1200, 3500] };
 
 export function quizDef(subject: Subject): GameDef<QuizState, QuizAction> {
   return {
@@ -122,7 +124,8 @@ export function quizDef(subject: Subject): GameDef<QuizState, QuizAction> {
       const right = rnd() < ROBO_SKILL[level];
       const wrong = task.options.map((_, i) => i).filter((i) => i !== task.correct);
       const i = right ? task.correct : wrong[Math.floor(rnd() * wrong.length)];
-      return { t: 'answer', i, ms: 2500 + rnd() * 5000 };
+      const [base, spread] = ROBO_MS[level];
+      return { t: 'answer', i, ms: base + rnd() * spread };
     },
     roboDelay: (s) => (s.order === 'turns' ? 1400 + Math.random() * 1200 : 2200 + Math.random() * 4500),
     phaseKey: (s) => `${s.q}:${s.phase}`,

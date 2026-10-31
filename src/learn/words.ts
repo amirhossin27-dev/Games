@@ -6,7 +6,7 @@ import type { Task } from './tasks';
 /**
  * Wort-Baumeister: Buchstaben und Silben zum Wort ordnen, Wörter zusammensetzen und richtig schreiben.
  * Leicht: Buchstaben ordnen · Mittel: Silben (ordnen, fehlende Silbe, Silben zählen) · Schwer: zusammengesetzte
- * Wörter, Rechtschreibung und lange Wörter aus Silben.
+ * Wörter, Rechtschreibung, Mehrzahl und lange Wörter aus Silben.
  */
 
 /** Kurze Wörter zum Buchstaben-Ordnen (mindestens drei verschiedene Buchstaben) */
@@ -65,7 +65,7 @@ export const COMPOUNDS: { a: string; b: string; w: string; e: string; wrong: str
 ];
 
 /** Richtig schreiben: Wort, Bild, typische Fehler */
-export const SPELLING: [string, string, string[]][] = [
+export const SPELLING: [string, string, string[], string?][] = [
   ['Fahrrad', '🚲', ['Fahrad', 'Farrad', 'Fahrrat']],
   ['Schmetterling', '🦋', ['Schmeterling', 'Schmetterlink', 'Schmätterling']],
   ['Giraffe', '🦒', ['Girafe', 'Giraffee', 'Schiraffe']],
@@ -90,6 +90,53 @@ export const SPELLING: [string, string, string[]][] = [
   ['Papagei', '🦜', ['Pappagei', 'Papagai', 'Babagei']],
   ['Flugzeug', '✈️', ['Flugzeuk', 'Fluckzeug', 'Flugzoig']],
   ['Kirsche', '🍒', ['Kirshe', 'Kirrsche', 'Kiersche']],
+  // Kniffliger: doppelte Buchstaben, ck/tz, ie, ä/e und stummes h
+  ['Schwimmbad', '🏊', ['Schwimbad', 'Schwimmbat', 'Schwiembad']],
+  ['Schokolade', '🍫', ['Schockolade', 'Schokolate', 'Schokolahde']],
+  ['Fenster', '🪟', ['Fennster', 'Fänster', 'Fensta']],
+  ['Brille', '👓', ['Brile', 'Brielle', 'Brillä']],
+  ['Wecker', '⏰', ['Weker', 'Wekker', 'Wäcker']],
+  ['Katze', '🐱', ['Kaze', 'Katse', 'Kazze']],
+  ['Ziege', '🐐', ['Zige', 'Ziehge', 'Tsiege']],
+  ['Biene', '🐝', ['Bine', 'Bihne', 'Bienne']],
+  ['Bäume', '🌳', ['Beume', 'Bäumme', 'Boime']],
+  ['Hexe', '🧙', ['Hekse', 'Hechse', 'Häxe']],
+  ['Taxi', '🚕', ['Taksi', 'Tacksi', 'Tachsi']],
+  ['Schlüssel', '🔑', ['Schlüsel', 'Schlüßel', 'Schlisel']],
+  ['Teller', '🍽️', ['Teler', 'Täller', 'Tella']],
+  ['Pflaster', '🩹', ['Flaster', 'Pflasta', 'Pflasster']],
+  ['Zahn', '🦷', ['Zaan', 'Tsahn', 'Zan']],
+  ['Hund', '🐶', ['Hunt', 'Hundt', 'Hunnd'], 'Hund mit d – das hörst du bei „Hunde“.'],
+  ['Pferd', '🐴', ['Pfert', 'Fert', 'Pherd'], 'Pferd mit d – das hörst du bei „Pferde“.'],
+  ['Berg', '🏔️', ['Berk', 'Bärg', 'Bergk'], 'Berg mit g – das hörst du bei „Berge“.'],
+];
+
+/** Mehrzahl: ein … – viele …? (Schwer) */
+export const PLURALS: [string, string, string, string[], string?][] = [
+  ['ein Baum', '🌳', 'Bäume', ['Baums', 'Baumen', 'Bäumer']],
+  ['ein Haus', '🏠', 'Häuser', ['Hauser', 'Häuse', 'Hausen']],
+  ['eine Maus', '🐭', 'Mäuse', ['Mausen', 'Mäuser', 'Mause']],
+  ['ein Kind', '🧒', 'Kinder', ['Kinde', 'Kinds', 'Künder']],
+  ['ein Buch', '📕', 'Bücher', ['Buche', 'Buchs', 'Büche']],
+  ['ein Apfel', '🍎', 'Äpfel', ['Apfeln', 'Äpfels', 'Apfels']],
+  ['ein Vogel', '🐦', 'Vögel', ['Vogeln', 'Vögels', 'Vogels']],
+  ['ein Hund', '🐶', 'Hunde', ['Hünde', 'Hunds', 'Hunder']],
+  ['eine Katze', '🐱', 'Katzen', ['Katzes', 'Kätze', 'Katzer']],
+  ['ein Ball', '⚽', 'Bälle', ['Balle', 'Balls', 'Bäller']],
+  ['ein Fuß', '🦶', 'Füße', ['Fuße', 'Füßer', 'Fußen']],
+  ['ein Zahn', '🦷', 'Zähne', ['Zahne', 'Zähner', 'Zahns']],
+  ['eine Blume', '🌸', 'Blumen', ['Blumes', 'Blümen', 'Blumer']],
+  ['ein Auto', '🚗', 'Autos', ['Auten', 'Autoe', 'Autoer']],
+  ['ein Schaf', '🐑', 'Schafe', ['Schäfe', 'Schafs', 'Schafer']],
+  ['ein Huhn', '🐔', 'Hühner', ['Huhne', 'Hühne', 'Huhns']],
+  ['ein Stern', '⭐', 'Sterne', ['Sterns', 'Sterner', 'Stärne']],
+  ['ein Bär', '🐻', 'Bären', ['Bäre', 'Bärs', 'Bärer']],
+  ['eine Kuh', '🐮', 'Kühe', ['Kuhs', 'Kuhen', 'Küher']],
+  ['ein Frosch', '🐸', 'Frösche', ['Frosche', 'Froschen', 'Fröscher']],
+  ['ein Glas', '🥛', 'Gläser', ['Glase', 'Glasen', 'Gläse']],
+  ['ein Messer', '🔪', 'Messer', ['Messers', 'Messeren', 'Mässer'], 'Manche Wörter bleiben gleich: ein Messer, viele Messer.'],
+  ['ein Ei', '🥚', 'Eier', ['Eis', 'Eien', 'Eie']],
+  ['eine Hand', '✋', 'Hände', ['Hande', 'Hands', 'Händer']],
 ];
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
@@ -194,13 +241,27 @@ function compound(rnd: Rnd): Task {
 
 /** Welches Wort ist richtig geschrieben? */
 function spelling(rnd: Rnd): Task {
-  const [w, e, wrong] = pick(SPELLING, rnd);
+  const [w, e, wrong, x] = pick(SPELLING, rnd);
   return {
     prompt: 'Wie schreibt man das?',
     hint: 'Nur ein Wort ist richtig geschrieben.',
     say: 'Wie schreibt man das richtig?',
     ...withOptions(w, shuffle(wrong, rnd), rnd),
     visual: { k: 'picture', e },
+    explain: x ?? `Richtig ist: ${w}.`,
+  };
+}
+
+/** Mehrzahl bilden */
+function plural(rnd: Rnd): Task {
+  const [one, e, many, wrong, x] = pick(PLURALS, rnd);
+  return {
+    prompt: `${one} – viele …?`,
+    hint: 'Wie heißt die Mehrzahl?',
+    say: `${one}, viele was?`,
+    ...withOptions(many, shuffle(wrong, rnd), rnd),
+    visual: { k: 'picture', e },
+    explain: x ?? `${one}, viele ${many}.`,
   };
 }
 
@@ -208,5 +269,5 @@ export function wordTask(level: Level, rnd: Rnd = Math.random): Task {
   if (level === 0) return letterBuild(rnd);
   const r = rnd();
   if (level === 1) return r < 0.4 ? syllableBuild(rnd) : r < 0.75 ? missingSyllable(rnd) : countSyllables(rnd);
-  return r < 0.4 ? compound(rnd) : r < 0.8 ? spelling(rnd) : syllableBuild(rnd);
+  return r < 0.25 ? compound(rnd) : r < 0.6 ? spelling(rnd) : r < 0.85 ? plural(rnd) : syllableBuild(rnd);
 }

@@ -30,9 +30,11 @@ export const catLabel = (id: SlfCat) => SLF_ALL.find((c) => c.id === id)!.label;
 
 /** Ohne die fiesen Buchstaben C, Q, X, Y … */
 export const SLF_LETTERS = [...'ABDEFGHIKLMNOPRSTW'];
+/** Auf „Schwer“ kommen die kniffligeren Buchstaben J und U dazu. */
+export const SLF_LETTERS_HARD = [...SLF_LETTERS, 'J', 'U'];
 export const SLF_ROUNDS = 3;
 /** Schreibzeit je Kind und Buchstabe */
-export const SLF_SECONDS: Record<Level, number> = { 0: 120, 1: 100, 2: 90 };
+export const SLF_SECONDS: Record<Level, number> = { 0: 120, 1: 100, 2: 75 };
 const MAX_LEN = 30;
 
 export function fold(word: string): string {
@@ -103,7 +105,7 @@ export interface SlfState {
 export type SlfAction = { t: 'submit'; answers: string[] } | { t: 'veto'; who: number; cat: number } | { t: 'next' };
 
 const SKILL: Record<SlfCat, number> = { stadt: 0.85, land: 0.75, fluss: 0.55, tier: 0.85, name: 0.9, beruf: 0.75 };
-const ROBO_FACTOR: Record<Level, number> = { 0: 0.55, 1: 0.75, 2: 0.9 };
+const ROBO_FACTOR: Record<Level, number> = { 0: 0.5, 1: 0.75, 2: 1 };
 
 function roboAnswers(cats: SlfCat[], letter: string, level: Level, rnd: Rnd): string[] {
   return cats.map((c) => {
@@ -144,8 +146,8 @@ export function slfTotals(s: SlfState): number[] {
   return out;
 }
 
-function pickLetters(rnd: Rnd): string[] {
-  const pool = SLF_LETTERS.slice();
+function pickLetters(level: Level, rnd: Rnd): string[] {
+  const pool = (level === 2 ? SLF_LETTERS_HARD : SLF_LETTERS).slice();
   const out: string[] = [];
   while (out.length < SLF_ROUNDS) out.push(pool.splice(Math.floor(rnd() * pool.length), 1)[0]);
   return out;
@@ -155,7 +157,7 @@ export function slfDef(robos: boolean[]): GameDef<SlfState, SlfAction> {
   return {
     init({ n, starter, level, shared, rnd }) {
       const cats = CATS_FOR[level];
-      const letters = pickLetters(rnd);
+      const letters = pickLetters(level, rnd);
       return {
         n,
         cats,
