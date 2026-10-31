@@ -83,6 +83,8 @@ export interface Settings {
   arcadeAfter?: number;
   /** Online-Funktionen von den Eltern erlaubt (fehlt = aus, siehe net/consent.ts) */
   online?: boolean;
+  /** Im Spielzimmer-Chat selbst schreiben (fehlt = ja, sonst nur fertige Sätze, siehe lib/chat.ts) */
+  chatFree?: boolean;
 }
 
 export interface ParentLock {

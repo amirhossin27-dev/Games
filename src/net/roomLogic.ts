@@ -15,6 +15,8 @@ export interface SeatDoc {
   at: number;
   /** Schaut gerade die Spielregeln an */
   tut?: boolean;
+  /** Spielt gerade ein Spiel für sich allein (außerhalb des Zimmers) */
+  solo?: boolean;
   /** Züge als JSON-Text: [{ n, r, a }] */
   acts?: string;
   react?: { e: ReactionId; at: number };
@@ -28,6 +30,8 @@ export interface RoomInfo {
   /** Reingelassene Kinder → Platznummer 1–3 */
   allowed?: Record<string, number>;
   denied?: Record<string, boolean>;
+  /** Kinder, die schon einmal drin waren – sie kommen beim Wiederkommen ohne Klingeln rein */
+  known?: Record<string, boolean>;
   robos?: number;
   round?: number;
   at: number;
@@ -43,6 +47,19 @@ export interface StateDoc {
   seats: string;
   game?: string;
   level?: number;
+}
+
+/** Nachricht im Chat des Spielzimmers (rooms/<Code>/chat/<id>) */
+export interface ChatMsg {
+  /** Konto des Kindes */
+  by: string;
+  name: string;
+  avatar: AvatarKind;
+  color: string;
+  t: string;
+  /** Nummer des fertigen Satzes (lib/chat.ts), sonst selbst geschrieben */
+  q?: number;
+  at: number;
 }
 
 export interface NetSeat extends SeatInfo {
@@ -139,4 +156,46 @@ export function guestActs(players: NetSeat[], seats: Record<string, SeatDoc>, ho
 /** Plätze, deren Gerät gerade weg ist (für sie springt Robo ein). */
 export function absentSeats(players: NetSeat[], seats: Record<string, SeatDoc>, now: number, me: number): number[] {
   return players.map((p, i) => (i !== me && p.uid && isAway(seats[p.uid], now) ? i : -1)).filter((i) => i >= 0);
+}
+
+/** Chat-Nachrichten, älteste zuerst */
+export function chatOf(raw: unknown): (ChatMsg & { id: string })[] {
+  if (!raw || typeof raw !== 'object') return [];
+  return Object.entries(raw as Record<string, ChatMsg>)
+    .filter(([, m]) => m && typeof m.t === 'string' && typeof m.at === 'number')
+    .map(([id, m]) => ({ ...m, id }))
+    .sort((a, b) => a.at - b.at || (a.id < b.id ? -1 : 1));
+}
+
+export const CHAT_KEEP = 30;
+
+/** Alte Nachrichten, die der Gastgeber wegräumt (erst ab ein paar zu viel, damit nicht jede Nachricht ein Aufräumen auslöst). */
+export function chatToPrune(list: { id: string }[], keep = CHAT_KEEP): string[] {
+  return list.length > keep + 10 ? list.slice(0, list.length - keep).map((m) => m.id) : [];
+}
+
+/**
+ * Wer klingelt und ohne Fragen reindarf: Kinder, die schon einmal in diesem Zimmer waren, und
+ * Spielfreunde des Gastgebers – solange Platz ist. Alle anderen müssen weiter klingeln.
+ */
+export function autoAdmit(info: RoomInfo, seats: Record<string, SeatDoc>, friends: Record<string, unknown>): string[] {
+  const free = maxPlayers(info) - taken(info, seats);
+  if (free <= 0) return [];
+  return knocking(info, seats)
+    .filter(({ uid }) => info.known?.[uid] || friends[uid])
+    .map(({ uid }) => uid)
+    .slice(0, free);
+}
+
+/** Platznummern für mehrere Kinder auf einmal (jedes bekommt einen anderen freien Platz). */
+export function slotsFor(info: RoomInfo, seats: Record<string, SeatDoc>, uids: string[]): Record<string, number> {
+  const out: Record<string, number> = {};
+  let cur = info;
+  for (const uid of uids) {
+    const slot = nextSlot(cur, seats);
+    if (slot === null) break;
+    out[uid] = slot;
+    cur = { ...cur, allowed: { ...cur.allowed, [uid]: slot } };
+  }
+  return out;
 }

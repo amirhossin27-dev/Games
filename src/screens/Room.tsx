@@ -4,6 +4,7 @@ import { GAME_BY_ID, playersText, type GameId } from '../games/registry';
 import { CODE_ANIMALS, CODE_LEN, codeAnimals, codeFromIndexes, codeWords, roomLink } from '../net/codes';
 import { onlineConfigured } from '../net/config';
 import { onlineAllowed } from '../net/consent';
+import { sendInvite } from '../net/presence';
 import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, ONLINE_OFF, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
 import { isAway, knocking, maxPlayers, members, ROBO_NAMES, taken, type ReactionId } from '../net/roomLogic';
 import { nav, useNav } from '../lib/nav';
@@ -14,6 +15,8 @@ import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
 import { Icon, type IconName } from '../ui/Icon';
 import { JoySays, Sheet, toast } from '../ui/parts';
+import { ChatPanel } from './Chat';
+import { FriendsCard, InviteFriends, RecentRooms } from './Friends';
 
 export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: string }[] = [
   { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: '#2F5F86' },
@@ -144,7 +147,7 @@ function JoinSheet({ profile, initial, onClose }: { profile: Profile; initial?: 
   );
 }
 
-function Lobby({ profile }: { profile: Profile }) {
+function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
   const room = useRoom();
   const navState = useNav();
   const { info, seats, uid, conn, error } = room;
@@ -247,6 +250,18 @@ function Lobby({ profile }: { profile: Profile }) {
             )}
           </section>
 
+          {/* Von einer Spielseite hierher gekommen: dieses Spiel fürs Zimmer übernehmen */}
+          {isHost && info.status === 'lobby' && preset && preset !== info.game && GAME_BY_ID[preset] && GAME_BY_ID[preset].players[1] >= list.length && (
+            <section className="card stitched row" aria-label="Spiel wechseln">
+              <span className="grow">
+                Lieber <b>{GAME_BY_ID[preset].name}</b> spielen?
+              </span>
+              <button type="button" className="btn small primary" onClick={() => void setGame(preset, info.level)}>
+                Wechseln
+              </button>
+            </section>
+          )}
+
           <section className="card col" aria-label="Zimmer-Code">
             <div className="row between">
               <b className="display">Zimmer-Code</b>
@@ -304,6 +319,10 @@ function Lobby({ profile }: { profile: Profile }) {
                   {doc?.tut ? (
                     <span className="tag" style={{ '--tag-bg': '#F7EDC8', '--tag-fg': '#6B5410' } as CSSProperties}>
                       lernt die Regeln
+                    </span>
+                  ) : doc?.solo && !isAway(doc, now) ? (
+                    <span className="tag" style={{ '--tag-bg': '#DCE9F3', '--tag-fg': '#2F5F86' } as CSSProperties}>
+                      spielt kurz allein
                     </span>
                   ) : isAway(doc, now) ? (
                     <span className="tag">ist kurz weg</span>
@@ -374,6 +393,11 @@ function Lobby({ profile }: { profile: Profile }) {
               Runde beenden
             </button>
           )}
+
+          <ChatPanel profile={profile} />
+
+          {info.status === 'lobby' && count < max && <InviteFriends profile={profile} code={code} game={info.game} members={list.map((m) => m.uid)} />}
+
           <button type="button" className="btn ghost block" onClick={() => void leaveRoom()}>
             <Icon name="door" /> Zimmer {isHost ? 'schließen' : 'verlassen'}
           </button>
@@ -390,8 +414,10 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
   const data = useData();
   const allowed = onlineAllowed(data.settings);
   const [sheet, setSheet] = useState<'create' | 'join' | null>(joinCode ? 'join' : preset ? 'create' : null);
+  // Spielfreund einladen: erst ein Zimmer öffnen, dann die Einladung schicken
+  const [inviting, setInviting] = useState<{ uid: string; name: string } | null>(null);
 
-  if (room.code && room.profileId === profile.id) return <Lobby profile={profile} />;
+  if (room.code && room.profileId === profile.id) return <Lobby profile={profile} preset={preset} />;
 
   return (
     <section className="screen">
@@ -411,6 +437,8 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
         </section>
       ) : (
         <>
+          <RecentRooms profile={profile} />
+          <FriendsCard profile={profile} onInvite={(uid, name) => setInviting({ uid, name })} />
           <section className="card tape col" style={{ gap: 12 }}>
             <h2>Zimmer öffnen</h2>
             <p className="muted">Du suchst ein Spiel aus und bekommst einen Code aus sechs Tieren. Den sagst du den anderen.</p>
@@ -425,7 +453,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
               <Icon name="grid" /> Code eingeben
             </button>
           </section>
-          <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Es gibt keinen Chat – nur lustige Reaktionen.</p>
+          <p className="small muted center">Wer klingelt, kommt erst rein, wenn der Gastgeber es erlaubt. Spielfreunde und Kinder, die schon einmal im Zimmer waren, kommen gleich rein. Im Chat gibt es fertige Sätze und einen Wortfilter.</p>
         </>
       )}
       {allowed && sheet === 'create' && (
@@ -440,6 +468,22 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
         />
       )}
       {allowed && sheet === 'join' && <JoinSheet profile={profile} initial={joinCode} onClose={() => setSheet(null)} />}
+      {allowed && inviting && (
+        <GamePicker
+          profile={profile}
+          title={`Was spielst du mit ${inviting.name}?`}
+          onPick={async (g, l) => {
+            const code = await createRoom(profile, g, l);
+            try {
+              await sendInvite(profile, inviting.uid, code, g);
+              toast(`${inviting.name} ist eingeladen!`);
+            } catch {
+              toast('Die Einladung ging nicht raus. Ist das Internet an?');
+            }
+          }}
+          onClose={() => setInviting(null)}
+        />
+      )}
     </section>
   );
 }

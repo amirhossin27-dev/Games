@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { freeChat } from '../lib/chat';
 import { nav } from '../lib/nav';
 import { checkParentPassword, checkRecoveryCode, PASSWORD_MIN, setParentPassword } from '../lib/parent';
 import { LIMIT_CHOICES, LOCK_MS, nowMs, playActions, usePlaytime } from '../lib/playtime';
@@ -153,9 +154,12 @@ function OnlineSection() {
         Spielstände in der Cloud – mit dem Spielerpass nehmt ihr sie auf ein neues Gerät mit.
       </p>
       <Switch label="Online erlauben" on={on} onChange={(v) => actions.settings({ online: v })} />
+      {on && <Switch label="Im Spielzimmer-Chat selbst schreiben" on={freeChat(data.settings)} onChange={(v) => actions.settings({ chatFree: v })} />}
       <p className="small muted">
         Dafür speichert Joyboy Spitzname, Tier, Farbe, Altersgruppe, Sterne, Spielstand und Spielfreunde bei Google Firebase (Datenbank in Europa). Jedes Kind bekommt dort ein
-        anonymes Konto ohne E-Mail. Ins Spielzimmer kommt nur, wen das Kind selbst hereinlässt. Einen Chat gibt es nicht.
+        anonymes Konto ohne E-Mail. Ins Spielzimmer kommt nur, wen das Kind selbst hereinlässt – oder wer schon einmal mitgespielt hat. Spielfreunde sehen, ob das Kind gerade
+        online ist. Im Chat des Spielzimmers gibt es fertige Sätze; selbst geschriebene Nachrichten gehen durch einen Wortfilter, Telefonnummern, E-Mails und Links werden
+        blockiert. Ist „selbst schreiben“ aus, sieht und schickt das Kind nur die fertigen Sätze.
       </p>
       {hasCloudData() &&
         (confirm ? (

@@ -38,6 +38,8 @@ export interface OnlineControls {
   again(): void;
   lobby(): void;
   leave(): void;
+  /** Chat des Zimmers öffnen */
+  chat?(): void;
 }
 
 export function GameScreen({ session, net, online }: { session: Session; net?: NetLink; online?: OnlineControls }) {
@@ -118,6 +120,11 @@ export function GameScreen({ session, net, online }: { session: Session; net?: N
         <button type="button" className="icon-btn" onClick={() => nav.tutorial(meta.id)} aria-label="Spielregeln ansehen">
           <Icon name="help" />
         </button>
+        {online?.chat && (
+          <button type="button" className="icon-btn" onClick={online.chat} aria-label="Chat">
+            <Icon name="chat" />
+          </button>
+        )}
         <button type="button" className="icon-btn" onClick={() => actions.settings({ sound: !data.settings.sound })} aria-label={data.settings.sound ? 'Ton aus' : 'Ton an'}>
           <Icon name={data.settings.sound ? 'speaker' : 'mute'} />
         </button>

@@ -52,8 +52,13 @@ Optional, für mehr Schutz vor Missbrauch des Keys: In der [Google Cloud Console
 | `rooms/<Code>/info` – Gastgeber, Spiel, wer reingelassen wurde | alle im Zimmer und wer geklingelt hat | nur der Gastgeber; ist er 20 s weg, übernimmt ein reingelassenes Kind |
 | `rooms/<Code>/seats/<Kind>` – eigener Platz, Züge, Herzschlag | alle im Zimmer; wer klingelt, nur den eigenen und den des Gastgebers | nur das Kind selbst, Name und Tier werden geprüft |
 | `rooms/<Code>/state` – Spielstand der Runde | alle im Zimmer | nur der Gastgeber |
+| `rooms/<Code>/chat/<id>` – Chat des Zimmers | alle im Zimmer | neue Nachrichten nur unter eigenem Namen, Text geht durch den Wortfilter (max. 60 Zeichen); ändern nicht, wegräumen nur der Gastgeber |
+| `presence/<Kind>` – online, in welchem Zimmer | wer das Konto kennt (Spielfreunde); auflisten geht nicht | nur das Kind selbst |
+| `invites/<Kind>/<Absender>` – Einladung ins Zimmer | nur das eingeladene Kind | nur der Absender; das eingeladene Kind darf sie löschen |
 | neues Zimmer | – | nur, wenn der Code frei oder seit 2 Stunden unbenutzt ist |
 
 ## Regeln ändern
 
-`database.rules.json` wird mit `npm run rules` gebaut – die Wortliste für Namen und die Tiere kommen dabei aus `src/lib/names.ts`. Ein Test meldet sich, wenn die Datei nicht mehr zur Wortliste passt. Nach jeder Änderung den neuen Inhalt in der Firebase-Konsole unter **Realtime Database → Regeln** einfügen und **Veröffentlichen**, sonst gelten auf dem Server noch die alten Regeln.
+`database.rules.json` wird mit `npm run rules` gebaut – die Wortliste für Namen und die Tiere kommen dabei aus `src/lib/names.ts`, die zusätzlichen Chat-Wörter aus `src/lib/chat.ts`. Ein Test meldet sich, wenn die Datei nicht mehr zu den Wortlisten passt. Nach jeder Änderung den neuen Inhalt in der Firebase-Konsole unter **Realtime Database → Regeln** einfügen und **Veröffentlichen**, sonst gelten auf dem Server noch die alten Regeln.
+
+`npm run test:rules` startet den Firebase-Emulator (braucht Java) und probiert gut 50 Fälle durch – z. B. dass ein Kind vor der Tür den Chat nicht lesen kann, dass Telefonnummern im Chat abgelehnt werden und dass nur der Gastgeber ein geschlossenes Zimmer wieder öffnen kann ([`scripts/test-rules.mjs`](../scripts/test-rules.mjs)).

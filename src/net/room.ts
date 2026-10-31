@@ -1,13 +1,34 @@
 import { useSyncExternalStore } from 'react';
 import { defFor } from '../games/defs';
 import { GAME_BY_ID, type GameId } from '../games/registry';
+import { chatProblem, QUICK_SENTENCES } from '../lib/chat';
 import { onlineName } from '../lib/names';
-import type { Level, Profile } from '../lib/store';
+import { getData, type Level, type Profile } from '../lib/store';
 import { ensureAuth } from './auth';
 import { isCode, randomCode } from './codes';
 import { onlineAllowed } from './consent';
 import { DbError, dbRequest, openStream, SERVER_TIME } from './db';
-import { buildSeats, isMember, leftRoom, members, nextSlot, parseActs, robosFor, takeOver, type NetSeat, type ReactionId, type RoomInfo, type SeatDoc, type StateDoc } from './roomLogic';
+import { rememberRoom } from './recent';
+import {
+  autoAdmit,
+  buildSeats,
+  chatOf,
+  chatToPrune,
+  isMember,
+  leftRoom,
+  members,
+  nextSlot,
+  parseActs,
+  robosFor,
+  slotsFor,
+  takeOver,
+  type ChatMsg,
+  type NetSeat,
+  type ReactionId,
+  type RoomInfo,
+  type SeatDoc,
+  type StateDoc,
+} from './roomLogic';
 
 /**
  * Online-Spielzimmer: Wer drin ist, hört live auf rooms/<Code>. Jedes Kind schreibt nur seinen
@@ -35,11 +56,13 @@ export interface RoomView {
   info: RoomInfo | null;
   seats: Record<string, SeatDoc>;
   game: RoomGame | null;
+  /** Chat des Zimmers, älteste Nachricht zuerst (nur für Kinder, die drin sind) */
+  chat: (ChatMsg & { id: string })[];
   /** Serverzeit minus Gerätezeit (aus den Antworten auf den Herzschlag) */
   offset: number;
 }
 
-const EMPTY: RoomView = { code: null, uid: null, profileId: null, conn: 'off', error: null, info: null, seats: {}, game: null, offset: 0 };
+const EMPTY: RoomView = { code: null, uid: null, profileId: null, conn: 'off', error: null, info: null, seats: {}, game: null, chat: [], offset: 0 };
 
 let view: RoomView = EMPTY;
 const listeners = new Set<() => void>();
@@ -101,10 +124,12 @@ const denied = (e: unknown) => e instanceof DbError && (e.status === 401 || e.st
 
 const GONE = 'Dieses Zimmer gibt es nicht mehr.';
 
+let lastChatRaw: unknown = null;
+
 function onTree(tree: Record<string, unknown> | null) {
   if (!tree || !tree.info) {
     // Zimmer gelöscht
-    set({ conn: 'online', info: null, seats: {}, game: null, error: GONE });
+    set({ conn: 'online', info: null, seats: {}, game: null, chat: [], error: GONE });
     return;
   }
   const info = tree.info as RoomInfo;
@@ -131,7 +156,58 @@ function onTree(tree: Record<string, unknown> | null) {
       }
     }
   }
-  set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats, game });
+  let chat = view.chat;
+  if (tree.chat !== lastChatRaw) {
+    lastChatRaw = tree.chat;
+    chat = chatOf(tree.chat);
+  }
+  set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats, game, chat });
+  if (info.status !== 'closed') {
+    remember();
+    if (info.host === view.uid) void hostChores();
+  }
+}
+
+/** Zimmer in „Zuletzt im Zimmer“ merken (nur wenn sich etwas geändert hat) */
+let remembered = '';
+function remember() {
+  const { code, info, seats, uid, profileId } = view;
+  if (!code || !info || !profileId) return;
+  const host = seats[info.host];
+  if (!host) return;
+  const key = `${profileId}|${code}|${info.game}|${info.host}|${host.name}`;
+  if (key === remembered) return;
+  remembered = key;
+  rememberRoom(profileId, { code, game: info.game, host: { name: host.name, avatar: host.avatar, color: host.color }, mine: info.host === uid });
+}
+
+/**
+ * Gastgeber: Spielfreunde und Kinder, die schon einmal drin waren, ohne Klingeln reinlassen –
+ * und den Chat kurz halten.
+ */
+let choring = false;
+async function hostChores() {
+  if (choring) return;
+  const { info, seats, profileId, chat } = view;
+  if (!info || !profileId) return;
+  const friends = getData().profiles.find((p) => p.id === profileId)?.friends ?? {};
+  const welcome = autoAdmit(info, seats, friends);
+  const prune = chatToPrune(chat);
+  if (!welcome.length && !prune.length) return;
+  choring = true;
+  try {
+    if (welcome.length) {
+      const slots = slotsFor(info, seats, welcome);
+      const changes: Record<string, unknown> = {};
+      for (const [u, slot] of Object.entries(slots)) Object.assign(changes, { [`allowed/${u}`]: slot, [`known/${u}`]: true });
+      await patchInfo(changes);
+    }
+    if (prune.length && view.code) await dbRequest('PATCH', `rooms/${view.code}/chat`, await token(), Object.fromEntries(prune.map((id) => [id, null])));
+  } catch {
+    // beim nächsten Stand nochmal
+  } finally {
+    choring = false;
+  }
 }
 
 /** Vor der Tür: Wer geklingelt hat, sieht nur, ob er reindarf. */
@@ -257,6 +333,8 @@ function stopAll() {
   window.clearInterval(heartbeat);
   window.clearTimeout(retry);
   lastStateRaw = '';
+  lastChatRaw = null;
+  remembered = '';
   myActs = [];
 }
 
@@ -279,7 +357,9 @@ export class RoomError extends Error {}
 
 export const ONLINE_OFF = 'Online-Spielen ist ausgeschaltet. Deine Eltern können es im Elternbereich erlauben.';
 
-const NO_ROOM = 'Dieses Zimmer gibt es nicht. Stimmt der Code?';
+export const NO_ROOM = 'Dieses Zimmer gibt es nicht. Stimmt der Code?';
+
+export const CLOSED = 'Dieses Zimmer ist gerade zu.';
 
 function friendly(e: unknown): RoomError {
   if (e instanceof RoomError) return e;
@@ -328,9 +408,16 @@ export async function joinRoom(profile: Profile, code: string) {
     await dbRequest('PATCH', `rooms/${code}/seats/${acc.uid}`, t, seatDocOf(profile)).catch((e) => {
       throw denied(e) ? new RoomError(NO_ROOM) : e;
     });
-    const info = await dbRequest<RoomInfo | null>('GET', `rooms/${code}/info`, t);
+    let info = await dbRequest<RoomInfo | null>('GET', `rooms/${code}/info`, t);
+    if (info?.status === 'closed' && info.host === acc.uid) {
+      // Eigenes Zimmer wieder aufmachen – mit demselben Code. Wer schon drin war, kommt gleich wieder rein.
+      const reopen = { status: 'lobby', allowed: null, denied: null, at: SERVER_TIME };
+      await dbRequest('PATCH', `rooms/${code}/info`, t, reopen);
+      info = { ...info, status: 'lobby', allowed: undefined, denied: undefined };
+    }
     let problem: string | null = null;
-    if (!info || info.status === 'closed') problem = NO_ROOM;
+    if (!info) problem = NO_ROOM;
+    else if (info.status === 'closed') problem = CLOSED;
     else if (info.status === 'playing' && !isMember(info, acc.uid)) problem = 'Dort wird gerade gespielt. Probier es nach der Runde nochmal.';
     if (problem) {
       await dbRequest('DELETE', `rooms/${code}/seats/${acc.uid}`, t).catch(() => undefined);
@@ -399,7 +486,7 @@ export async function admit(uid: string) {
   if (!info) return;
   const slot = nextSlot(info, view.seats);
   if (slot === null) return;
-  await patchInfo({ [`allowed/${uid}`]: slot, [`denied/${uid}`]: null });
+  await patchInfo({ [`allowed/${uid}`]: slot, [`denied/${uid}`]: null, [`known/${uid}`]: true });
 }
 
 export const deny = (uid: string) => patchInfo({ [`denied/${uid}`]: true });
@@ -501,5 +588,36 @@ async function patchSeat(changes: Record<string, unknown>) {
 export const react = (e: ReactionId) => patchSeat({ react: { e, at: SERVER_TIME } });
 
 export const setLearning = (on: boolean) => patchSeat({ tut: on });
+
+/** Spielt gerade für sich allein – die anderen sehen „spielt kurz allein“. */
+export const setSolo = (on: boolean) => patchSeat({ solo: on });
+
+// ───── Chat ─────
+
+let lastSent = 0;
+
+/**
+ * Nachricht in den Chat schicken: entweder ein fertiger Satz (`quick` = seine Nummer) oder
+ * selbst geschrieben. Gibt einen Hinweis zurück, wenn es nicht geht – sonst `null`.
+ */
+export async function sendChat(profile: Profile, text: string, quick?: number): Promise<string | null> {
+  const { code, uid, info } = view;
+  if (!code || !uid || !info || !isMember(info, uid)) return 'Du bist gerade in keinem Spielzimmer.';
+  const t = quick !== undefined ? QUICK_SENTENCES[quick] : text.trim();
+  if (!t) return 'Schreib erst etwas.';
+  const problem = quick !== undefined ? null : chatProblem(t);
+  if (problem) return problem;
+  if (Date.now() - lastSent < 1500) return 'Nicht so schnell – warte kurz.';
+  lastSent = Date.now();
+  const id = `${Date.now().toString(36)}${uid.slice(0, 6)}${Math.random().toString(36).slice(2, 6)}`;
+  const msg = { by: uid, name: onlineName(profile.name, profile.avatar), avatar: profile.avatar, color: profile.color, t, ...(quick !== undefined ? { q: quick } : {}), at: SERVER_TIME };
+  try {
+    await dbRequest('PUT', `rooms/${code}/chat/${id}`, await token(), msg);
+    return null;
+  } catch (e) {
+    lastSent = 0;
+    return denied(e) ? 'Das ließ sich nicht schicken.' : 'Keine Verbindung. Ist das Internet an?';
+  }
+}
 
 export const gameMeta = () => (view.info ? GAME_BY_ID[view.info.game] : null);
