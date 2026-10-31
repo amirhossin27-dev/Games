@@ -53,6 +53,12 @@
   --health: var(--sage);
   --health-soft: var(--sage-soft);
   --memo-ink: var(--ink);
+  --sage-ink: #33673e;
+  --terra-ink: var(--terra-d);
+  --focus: var(--sky-d);
+  --on-accent: #fffdf8;
+  --on-butter: var(--ink);
+  --trace-paper: #fffdf8;
   color-scheme: light;
 }
 
@@ -120,7 +126,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 3px solid var(--sky-d);
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 
@@ -277,7 +283,7 @@ p {
 }
 
 .tab[aria-current='page'] {
-  color: #33673e;
+  color: var(--sage-ink);
 }
 
 .tab[aria-current='page'] .tab-icon {
@@ -320,16 +326,17 @@ p {
 
 .btn.primary {
   background: var(--sage);
-  color: #fffdf8;
+  color: var(--on-accent);
 }
 
 .btn.warm {
   background: var(--terra-d);
-  color: #fffdf8;
+  color: var(--on-accent);
 }
 
 .btn.butter {
   background: var(--butter);
+  color: var(--on-butter);
 }
 
 .btn.secondary {
@@ -345,7 +352,7 @@ p {
   border-color: transparent;
   box-shadow: none;
   background: transparent;
-  color: #33673e;
+  color: var(--sage-ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -405,7 +412,7 @@ p {
   border: none;
   box-shadow: none;
   background: var(--sage-soft);
-  color: #33673e;
+  color: var(--sage-ink);
   width: 44px;
   height: 44px;
 }
@@ -504,7 +511,7 @@ p {
 .chip.active,
 .chip[aria-pressed='true'] {
   background: var(--sage);
-  color: #fffdf8;
+  color: var(--on-accent);
 }
 
 .bar {
@@ -524,12 +531,13 @@ p {
 
 .bar.butter > i {
   background: var(--butter);
+  color: var(--on-butter);
 }
 
 .polaroid {
   display: inline-block;
   padding: 5px 5px 12px;
-  background: #fff;
+  background: var(--card);
   box-shadow: 0 2px 0 rgba(45, 58, 49, 0.08), 0 8px 16px rgba(45, 58, 49, 0.14);
   transform: rotate(-4deg);
   flex-shrink: 0;
@@ -595,12 +603,12 @@ p {
 
 .seg button[aria-pressed='true'] {
   background: var(--sky-d);
-  color: #fffdf8;
+  color: var(--on-accent);
   box-shadow: 2px 3px 0 var(--ink);
 }
 
 .seg button[aria-pressed='true'] small {
-  color: #fffdf8;
+  color: var(--on-accent);
 }
 
 .field {
@@ -631,7 +639,7 @@ p {
 }
 
 .error {
-  color: var(--terra-d);
+  color: var(--terra-ink);
   font-weight: 700;
 }
 
@@ -652,11 +660,12 @@ p {
 
 .pill.warn {
   background: var(--butter);
+  color: var(--on-butter);
 }
 
 .pill.alarm {
   background: var(--terra-d);
-  color: #fffdf8;
+  color: var(--on-accent);
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -674,6 +683,7 @@ p {
   flex-shrink: 0;
   border-radius: 50%;
   background: var(--butter);
+  color: var(--on-butter);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -942,7 +952,7 @@ p {
   padding: 0 14px;
   border-radius: 12px 12px 0 0;
   background: var(--kraft-2);
-  color: #4a574d;
+  color: var(--ink-2);
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.95rem;
@@ -1026,6 +1036,7 @@ p {
   display: grid;
   place-items: center;
   background: var(--butter);
+  color: var(--on-butter);
   border: 2px solid var(--ink);
   box-shadow: 2px 3px 0 var(--ink);
 }
@@ -1037,7 +1048,7 @@ p {
   padding: 0 4px;
   font-size: 0.8rem;
   font-weight: 700;
-  color: var(--terra-d);
+  color: var(--terra-ink);
 }
 
 .dots {
@@ -1113,16 +1124,16 @@ p {
 
 .mode-tile.main {
   background: var(--sage);
-  color: #fffdf8;
+  color: var(--on-accent);
 }
 
 .mode-tile.main span.sub {
-  color: #fffdf8;
+  color: var(--on-accent);
 }
 
 .mode-tile.main .ico {
   background: var(--card);
-  color: #33673e;
+  color: var(--sage-ink);
 }
 
 .mode-tile:disabled {
@@ -1200,7 +1211,7 @@ p {
   padding: 0 12px;
   border-radius: 999px;
   border: 2px dashed var(--sage);
-  color: #33673e;
+  color: var(--sage-ink);
   font-weight: 700;
   font-size: 0.85rem;
 }
@@ -1213,8 +1224,8 @@ p {
 }
 
 .live-badge.off {
-  border-color: var(--terra-d);
-  color: var(--terra-d);
+  border-color: var(--terra-ink);
+  color: var(--terra-ink);
 }
 
 .live-badge.off .dot {
@@ -1459,20 +1470,21 @@ p {
 
 .icon-btn.send {
   background: var(--sage);
-  color: #fffdf8;
+  color: var(--on-accent);
 }
 
 .icon-btn.send:disabled {
   opacity: 0.4;
 }
 
-/* Spielfreunde und zuletzt besuchte Zimmer */
-.code-mini {
+/* Spielfreunde und Spielzimmer, in denen gerade Freunde sind */
+.friend-stack {
   display: inline-flex;
-  gap: 1px;
-  font-size: 0.85rem;
-  letter-spacing: 0;
-  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.friend-stack > * + * {
+  margin-left: -14px;
 }
 
 .friend-ava {
@@ -1496,29 +1508,166 @@ p {
   background: #3fae5a;
 }
 
-.invite-pop {
-  position: fixed;
-  left: 50%;
-  /* unten über den Reitern – oben erscheinen die Hinweise */
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
-  z-index: 110;
-  width: min(420px, calc(100% - 24px));
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
+/* ── Spielfreund anrufen ── */
+.call-friends {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 10px;
-  padding: 14px;
-  border-radius: 18px;
-  border: 2px solid var(--ink);
-  background: var(--card);
-  box-shadow: 3px 4px 0 var(--ink);
-  animation: invite-in 0.25s ease;
 }
 
-@keyframes invite-in {
-  from {
-    transform: translate(-50%, 16px);
+.call-friend {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  border-radius: 16px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  text-align: center;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.call-friend b {
+  font-size: 1rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.call-friend .small {
+  color: var(--muted);
+}
+
+.call-friend:not(:disabled) {
+  border-color: var(--ink);
+  box-shadow: 2px 3px 0 var(--ink);
+}
+
+.call-friend:not(:disabled) .small {
+  color: var(--sage);
+  font-weight: 700;
+}
+
+.call-friend.waiting {
+  background: var(--sage-soft);
+}
+
+.call-friend:active:not(:disabled) {
+  transform: translate(2px, 3px);
+  box-shadow: none;
+}
+
+.call-friend:disabled {
+  opacity: 0.5;
+}
+
+.call-friend .online-dot {
+  width: 18px;
+  height: 18px;
+  border-width: 3px;
+}
+
+.call-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 26px 18px 20px;
+  text-align: center;
+}
+
+.call-title {
+  font-size: 1.35rem;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.call-game {
+  width: 110px;
+}
+
+.call-ring {
+  position: relative;
+  display: inline-flex;
+  border-radius: 50%;
+  margin: 8px 0 14px;
+}
+
+.call-ring.on::before,
+.call-ring.on::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 3px solid var(--sage);
+  opacity: 0;
+  animation: call-ring 1.8s ease-out infinite;
+}
+
+.call-ring.on::after {
+  animation-delay: 0.9s;
+}
+
+@keyframes call-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.45);
     opacity: 0;
+  }
+}
+
+/* Anruf beim Freund: groß in der Mitte, egal wo man gerade ist */
+.call-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(45, 58, 49, 0.45);
+  animation: call-fade 0.2s ease;
+}
+
+.call-pop {
+  width: min(380px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 26px 18px 14px;
+  border-radius: 24px;
+  border: 2px solid var(--ink);
+  background: var(--card);
+  box-shadow: 4px 6px 0 var(--ink);
+  text-align: center;
+  animation: call-in 0.25s ease;
+}
+
+@keyframes call-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes call-in {
+  from {
+    transform: translateY(16px) scale(0.96);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .call-ring.on::before,
+  .call-ring.on::after,
+  .call-backdrop,
+  .call-pop {
+    animation: none;
   }
 }
 
@@ -1573,7 +1722,7 @@ p {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  color: #fffdf8;
+  color: var(--on-accent);
   border: 2px solid var(--ink);
   box-shadow: 2px 3px 0 var(--ink);
 }
@@ -1678,7 +1827,7 @@ p {
 
 .limit-grid button[aria-pressed='true'] {
   background: var(--sky-d);
-  color: #fffdf8;
+  color: var(--on-accent);
   box-shadow: 2px 3px 0 var(--ink);
 }
 
@@ -1891,7 +2040,7 @@ p {
 }
 
 .mini-card.red {
-  color: var(--terra-d);
+  color: var(--terra-ink);
 }
 
 .mini-card.dim {
@@ -2366,7 +2515,7 @@ p {
   min-height: 86px;
   border-radius: 16px;
   border: 2px solid var(--ink);
-  color: #fffdf8;
+  color: var(--on-accent);
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 2rem;
@@ -2427,7 +2576,7 @@ p {
 }
 
 .answer .mark.bad {
-  color: var(--terra-d);
+  color: var(--terra-ink);
 }
 
 .quiz-feedback {
@@ -2462,6 +2611,7 @@ p {
   display: block;
   height: 100%;
   background: var(--butter);
+  color: var(--on-butter);
   transition: width 0.25s linear;
 }
 
@@ -2562,6 +2712,7 @@ p {
 
 .ttt-cell.win {
   background: var(--butter);
+  color: var(--on-butter);
 }
 
 .ludo-board {
@@ -2640,6 +2791,7 @@ p {
 
 .die.held {
   background: var(--butter);
+  color: var(--on-butter);
   transform: translateY(-4px);
 }
 
@@ -2694,7 +2846,7 @@ p {
 }
 
 .pcard.red {
-  color: var(--terra-d);
+  color: var(--terra-ink);
 }
 
 .pcard.back {
@@ -2859,6 +3011,7 @@ p {
   border-radius: 16px;
   border: 2px solid var(--ink);
   background: var(--butter);
+  color: var(--on-butter);
   display: grid;
   place-items: center;
   font-family: var(--font-display);
@@ -2928,7 +3081,7 @@ p {
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 0.8rem;
-  color: #33673e;
+  color: var(--sage-ink);
 }
 
 /* ───────────── Animationen ───────────── */
@@ -3115,4 +3268,220 @@ p {
     animation-iteration-count: 1 !important;
     transition: none !important;
   }
+}
+
+/* Gastgeber im laufenden Spiel: Wer klingelt, wer wartet auf die nächste Runde */
+.host-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.host-bar-card {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--sticky);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  padding: 10px 12px;
+  box-shadow: 3px 4px 0 var(--ink);
+  animation: pop-in 0.25s ease;
+  color: var(--ink);
+}
+
+/* Vor der Tür: Die Klingel wackelt, solange man wartet */
+.knock-wait span {
+  display: inline-block;
+  font-size: 2.6rem;
+  animation: knock-ring 1.6s ease-in-out infinite;
+  transform-origin: 50% 10%;
+}
+
+@keyframes knock-ring {
+  0%,
+  55%,
+  100% {
+    transform: rotate(0);
+  }
+  10%,
+  30% {
+    transform: rotate(14deg);
+  }
+  20%,
+  40% {
+    transform: rotate(-14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knock-wait span {
+    animation: none;
+  }
+}
+
+/* Ludo online: „Du bist Blau“ */
+.ludo-me {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.ludo-me .ludo-piece {
+  width: 22px;
+  height: 22px;
+}
+
+.host-bar.at-end {
+  position: static;
+  padding: 0;
+}
+
+/* ───── Nachspuren (Zahlen-Spur, Schwung-Strecke) ───── */
+
+.trace {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.trace-canvas {
+  display: block;
+  background: var(--trace-paper);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: crosshair;
+}
+
+.trace-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.trace-card .display {
+  font-size: 1.3rem;
+}
+
+.trace-prompt.display {
+  font-size: clamp(1.8rem, 9vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.trace-hint {
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.trace-count {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 330px;
+  font-size: 1.55rem;
+  line-height: 1.15;
+}
+
+.trace-count .gap {
+  margin-right: 10px;
+}
+
+.trace-note {
+  font-weight: 700;
+  color: var(--terra-ink);
+  text-align: center;
+  min-height: 1.3em;
+}
+
+.trace-tools {
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ───────────── Abend und Nacht · 20:00–07:00 ───────────── */
+:root[data-theme='dark'] {
+  --paper: #1d2420;
+  --card: #28312b;
+  --kraft: #303b32;
+  --kraft-2: #414b3e;
+  --ink: #e4dfd1;
+  --ink-2: #cecbbb;
+  --muted: #b5b7a8;
+  --line: #4b5649;
+  --stitch: #69715e;
+  --sage: #466f50;
+  --sage-l: #83a87d;
+  --sage-ink: #adcca2;
+  --sage-soft: #344637;
+  --terra: #b97e5e;
+  --terra-d: #925239;
+  --terra-ink: #e1a588;
+  --terra-soft: #49392f;
+  --sky: #8aabb9;
+  --sky-d: #385f7b;
+  --sky-soft: #2e4047;
+  --butter: #c6ab6a;
+  --butter-soft: #45412e;
+  --sticky: #45412e;
+  --plum: #725c82;
+  --plum-soft: #403848;
+  --reaction-sky: #b1cad6;
+  --reaction-butter: #d6c18a;
+  --reaction-plum: #c7b4d1;
+  --focus: #b5c6ce;
+  --on-accent: #f0e7d5;
+  --on-butter: #292d25;
+  --trace-paper: #c8c0aa;
+  --shadow: 0 2px 0 rgb(0 0 0 / 12%), 0 10px 22px rgb(0 0 0 / 20%);
+  color-scheme: dark;
+}
+
+:root[data-theme='dark'] .call-friend:not(:disabled) .small,
+:root[data-theme='dark'] .answer .mark.ok {
+  color: var(--sage-ink);
+}
+
+:root[data-theme='dark'] .die.held i {
+  background: var(--on-butter);
+}
+
+:root[data-theme='dark'] .sea-cell {
+  border-color: var(--line);
+}
+
+:root[data-theme='dark'] .sea-cell.water {
+  background: var(--sky-soft);
+}
+
+/* Farbige Spielbilder und Canvas-Inhalte behalten erkennbare Spielfarben. */
+:root[data-theme='dark'] :is(.game-art, .avatar svg, .game-canvas, .clock-face) {
+  filter: brightness(0.86) saturate(0.8);
+}
+
+:root[data-theme='dark'] .game-card.locked .game-card-art > .game-art {
+  filter: grayscale(0.75) brightness(0.86);
 }

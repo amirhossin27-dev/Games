@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { BZ_COLS, BZ_ROWS, bzEmpty, bzRow, bzShift } from '../Ballz';
 import { hopGenerate, type HopPlat } from '../Hopper';
-import { DX, DY, MAZE, MH, MW, START, canGo, chooseDir, countDots, dotGrid, ghostTarget, isWall, modeAt, opposite, type Dir } from '../muncher';
-import { autoStep, bestTarget, canAutoFinish, canTab, pickUp, solDeal, solDraw, solMove, solWon, type SCard, type SolState } from '../solitaire';
-import { HALF, TURN_WINDOW, makeSeg, newRun, runScore, runStep, segEnd, type RunState } from '../runner';
+import { tapDir } from '../Snake';
+import { DX, DY, MAZE, MH, MW, START, canGo, chooseDir, countDots, dotGrid, ghostTarget, isWall, modeAt, opposite, type Dir } from '../muncher-logic';
+import { autoStep, bestTarget, canAutoFinish, canTab, pickUp, solDeal, solDraw, solMove, solWon, type SCard, type SolState } from '../solitaire-logic';
+import { HALF, TURN_WINDOW, makeSeg, newRun, runScore, runStep, segEnd, type RunState } from '../runner-logic';
 
 function seeded(seed: number) {
   let s = seed >>> 0;
@@ -265,5 +266,32 @@ describe('Tempel-Lauf', () => {
     ];
     for (let i = 0; i < 60 * 5 && !b.dead; i++) runStep(b, 1 / 60, {}, rnd);
     expect(b.dead).toBe('caught');
+  });
+});
+
+describe('Schlange: Lenken durch Antippen', () => {
+  // Kopf auf Feld (5|9), Felder sind 20 Pixel groß → Mitte des Kopfs bei (110|190).
+  const head = { x: 5, y: 9 };
+
+  it('fährt sie waagerecht, zählt nur über oder unter ihr', () => {
+    expect(tapDir(head, 'right', true, 110, 40)).toBe('up');
+    expect(tapDir(head, 'right', true, 290, 300)).toBe('down');
+    expect(tapDir(head, 'left', true, 10, 60)).toBe('up');
+  });
+
+  it('fährt sie senkrecht, zählt nur links oder rechts daneben', () => {
+    expect(tapDir(head, 'up', true, 20, 10)).toBe('left');
+    expect(tapDir(head, 'down', true, 250, 370)).toBe('right');
+  });
+
+  it('auf die eigene Spur tippen tut nichts', () => {
+    expect(tapDir(head, 'right', true, 280, 195)).toBeNull();
+    expect(tapDir(head, 'up', true, 115, 20)).toBeNull();
+  });
+
+  it('vor dem Start gilt die größere Entfernung, auch nach hinten', () => {
+    expect(tapDir(head, 'right', false, 10, 200)).toBe('left');
+    expect(tapDir(head, 'right', false, 120, 20)).toBe('up');
+    expect(tapDir(head, 'right', false, 112, 192)).toBeNull();
   });
 });

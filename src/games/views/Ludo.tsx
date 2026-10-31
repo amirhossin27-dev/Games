@@ -1,6 +1,6 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { buzz, sfx } from '../../arcade/engine';
-import { SEAT_COLORS, type PlayProps } from '../../engine/game';
+import { SEAT_COLOR_NAMES, SEAT_COLORS, type PlayProps } from '../../engine/game';
 import { useGame } from '../../engine/useGame';
 import { cls } from '../../lib/util';
 import { Die, SeatStrip, useOnChange } from '../../ui/parts';
@@ -72,10 +72,14 @@ export function Ludo(props: PlayProps) {
   const inGoal = s.pos.map((p) => p.filter((x) => x >= 40).length);
   const canRoll = g.myTurn && s.phase === 'roll';
   let hint = turnHint(g, seats, '');
+  const online = !!props.net;
   if (!hint && !g.outcome) {
-    if (canRoll) hint = `${nameOf(seats, s.turn)}: Tippe auf den Würfel!`;
+    if (canRoll) hint = online ? 'Du bist dran: Tippe auf den Würfel!' : `${nameOf(seats, s.turn)}: Tippe auf den Würfel!`;
     else if (s.phase === 'move' && g.myTurn) hint = 'Tippe auf eine leuchtende Figur';
+    else if (online && s.turn !== g.view) hint = `${nameOf(seats, s.turn)} ist dran …`;
   }
+  // Online: Jedes Kind sieht, welche Farbe es hat – bei drei oder vier Kindern sonst schwer zu finden.
+  const mine = online ? g.view : -1;
 
   return (
     <div className="g-col">
@@ -88,6 +92,12 @@ export function Ludo(props: PlayProps) {
         </p>
       </div>
       {s.last?.note && hint && <p className="game-hint">{hint}</p>}
+      {mine >= 0 && !g.outcome && (
+        <p className="ludo-me">
+          <span className="ludo-piece" style={{ '--pc': SEAT_COLORS[mine] } as CSSProperties} aria-hidden="true" />
+          Du bist {SEAT_COLOR_NAMES[mine]}
+        </p>
+      )}
     </div>
   );
 }

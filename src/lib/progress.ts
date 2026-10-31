@@ -47,6 +47,7 @@ export const BADGES: Badge[] = [
   { id: 'welt-entdecker', name: 'Welt-Entdecker', text: '40 Fragen im Welt-Quiz richtig', icon: 'globe', color: '#6B5410', need: 40, have: (p) => p.counters.world },
   { id: 'wort-architekt', name: 'Wort-Architekt', text: '40 Wörter richtig gebaut', icon: 'pencil', color: '#8F3E1F', need: 40, have: (p) => p.counters.words },
   { id: 'english-star', name: 'English Star', text: '40 englische Wörter richtig', icon: 'sparkle', color: '#2F5F86', need: 40, have: (p) => p.counters.english },
+  { id: 'schreib-profi', name: 'Schreib-Profi', text: '40-mal sauber nachgespurt', icon: 'pencil', color: '#417A4D', need: 40, have: (p) => p.counters.writing },
   { id: 'gedaechtnis-ass', name: 'Gedächtnis-Ass', text: '10-mal Paare finden gespielt', icon: 'cards', color: '#417A4D', need: 10, have: (p) => p.games.paare?.played ?? 0 },
   { id: 'regel-kenner', name: 'Regel-Kenner', text: '5 Spielregeln gelernt', icon: 'book', color: '#6B5410', need: 5, have: (p) => p.tutorials.length },
   { id: 'teamplayer', name: 'Teamplayer', text: '10 Spiele mit anderen Kindern', icon: 'users', color: '#6E4C86', need: 10, have: (p) => p.counters.together },
@@ -64,7 +65,7 @@ export function withBadges(p: Profile): { profile: Profile; earned: Badge[] } {
 
 // ───── Ergebnis eintragen ─────
 
-export type Subject = 'math' | 'letters' | 'clock' | 'world' | 'words' | 'english';
+export type Subject = 'math' | 'letters' | 'clock' | 'world' | 'words' | 'english' | 'writing';
 
 export interface PlayResult {
   profileId: string;

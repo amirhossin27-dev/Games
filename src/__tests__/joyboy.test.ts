@@ -114,16 +114,34 @@ describe('Aufgaben', () => {
     for (const level of [0, 1, 2] as Level[])
       for (let k = 0; k < 300; k++) {
         const t = mathTask(level, rnd);
-        const m = t.prompt.match(/^(\d+) ([+−·]) (\d+) = \?$/)!;
-        expect(m, t.prompt).toBeTruthy();
-        const [a, op, b] = [Number(m[1]), m[2], Number(m[3])];
-        const x = op === '+' ? a + b : op === '−' ? a - b : a * b;
-        expect(Number(t.options[t.correct])).toBe(x);
         expect(new Set(t.options).size).toBe(t.options.length);
         expect(t.options.length).toBeGreaterThanOrEqual(3);
+        const right = Number(t.options[t.correct]);
+        // Platzhalter: „a + ? = c“ oder „c − ? = a“
+        const gap = t.prompt.match(/^(\d+) ([+−]) \? = (\d+)$/);
+        if (gap) {
+          const [a, op, c] = [Number(gap[1]), gap[2], Number(gap[3])];
+          expect(op === '+' ? a + right : a - right, t.prompt).toBe(c);
+          expect(level, t.prompt).toBeGreaterThan(0);
+          expect(Math.max(a, c)).toBeLessThanOrEqual(level === 1 ? 20 : 100);
+          continue;
+        }
+        const m = t.prompt.match(/^(\d+) ([+−·:]) (\d+) = \?$/)!;
+        expect(m, t.prompt).toBeTruthy();
+        const [a, op, b] = [Number(m[1]), m[2], Number(m[3])];
+        const x = op === '+' ? a + b : op === '−' ? a - b : op === '·' ? a * b : a / b;
+        expect(right, t.prompt).toBe(x);
+        expect(Number.isInteger(x)).toBe(true);
         expect(x).toBeGreaterThanOrEqual(0);
         if (level === 0) expect(Math.max(a, x)).toBeLessThanOrEqual(10);
         if (level === 1) expect(Math.max(a, x)).toBeLessThanOrEqual(20);
+        if (level < 2) expect(op === '·' || op === ':', t.prompt).toBe(false);
+        if (level === 2) {
+          expect(Math.max(a, x)).toBeLessThanOrEqual(100);
+          // Auf „Schwer“ geht Plus und Minus immer über den Zehner.
+          if (op === '+') expect((a % 10) + (b % 10), t.prompt).toBeGreaterThanOrEqual(10);
+          if (op === '−') expect(a % 10, t.prompt).toBeLessThan(b % 10);
+        }
       }
   });
 
@@ -153,8 +171,17 @@ describe('Aufgaben', () => {
         expect(new Set(t.options).size).toBe(t.options.length);
         if (t.visual?.k === 'clock') {
           const { h, m } = t.visual;
-          const expected = level === 2 ? `${h}:${String(m).padStart(2, '0')}` : clockWords(h, m);
-          expect(t.options[t.correct]).toBe(expected);
+          // Schwer: auch „Wie spät ist es in 25 Minuten?“ / „Wie spät war es vor 1 Stunde und 10 Minuten?“
+          const span = t.prompt.match(/(in|vor) (?:(\d+) Stunde(?: und (\d+) Minuten)?|(\d+) Minuten)\?$/);
+          let delta = 0;
+          if (span) {
+            expect(level).toBe(2);
+            delta = (span[2] ? Number(span[2]) * 60 + Number(span[3] ?? 0) : Number(span[4])) * (span[1] === 'in' ? 1 : -1);
+          }
+          const t2 = ((((h % 12) * 60 + m + delta) % 720) + 720) % 720;
+          const [h2, m2] = [Math.floor(t2 / 60) || 12, t2 % 60];
+          const expected = level === 2 ? `${h2}:${String(m2).padStart(2, '0')}` : clockWords(h, m);
+          expect(t.options[t.correct], t.prompt).toBe(expected);
         }
       }
   });
@@ -308,8 +335,8 @@ describe('Würfelglück', () => {
 });
 
 describe('Schiffe versenken', () => {
-  it('stellt gültige Flotten für beide Meeresgrößen auf', () => {
-    for (const level of [0, 1] as Level[]) {
+  it('stellt gültige Flotten für alle Stufen auf', () => {
+    for (const level of [0, 1, 2] as Level[]) {
       const { size, fleet } = SEA_FOR[level];
       for (let k = 0; k < 30; k++) expect(validFleet(randomFleet(size, fleet, Math.random), size, fleet)).toBe(true);
     }
@@ -395,7 +422,7 @@ describe('Namen und Katalog', () => {
   });
 
   it('jedes Spiel hat ein Tutorial mit mindestens zwei Schritten', () => {
-    expect(GAMES).toHaveLength(29);
+    expect(GAMES).toHaveLength(31);
     for (const g of GAMES) {
       expect(g.tutorial.length, g.id).toBeGreaterThanOrEqual(2);
       for (const step of g.tutorial) expect(step.say.length, g.id).toBeGreaterThan(10);
@@ -410,7 +437,7 @@ describe('Erst lernen, dann spielen', () => {
     applyResult(p, { profileId: p.id, game, stars: 2, won: false, together: false, logic: false, learn: isLearnGame(GAME_BY_ID[game]) }).profile;
 
   it('trennt Lern- und Brettspiele von Arcade- und Duell-Spielen', () => {
-    expect(GAMES.filter(isLearnGame)).toHaveLength(14);
+    expect(GAMES.filter(isLearnGame)).toHaveLength(16);
     expect(isLearnGame(GAME_BY_ID.rechnen)).toBe(true);
     expect(isLearnGame(GAME_BY_ID.ludo)).toBe(true);
     expect(isLearnGame(GAME_BY_ID.schlange)).toBe(false);

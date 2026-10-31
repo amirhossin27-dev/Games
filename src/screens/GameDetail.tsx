@@ -19,16 +19,22 @@ import { TimePill } from '../ui/TimePill';
 
 const ROBO_NAMES = ['Robo', 'Robbi', 'Roboto'];
 const LEVEL_SUB: Record<string, [string, string, string]> = {
-  rechnen: ['bis 10', 'bis 20', 'bis 100 · mal'],
+  rechnen: ['bis 10', 'bis 20', 'bis 100 · mal, geteilt'],
   buchstaben: ['Anlaut', 'Bilder', 'Lücken'],
-  uhr: ['volle Std.', 'halb, Viertel', 'Minuten'],
+  uhr: ['volle Std.', 'halb, Viertel', 'Minuten, Dauer'],
   welt: ['Bilder', 'Tiere, Natur', 'Länder, All'],
-  woerter: ['Buchstaben', 'Silben', 'Zusammensetzen'],
-  englisch: ['Bild → Wort', 'Wort → Bild', 'Sätze'],
-  paare: ['12 Karten', '16 Karten', '20 Karten'],
+  woerter: ['Buchstaben', 'Silben', 'Mehrzahl, Schreiben'],
+  englisch: ['Bild → Wort', 'Wort → Bild', 'Sätze, Grammatik'],
+  zahlenspur: ['0 bis 9', 'bis 20', 'ohne Vorlage'],
+  schwung: ['Bögen', 'Zickzack', 'Schlaufen'],
+  paare: ['12 Karten', '16 Karten', '24 Karten'],
+  vier: ['Robo übt', 'Robo denkt mit', 'Robo-Profi'],
+  ttt: ['Robo übt', 'Robo denkt mit', 'Robo-Profi'],
+  ludo: ['Robo übt', 'Robo denkt mit', 'Robo-Profi'],
+  maumau: ['Robo übt', 'Robo denkt mit', 'Robo-Profi'],
   wuerfel: ['kurzer Block', 'ganzer Block', 'ganzer Block'],
-  schiffe: ['8 × 8', '10 × 10', '10 × 10'],
-  slf: ['3 Spalten', '4 Spalten', '6 Spalten'],
+  schiffe: ['8 × 8', '10 × 10', 'kleine Schiffe'],
+  slf: ['3 Spalten', '4 Spalten', '6 Spalten, J, U'],
 };
 
 export const seatOf = (p: Profile): SeatInfo => ({ name: p.name, avatar: p.avatar, color: p.color, robo: false, profileId: p.id });
@@ -191,7 +197,7 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
           <br />
           <span className="small muted">Joy erklärt das Spiel in {meta.tutorial.length} Schritten</span>
         </span>
-        <span className="icon-btn" style={{ background: '#F2C94C' }} aria-hidden="true">
+        <span className="icon-btn" style={{ background: 'var(--butter)', color: 'var(--on-butter)' }} aria-hidden="true">
           <Icon name="play" />
         </span>
       </button>

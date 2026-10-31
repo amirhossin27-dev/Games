@@ -66,7 +66,7 @@ export function Welcome({ edit }: { edit?: string }) {
               setError(null);
             }}
           />
-          <button type="button" className="icon-btn" aria-label="Neuen Namen würfeln" onClick={roll} style={{ background: '#F2C94C' }}>
+          <button type="button" className="icon-btn" aria-label="Neuen Namen würfeln" onClick={roll} style={{ background: 'var(--butter)', color: 'var(--on-butter)' }}>
             <Icon name="dice" size={26} />
           </button>
         </div>

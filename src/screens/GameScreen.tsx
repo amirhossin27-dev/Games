@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { setSoundStyle, sfx, unlockAudio, useTouchLock } from '../arcade/engine';
 import type { NetLink, Outcome } from '../engine/game';
 import { GameView } from '../games/play';
@@ -40,6 +40,10 @@ export interface OnlineControls {
   leave(): void;
   /** Chat des Zimmers öffnen */
   chat?(): void;
+  /** Kinder, die gerade dazugekommen sind und in der nächsten Runde mitspielen */
+  next?: string[];
+  /** Gastgeber: Wer klingelt (und wer wartet) – im Spiel unten, am Ende im Ergebnis */
+  bar?(atEnd: boolean): ReactNode;
 }
 
 export function GameScreen({ session, net, online }: { session: Session; net?: NetLink; online?: OnlineControls }) {
@@ -136,6 +140,7 @@ export function GameScreen({ session, net, online }: { session: Session; net?: N
           props={{ seats: session.seats, level: session.level, starter: session.round % session.seats.length, best: best.current, onEnd, net }}
         />
       </div>
+      {!result && online?.bar?.(false)}
       {result && (
         <ResultCard
           session={session}
@@ -192,7 +197,7 @@ function ResultCard({
   else title = 'Gleichstand vorne!';
 
   const scoreText = (i: number) => {
-    if (outcome.correct && outcome.asked) return `${outcome.correct[i]} von ${outcome.asked[i]} richtig`;
+    if (outcome.correct && outcome.asked) return `${outcome.correct[i]} von ${outcome.asked[i]} ${meta.scoreLabel ?? 'richtig'}`;
     if (outcome.scores) return `${outcome.scores[i]} ${meta.id === 'maumau' ? 'Karten übrig' : meta.id === 'paare' ? 'Paare' : 'Punkte'}`;
     return '';
   };
@@ -234,7 +239,7 @@ function ResultCard({
             <span className="display" style={{ fontSize: '2.4rem', lineHeight: 1 }}>
               {outcome.correct ? `${outcome.correct[0]} / ${outcome.asked?.[0]}` : outcome.solo?.failed ? '–' : outcome.solo?.score}
             </span>
-            <span className="muted">{outcome.correct ? 'richtig' : meta.scoreLabel}</span>
+            <span className="muted">{outcome.correct ? (meta.scoreLabel ?? 'richtig') : meta.scoreLabel}</span>
             {best !== undefined && !me?.newRecord && <span className="small muted">Dein Rekord: {best}</span>}
           </div>
         ) : (
@@ -286,6 +291,14 @@ function ResultCard({
           </div>
         )}
 
+        {online?.next?.length ? (
+          <p className="small center" role="status">
+            <b>{online.next.join(', ')}</b> {online.next.length > 1 ? 'spielen' : 'spielt'} in der nächsten Runde mit!
+          </p>
+        ) : null}
+
+        {online?.bar?.(true)}
+
         {online && !online.host ? (
           <p className="card center display" role="status">
             Warte, bis {online.hostName} „Nochmal“ tippt …
@@ -296,7 +309,7 @@ function ResultCard({
           </button>
         )}
         <button type="button" className="btn secondary block" onClick={onClose}>
-          {online ? (online.host ? 'Zurück ins Spielzimmer' : 'Zimmer verlassen') : 'Anderes Spiel'}
+          {online ? (online.host ? 'Zurück ins Spielzimmer' : 'Spielzimmer verlassen') : 'Anderes Spiel'}
         </button>
       </div>
     </div>

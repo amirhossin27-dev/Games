@@ -3,6 +3,7 @@ import { sfx } from '../arcade/engine';
 import type { TutArt, TutorialStep } from '../engine/tutorial';
 import { GAME_BY_ID, type GameId } from '../games/registry';
 import { AnswerGrid, TaskCard } from '../games/views/Quiz';
+import { inkColor, TraceTaskCard, TraceTaskPad } from '../games/views/Trace';
 import { nav } from '../lib/nav';
 import { finishTutorial } from '../lib/progress';
 import { canSpeak, speak, speakIfAuto, stopSpeaking, useVoiceReady } from '../lib/speech';
@@ -15,7 +16,7 @@ import { AnalogClock, Die, Hand, SpeakButton, toast } from '../ui/parts';
 
 const ARROW: Record<string, string> = { left: '←', right: '→', up: '↑', down: '↓' };
 
-function Art({ art, onSolved }: { art: TutArt; onSolved: (ok: boolean) => void }) {
+function Art({ art, color, onSolved }: { art: TutArt; color?: string; onSolved: (ok: boolean) => void }) {
   const [picked, setPicked] = useState<number | null>(null);
   useEffect(() => setPicked(null), [art]);
   switch (art.k) {
@@ -90,6 +91,20 @@ function Art({ art, onSolved }: { art: TutArt; onSolved: (ok: boolean) => void }
           {art.label && <p className="display" style={{ fontSize: '1.4rem' }}>{art.label}</p>}
         </div>
       );
+    case 'trace':
+      return (
+        <div className="col" style={{ width: '100%', gap: 8, alignItems: 'center' }}>
+          <TraceTaskCard task={art.task} />
+          <TraceTaskPad
+            task={art.task}
+            level={art.level}
+            color={inkColor(color, 0)}
+            autoDemo
+            disabled={!art.tryIt}
+            onDone={(r) => onSolved(r.stars > 0)}
+          />
+        </div>
+      );
     case 'quiz': {
       const reveal = picked !== null && picked === art.task.correct;
       return (
@@ -126,7 +141,7 @@ export function Tutorial({ game }: { game: GameId }) {
   const voiceReady = useVoiceReady();
   const step = steps[i];
   const last = i === steps.length - 1;
-  const needsTry = step.art.k === 'quiz' && step.art.tryIt;
+  const needsTry = (step.art.k === 'quiz' || step.art.k === 'trace') && !!step.art.tryIt;
 
   const say = needsTry && solved === true ? 'Super, das ist richtig! Du bist bereit.' : needsTry && solved === false ? 'Fast! Probier es nochmal.' : step.say;
 
@@ -172,7 +187,7 @@ export function Tutorial({ game }: { game: GameId }) {
           ))}
         </div>
         <div className="tut-stage">
-          <Art art={step.art} onSolved={(ok) => setSolved((cur) => (cur === true ? true : ok))} />
+          <Art art={step.art} color={profile?.color} onSolved={(ok) => setSolved((cur) => (cur === true ? true : ok))} />
         </div>
         <div className="joy-row">
           <Joy size={66} mood={solved ? 'cheer' : 'talk'} />
@@ -191,7 +206,7 @@ export function Tutorial({ game }: { game: GameId }) {
             </button>
           ) : (
             <button type="button" className="btn primary" disabled={needsTry && solved !== true} onClick={() => finish(true)}>
-              {needsTry && solved !== true ? 'Tippe die Antwort' : 'Verstanden!'}
+              {needsTry && solved !== true ? (step.art.k === 'trace' ? 'Erst nachspuren' : 'Tippe die Antwort') : 'Verstanden!'}
             </button>
           )}
         </div>

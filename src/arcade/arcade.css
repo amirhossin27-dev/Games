@@ -76,87 +76,18 @@
   background: #0f380f;
   color: #9bbc0f;
 }
-.snake-pad {
+.snake-field {
+  cursor: pointer;
+}
+/* Ersetzt die Pfeiltasten: ein kurzer Hinweis, wie man lenkt. */
+.snake-hint {
   flex: none;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  width: 100%;
-  max-width: 420px;
-  padding-bottom: 5px;
-}
-/* Große Game-Boy-Knöpfe: hell = drückbar, dunkel = da fährt die Schlange gerade hin, blass = geht nicht (umdrehen). */
-.snake-btn {
-  height: 72px;
-  display: grid;
-  place-items: center;
-  border-radius: 20px;
-  background: #9bbc0f;
-  color: #0f380f;
-  box-shadow: 0 5px 0 #306230;
-  touch-action: none;
-  transition: transform 0.06s, box-shadow 0.06s, background 0.12s, color 0.12s, opacity 0.15s;
-}
-.snake-btn:active {
-  transform: translateY(4px);
-  box-shadow: 0 1px 0 #306230;
-}
-.snake-btn.on {
-  background: #0f380f;
-  color: #9bbc0f;
-  box-shadow: 0 5px 0 #071c07, 0 0 0 3px #9bbc0f;
-}
-.snake-btn.on:active {
-  box-shadow: 0 1px 0 #071c07, 0 0 0 3px #9bbc0f;
-}
-.snake-btn.off {
-  opacity: 0.35;
-}
-/* Vor dem Start hüpfen die Pfeile nacheinander leicht – „hier tippen!“ */
-.snake-pad.wait .snake-btn {
-  animation: snake-nudge 1.6s ease-in-out infinite;
-}
-.snake-pad.wait .snake-btn:nth-child(2) {
-  animation-delay: 0.15s;
-}
-.snake-pad.wait .snake-btn:nth-child(3) {
-  animation-delay: 0.3s;
-}
-.snake-pad.wait .snake-btn:nth-child(4) {
-  animation-delay: 0.45s;
-}
-@keyframes snake-nudge {
-  0%,
-  40%,
-  100% {
-    translate: 0 0;
-  }
-  20% {
-    translate: 0 -6px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .snake-pad.wait .snake-btn {
-    animation: none;
-  }
-}
-.snake-arrow {
-  width: 40px;
-  height: 40px;
-  fill: currentColor;
-  stroke: currentColor;
-  stroke-width: 3;
-  stroke-linejoin: round;
-}
-@media (max-height: 700px) {
-  .snake-btn {
-    height: 60px;
-    border-radius: 18px;
-  }
-  .snake-arrow {
-    width: 34px;
-    height: 34px;
-  }
+  margin: 0;
+  padding: 2px 8px 6px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+  opacity: 0.75;
 }
 .rx {
   flex: 1;

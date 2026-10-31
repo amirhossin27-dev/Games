@@ -49,8 +49,36 @@ const MAX_FRIENDS = 20;
 
 export const isOnline = (p: Presence | undefined, now: number) => !!p && p.on !== false && now - p.at < ONLINE_MS;
 
-/** Kann man gerade zu diesem Freund ins Zimmer? */
-export const canJoin = (p: Presence | undefined, now: number) => isOnline(p, now) && !!p?.room && isCode(p.room) && p.st === 'lobby';
+/** Ist dieser Freund gerade in einem offenen Spielzimmer? Dann kann man zu ihm – auch mitten in der Runde. */
+export const canJoin = (p: Presence | undefined, now: number) => isOnline(p, now) && !!p?.room && isCode(p.room) && (p.st === 'lobby' || p.st === 'playing');
+
+/** Ein Spielzimmer, in dem gerade mindestens ein Spielfreund ist */
+export interface FriendRoom {
+  code: string;
+  game?: GameId;
+  /** Läuft gerade eine Runde? */
+  playing: boolean;
+  /** Die Spielfreunde darin (Konten) */
+  friends: string[];
+}
+
+/**
+ * Die gerade offenen Spielzimmer der Spielfreunde – nach Zimmer zusammengefasst. Wartende Zimmer
+ * zuerst (da geht es gleich los), dann die mit mehr Freunden. Das eigene Zimmer zählt nicht.
+ */
+export function friendRooms(presence: Record<string, Presence>, friendUids: string[], now: number, myRoom?: string | null): FriendRoom[] {
+  const rooms = new Map<string, FriendRoom>();
+  for (const uid of friendUids) {
+    const p = presence[uid];
+    if (!canJoin(p, now) || p!.room === myRoom) continue;
+    const r = rooms.get(p!.room!) ?? { code: p!.room!, game: p!.game, playing: false, friends: [] };
+    r.friends.push(uid);
+    if (p!.st === 'playing') r.playing = true;
+    if (!r.game) r.game = p!.game;
+    rooms.set(r.code, r);
+  }
+  return [...rooms.values()].sort((a, b) => Number(a.playing) - Number(b.playing) || b.friends.length - a.friends.length);
+}
 
 // ───── Kleiner Speicher für die Anzeige ─────
 

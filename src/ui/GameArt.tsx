@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 /** Illustrationen der Spiele im Papierwelt-Stil. Arcade-Spiele bekommen ein großes Bild-Symbol. */
-export type ArtKind = 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'slf' | { emoji: string; bg: string };
+export type ArtKind = 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch' | 'zahlenspur' | 'schwung' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'slf' | { emoji: string; bg: string };
 
 const C = { sky: '#6FA8D6', plum: '#8E6BA8', terra: '#D9774F', butter: '#F2C94C', sage: '#5E9C6B', peach: '#E58F7A', ink: '#2D3A31', paper: '#FFFDF8' };
 
@@ -12,6 +12,8 @@ const BG: Record<string, string> = {
   welt: '#DCE9F3',
   woerter: '#F7EDC8',
   englisch: '#E9E1F0',
+  zahlenspur: '#DCE9F3',
+  schwung: '#DDEBDD',
   paare: '#F6E1D8',
   vier: '#E9E1F0',
   ttt: '#DCE9F3',
@@ -98,6 +100,27 @@ function art(kind: Exclude<ArtKind, object>): ReactNode {
           <path d="M22 18 H118 Q128 18 128 28 V66 Q128 76 118 76 H62 L44 92 L48 76 H32 Q22 76 22 66 V28 Q22 18 32 18 Z" fill={C.paper} stroke={C.ink} strokeWidth="2.5" strokeLinejoin="round" />
           <text x="75" y="58" textAnchor="middle" fontSize="30" fontWeight="800" fontFamily={FONT} fill={C.plum}>Hello!</text>
           <Tile x={118} y={66} w={34} h={34} fill={C.terra} text="en" size={18} rotate={8} />
+        </>
+      );
+    case 'zahlenspur':
+      return (
+        <>
+          <rect x="30" y="12" width="100" height="88" rx="12" fill={C.paper} stroke={C.ink} strokeWidth="2" />
+          <path d="M58 40 C58 28 68 22 80 22 C93 22 101 30 101 41 C101 54 89 64 58 90 L104 90" fill="none" stroke="#E3DDCF" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M58 40 C58 28 68 22 80 22 C93 22 101 30 101 41 C101 51 94 59 84 67" fill="none" stroke={C.sky} strokeWidth="6" strokeLinecap="round" />
+          <circle cx="58" cy="40" r="7" fill={C.sage} />
+          <text x="58" y="44" textAnchor="middle" fontSize="10" fontWeight="800" fontFamily={FONT} fill={C.paper}>1</text>
+          <circle cx="84" cy="67" r="6" fill={C.paper} stroke={C.ink} strokeWidth="2" />
+        </>
+      );
+    case 'schwung':
+      return (
+        <>
+          <path d="M14 70 C24 34 40 34 50 70 C60 106 76 106 86 70 C96 34 112 34 122 70" fill="none" stroke="#E3DDCF" strokeWidth="14" strokeLinecap="round" />
+          <path d="M14 70 C24 34 40 34 50 70 C55 88 62 97 68 99" fill="none" stroke={C.terra} strokeWidth="6" strokeLinecap="round" />
+          <text x="70" y="104" textAnchor="middle" fontSize="24">🐻</text>
+          <text x="134" y="78" textAnchor="middle" fontSize="24">🍯</text>
+          <circle cx="14" cy="70" r="7" fill={C.sage} />
         </>
       );
     case 'paare':

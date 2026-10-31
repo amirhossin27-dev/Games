@@ -8,19 +8,18 @@ import { ensureAuth } from './auth';
 import { isCode, randomCode } from './codes';
 import { onlineAllowed } from './consent';
 import { DbError, dbRequest, openStream, SERVER_TIME } from './db';
-import { rememberRoom } from './recent';
 import {
+  admitChanges,
   autoAdmit,
   buildSeats,
   chatOf,
   chatToPrune,
+  fillSeats,
   isMember,
   leftRoom,
   members,
-  nextSlot,
   parseActs,
   robosFor,
-  slotsFor,
   takeOver,
   type ChatMsg,
   type NetSeat,
@@ -120,13 +119,13 @@ let myActs: { n: number; r: number; a: unknown }[] = [];
 
 const token = async (force = false) => {
   // Nie ein Konto für „kein Kind“ anlegen (z. B. wenn ein Zug noch unterwegs ist und das Zimmer schon zu)
-  if (!view.profileId) throw new Error('kein Kind im Zimmer');
+  if (!view.profileId) throw new Error('kein Freund im Zimmer');
   return (await ensureAuth(view.profileId, force)).token!;
 };
 
 const denied = (e: unknown) => e instanceof DbError && (e.status === 401 || e.status === 403);
 
-const GONE = 'Dieses Zimmer gibt es nicht mehr.';
+const GONE = 'Dieses Spielzimmer gibt es nicht mehr.';
 
 let lastChatRaw: unknown = null;
 
@@ -142,7 +141,8 @@ function onTree(tree: Record<string, unknown> | null) {
   let game = view.game;
   if (!state) game = null;
   else {
-    const raw = `${state.round}|${state.seq}|${state.st}`;
+    // Auch die Plätze: Ein neues Kind kann mitten in der Runde Robos Platz übernehmen.
+    const raw = `${state.round}|${state.seq}|${state.st}|${state.seats}`;
     if (raw !== lastStateRaw) {
       lastStateRaw = raw;
       try {
@@ -165,47 +165,28 @@ function onTree(tree: Record<string, unknown> | null) {
     lastChatRaw = tree.chat;
     chat = chatOf(tree.chat);
   }
-  set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats, game, chat });
-  if (info.status !== 'closed') {
-    remember();
-    if (info.host === view.uid) void hostChores();
-  }
-}
-
-/** Zimmer in „Zuletzt im Zimmer“ merken (nur wenn sich etwas geändert hat) */
-let remembered = '';
-function remember() {
-  const { code, info, seats, uid, profileId } = view;
-  if (!code || !info || !profileId) return;
-  const host = seats[info.host];
-  if (!host) return;
-  const key = `${profileId}|${code}|${info.game}|${info.host}|${host.name}`;
-  if (key === remembered) return;
-  remembered = key;
-  rememberRoom(profileId, { code, game: info.game, host: { name: host.name, avatar: host.avatar, color: host.color }, mine: info.host === uid });
+  set({ conn: 'online', error: info.status === 'closed' ? 'Das Spielzimmer wurde zugemacht.' : null, info, seats, game, chat });
+  if (info.status !== 'closed' && info.host === view.uid) void hostChores();
 }
 
 /**
- * Gastgeber: Spielfreunde und Kinder, die schon einmal drin waren, ohne Klingeln reinlassen –
- * und den Chat kurz halten.
+ * Gastgeber: Spielfreunde und Kinder, die schon einmal drin waren, ohne Klingeln reinlassen,
+ * neue Kinder in der laufenden Runde auf freie Plätze setzen – und den Chat kurz halten.
  */
 let choring = false;
 async function hostChores() {
   if (choring) return;
-  const { info, seats, profileId, chat } = view;
+  const { info, seats, profileId, chat, game } = view;
   if (!info || !profileId) return;
   const friends = getData().profiles.find((p) => p.id === profileId)?.friends ?? {};
   const welcome = autoAdmit(info, seats, friends);
   const prune = chatToPrune(chat);
-  if (!welcome.length && !prune.length) return;
+  const filled = info.status === 'playing' && game && game.round === info.round ? fillSeats(game.seats, info, seats) : null;
+  if (!welcome.length && !prune.length && !filled) return;
   choring = true;
   try {
-    if (welcome.length) {
-      const slots = slotsFor(info, seats, welcome);
-      const changes: Record<string, unknown> = {};
-      for (const [u, slot] of Object.entries(slots)) Object.assign(changes, { [`allowed/${u}`]: slot, [`known/${u}`]: true });
-      await patchInfo(changes);
-    }
+    if (welcome.length) await patchInfo(admitChanges(info, seats, welcome));
+    if (filled && view.code) await dbRequest('PATCH', `rooms/${view.code}/state`, await token(), { seats: JSON.stringify(filled) });
     if (prune.length && view.code) await dbRequest('PATCH', `rooms/${view.code}/chat`, await token(), Object.fromEntries(prune.map((id) => [id, null])));
   } catch {
     // beim nächsten Stand nochmal
@@ -221,7 +202,7 @@ function onDoor(info: RoomInfo | null) {
     return;
   }
   const hostDoc = view.seats[info.host];
-  set({ conn: 'online', error: info.status === 'closed' ? 'Das Zimmer wurde geschlossen.' : null, info, seats: hostDoc ? { [info.host]: hostDoc } : {}, game: null });
+  set({ conn: 'online', error: info.status === 'closed' ? 'Das Spielzimmer wurde zugemacht.' : null, info, seats: hostDoc ? { [info.host]: hostDoc } : {}, game: null });
   // Reingelassen → ab jetzt das ganze Zimmer
   if (isMember(info, view.uid)) void connect();
   else if (!hostDoc) void loadHost(info.host);
@@ -278,7 +259,7 @@ async function connect(force = false) {
         const { [uid]: _me, ...allowed } = info.allowed ?? {};
         set({ info: { ...info, allowed } });
         void connect();
-      } else set({ error: 'Kein Zugang zu diesem Zimmer.' });
+      } else set({ error: 'Kein Zugang zu diesem Spielzimmer.' });
     },
     onError: () => {
       set({ conn: 'offline' });
@@ -318,13 +299,20 @@ function startHeartbeat() {
   heartbeat = window.setInterval(beat, 5000);
 }
 
+/**
+ * So lange darf der Gastgeber weg sein, bevor ein anderes Kind übernimmt. Die Regeln erlauben es
+ * schon nach 20 Sekunden – wir warten länger, damit der Gastgeber kurz in eine andere App kann
+ * (z. B. um den Code zu schicken), ohne sein Zimmer zu verlieren.
+ */
+const TAKEOVER_MS = 45_000;
+
 /** Ist der Gastgeber weg, übernimmt das anwesende Kind mit der kleinsten Platznummer. */
 async function maybeTakeOver(t: string) {
   const { info, seats, uid } = view;
   if (!info || !uid) return;
   const now = serverNow();
   const hostDoc = seats[info.host];
-  if (hostDoc && now - hostDoc.at < 20_000) return;
+  if (hostDoc && now - hostDoc.at < TAKEOVER_MS) return;
   const present = Object.entries(info.allowed ?? {})
     .filter(([u]) => seats[u] && now - seats[u].at < 15_000)
     .sort((a, b) => a[1] - b[1]);
@@ -338,7 +326,6 @@ function stopAll() {
   window.clearTimeout(retry);
   lastStateRaw = '';
   lastChatRaw = null;
-  remembered = '';
   myActs = [];
 }
 
@@ -361,9 +348,9 @@ export class RoomError extends Error {}
 
 export const ONLINE_OFF = 'Online-Spielen ist ausgeschaltet. Deine Eltern können es im Elternbereich erlauben.';
 
-export const NO_ROOM = 'Dieses Zimmer gibt es nicht. Stimmt der Code?';
+export const NO_ROOM = 'Dieses Spielzimmer gibt es nicht. Stimmt der Code?';
 
-export const CLOSED = 'Dieses Zimmer ist gerade zu.';
+export const CLOSED = 'Dieses Spielzimmer ist gerade zu.';
 
 function friendly(e: unknown): RoomError {
   if (e instanceof RoomError) return e;
@@ -389,7 +376,7 @@ export async function createRoom(profile: Profile, game: GameId, level: Level): 
         if (!denied(e)) throw e;
       }
     }
-    if (!code) throw new RoomError('Das Zimmer ließ sich gerade nicht öffnen. Versuch es gleich nochmal.');
+    if (!code) throw new RoomError('Das Spielzimmer ließ sich gerade nicht öffnen. Versuch es gleich nochmal.');
     set({ ...EMPTY, code, uid: acc.uid, profileId: profile.id, conn: 'connecting' });
     saveResume();
     void connect();
@@ -402,7 +389,7 @@ export async function createRoom(profile: Profile, game: GameId, level: Level): 
 export async function joinRoom(profile: Profile, code: string) {
   try {
     if (!onlineAllowed()) throw new RoomError(ONLINE_OFF);
-    if (!isCode(code)) throw new RoomError('Diesen Zimmer-Code gibt es nicht.');
+    if (!isCode(code)) throw new RoomError('Diesen Spielzimmer-Code gibt es nicht.');
     if (view.code === code && view.profileId === profile.id) return;
     if (view.code) await leaveRoom();
     const acc = await ensureAuth(profile.id);
@@ -419,10 +406,11 @@ export async function joinRoom(profile: Profile, code: string) {
       await dbRequest('PATCH', `rooms/${code}/info`, t, reopen);
       info = { ...info, status: 'lobby', allowed: undefined, denied: undefined };
     }
+    // Läuft gerade eine Runde, darf man trotzdem klingeln: Wer reinkommt, übernimmt einen Robo-Platz
+    // oder spielt ab der nächsten Runde mit (siehe hostChores).
     let problem: string | null = null;
     if (!info) problem = NO_ROOM;
     else if (info.status === 'closed') problem = CLOSED;
-    else if (info.status === 'playing' && !isMember(info, acc.uid)) problem = 'Dort wird gerade gespielt. Probier es nach der Runde nochmal.';
     if (problem) {
       await dbRequest('DELETE', `rooms/${code}/seats/${acc.uid}`, t).catch(() => undefined);
       throw new RoomError(problem);
@@ -486,12 +474,13 @@ async function patchInfo(changes: Record<string, unknown>) {
   await dbRequest('PATCH', `rooms/${view.code}/info`, await token(), { ...changes, at: SERVER_TIME });
 }
 
+/** Reinlassen – ist es sonst zu voll, macht ein Robo Platz. */
 export async function admit(uid: string) {
   const info = view.info;
   if (!info) return;
-  const slot = nextSlot(info, view.seats);
-  if (slot === null) return;
-  await patchInfo({ [`allowed/${uid}`]: slot, [`denied/${uid}`]: null, [`known/${uid}`]: true });
+  const changes = admitChanges(info, view.seats, [uid]);
+  if (!Object.keys(changes).length) return;
+  await patchInfo(changes);
 }
 
 export const deny = (uid: string) => patchInfo({ [`denied/${uid}`]: true });
@@ -567,7 +556,9 @@ export function pushAct(a: unknown) {
   const round = view.game?.round ?? 0;
   myActs = myActs.filter((x) => x.r === round);
   if (!myActs.length) myActs = parseActs(view.uid ? view.seats[view.uid] : undefined, round).map((x) => ({ ...x, r: round }));
-  const n = (myActs[myActs.length - 1]?.n ?? 0) + 1;
+  // Wer einen Platz übernommen hat, zählt nach den Zügen des Vorgängers weiter – sonst überhört der Gastgeber sie.
+  const seat = view.game && view.uid ? view.game.seats.findIndex((s) => s.uid === view.uid) : -1;
+  const n = Math.max(myActs[myActs.length - 1]?.n ?? 0, seat >= 0 ? (view.game?.ack[seat] ?? 0) : 0) + 1;
   myActs = [...myActs.slice(-15), { n, r: round, a }];
   const body = JSON.stringify(myActs);
   const code = view.code;

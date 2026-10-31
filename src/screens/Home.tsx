@@ -17,7 +17,7 @@ import { TimePill } from '../ui/TimePill';
 export function TabBar({ active }: { active: 'home' | 'rooms' | 'me' }) {
   const tabs: { id: 'home' | 'rooms' | 'me'; label: string; icon: IconName }[] = [
     { id: 'home', label: 'Spielen', icon: 'pad' },
-    { id: 'rooms', label: 'Zimmer', icon: 'users' },
+    { id: 'rooms', label: 'Spielzimmer', icon: 'users' },
     { id: 'me', label: 'Ich', icon: 'user' },
   ];
   return (
@@ -129,25 +129,6 @@ export function Home({ profile, tab: initial }: { profile: Profile; tab?: string
           <Icon name="arrow" />
         </button>
       )}
-
-      <section className="card tape" aria-label="Zusammen spielen">
-        <div className="col" style={{ gap: 12 }}>
-          <div className="row between">
-            <div>
-              <h2>Zusammen spielen</h2>
-              <p style={{ color: '#3B4A3F' }}>Bis zu 4 Kinder – an einem Gerät oder online, jedes am eigenen.</p>
-            </div>
-          </div>
-          <div className="row" style={{ gap: 12 }}>
-            <button type="button" className="btn primary grow" onClick={() => setTab('zusammen')}>
-              Spiele für mehrere
-            </button>
-            <button type="button" className="btn secondary" onClick={() => nav.go({ name: 'rooms' })}>
-              Online
-            </button>
-          </div>
-        </div>
-      </section>
 
       <section className="sticky spruch" aria-label="Joys Spruch für dich">
         <Joy size={54} mood="cheer" />

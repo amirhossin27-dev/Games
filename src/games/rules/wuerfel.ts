@@ -133,7 +133,7 @@ export function wuerfelRobo(s: WuerfelState, seat: number, level: Level, rnd: Rn
   if (s.rolls === 0) return { t: 'roll', hold: [false, false, false, false, false] };
   const stay = bestValue(s.dice, sheet, s.cats);
   // Auf „Leicht“ überlegt Robo nicht so genau.
-  if (s.rolls < 3 && rnd() < [0.6, 0.85, 1][level]) {
+  if (s.rolls < 3 && rnd() < [0.5, 0.8, 1][level]) {
     let bestHold: boolean[] | null = null;
     let bestV = stay.v;
     for (let mask = 0; mask < 31; mask++) {

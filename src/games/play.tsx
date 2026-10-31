@@ -24,6 +24,7 @@ import { Ludo } from './views/Ludo';
 import { Quiz } from './views/Quiz';
 import { Schiffe } from './views/Schiffe';
 import { Slf } from './views/Slf';
+import { Trace } from './views/Trace';
 import { Wuerfel } from './views/Wuerfel';
 
 const ARCADE: Partial<Record<GameId, ComponentType<ArcadeProps>>> = {
@@ -62,6 +63,10 @@ export function GameView({ id, props }: { id: GameId; props: PlayProps }) {
     case 'woerter':
     case 'englisch':
       return <Quiz {...props} subject={id} />;
+    case 'zahlenspur':
+      return <Trace {...props} game="zahlen" />;
+    case 'schwung':
+      return <Trace {...props} game="schwung" />;
     case 'paare':
       return <Memory {...props} />;
     case 'vier':

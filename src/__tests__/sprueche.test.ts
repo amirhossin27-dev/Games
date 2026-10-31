@@ -73,6 +73,6 @@ describe('ohne Tagesaufgabe', () => {
     expect(res.out.earned).not.toContain(badge);
     res = applyResult(res.profile, { profileId: p.id, game: 'paare', stars: 1, won: false, together: false, logic: false });
     expect(res.out.earned).toContain(badge);
-    expect(BADGES).toHaveLength(12);
+    expect(BADGES).toHaveLength(13);
   });
 });

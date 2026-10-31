@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
 import { buzz, noise, outlinedText, oval, starPath, tone, useFillCanvas, useLoop } from './engine';
-import { FWD, HALF, LANE, newRun, rightOf, runScore, runStep, segPoint, TURN_WINDOW, yawOf, type Decor, type Obstacle, type RunInput, type RunState, type Seg } from './runner';
+import { FWD, HALF, LANE, newRun, rightOf, runScore, runStep, segPoint, TURN_WINDOW, yawOf, type Decor, type Obstacle, type RunInput, type RunState, type Seg } from './runner-logic';
 import type { GameProps } from './types';
 
 // ───────────────────────── Kamera ─────────────────────────

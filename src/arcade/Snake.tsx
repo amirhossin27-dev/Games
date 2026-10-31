@@ -65,11 +65,9 @@ export function Snake({ best, onEnd }: GameProps) {
   const s = useRef<SnakeState>(fresh());
   const [score, setScore] = useState(0);
   const [started, setStarted] = useState(false);
-  /** Wohin die Schlange gerade will – leuchtet unten als Knopf auf. */
-  const [heading, setHeading] = useState<Dir>('right');
-  const swipe = useRef<{ x: number; y: number; id: number } | null>(null);
+  const swipe = useRef<{ x: number; y: number; id: number; swiped: boolean } | null>(null);
 
-  const { wrapRef, canvasRef, paint } = useFitCanvas(W, H, (ctx) => {
+  const { wrapRef, canvasRef, paint, toLogical } = useFitCanvas(W, H, (ctx) => {
     const st = s.current;
     ctx.fillStyle = LCD.bg;
     ctx.fillRect(0, 0, W, H);
@@ -84,6 +82,14 @@ export function Snake({ best, onEnd }: GameProps) {
         if (ch === 'X') ctx.fillRect(st.food.x * C + px * (rx + 0.5), st.food.y * C + px * (ry + 0.5), px, px);
       }),
     );
+
+    // Die eigene Spur der Schlange ist etwas dunkler: Daneben tippen lenkt sie dorthin.
+    if (st.started && st.alive) {
+      const h = st.snake[0];
+      ctx.fillStyle = 'rgba(15, 56, 15, 0.14)';
+      if (heading(st) === 'left' || heading(st) === 'right') ctx.fillRect(0, h.y * C, W, C);
+      else ctx.fillRect(h.x * C, 0, C, H);
+    }
 
     if (!st.alive && Math.floor(st.blink * 8) % 2 === 1) return;
     st.snake.forEach((p, i) => {
@@ -109,13 +115,21 @@ export function Snake({ best, onEnd }: GameProps) {
       st.dir = d;
       st.started = true;
       setStarted(true);
-      setHeading(d);
       return;
     }
-    const last = st.queue[st.queue.length - 1] ?? st.dir;
+    const last = heading(st);
     if (d === last || d === OPPOSITE[last] || st.queue.length >= 2) return;
     st.queue.push(d);
-    setHeading(d);
+  };
+
+  /** Antippen: Die Schlange biegt zu der Seite ab, auf die das Kind neben sie tippt. */
+  const tap = (clientX: number, clientY: number) => {
+    const st = s.current;
+    const p = toLogical(clientX, clientY);
+    const d = tapDir(st.snake[0], heading(st), st.started, p.x, p.y);
+    if (!d) return;
+    buzz(10);
+    turn(d);
   };
 
   useEffect(() => {
@@ -170,9 +184,10 @@ export function Snake({ best, onEnd }: GameProps) {
     paint();
   }, true);
 
-  // Wischen: schon während der Bewegung abbiegen, damit es sich direkt anfühlt.
+  // Tippen gilt beim Loslassen, Wischen schon während der Bewegung. So stören sich die beiden nicht:
+  // Wer wischt, löst kein Antippen aus.
   const onDown = (e: RPointerEvent) => {
-    swipe.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+    swipe.current = { x: e.clientX, y: e.clientY, id: e.pointerId, swiped: false };
   };
   const onMove = (e: RPointerEvent) => {
     const sw = swipe.current;
@@ -181,30 +196,15 @@ export function Snake({ best, onEnd }: GameProps) {
     const dy = e.clientY - sw.y;
     if (Math.max(Math.abs(dx), Math.abs(dy)) < 22) return;
     turn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up');
-    swipe.current = { x: e.clientX, y: e.clientY, id: e.pointerId };
+    swipe.current = { x: e.clientX, y: e.clientY, id: e.pointerId, swiped: true };
   };
-  const onUp = () => {
+  const onUp = (e: RPointerEvent) => {
+    const sw = swipe.current;
     swipe.current = null;
+    if (sw && sw.id === e.pointerId && !sw.swiped) tap(e.clientX, e.clientY);
   };
-
-  const pad = (d: Dir, label: string) => {
-    const on = started && heading === d;
-    const off = started && heading === OPPOSITE[d];
-    return (
-      <button
-        type="button"
-        className={`snake-btn${on ? ' on' : ''}${off ? ' off' : ''}`}
-        onPointerDown={(e) => {
-          e.preventDefault();
-          buzz(10);
-          turn(d);
-        }}
-        aria-label={label}
-        aria-pressed={on}
-      >
-        <Arrow dir={d} />
-      </button>
-    );
+  const onCancel = () => {
+    swipe.current = null;
   };
 
   return (
@@ -213,35 +213,42 @@ export function Snake({ best, onEnd }: GameProps) {
         <span>🍎 {String(score).padStart(3, '0')}</span>
         <span>🏆 {best !== undefined ? String(best).padStart(3, '0') : '---'}</span>
       </div>
-      <div className="canvas-wrap lcd-frame" ref={wrapRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+      <div className="canvas-wrap lcd-frame snake-field" ref={wrapRef} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onCancel}>
         {/* So groß wie das Spielfeld, damit der Start-Hinweis immer auf dem Bildschirm liegt. */}
         <div className="snake-screen">
           <canvas ref={canvasRef} className="game-canvas" />
           {!started && (
             <div className="canvas-overlay snake-start">
-              <span className="lcd-text">Tippe unten auf einen Pfeil ↓</span>
+              <span className="lcd-text">Tippe dahin, wo die Schlange hin soll</span>
             </div>
           )}
         </div>
       </div>
-      {/* Alle vier Pfeile in einer Reihe, so wie sie auf dem Bildschirm liegen: links ganz links, rechts ganz rechts. */}
-      <div className={`snake-pad${started ? '' : ' wait'}`}>
-        {pad('left', 'Links')}
-        {pad('up', 'Hoch')}
-        {pad('down', 'Runter')}
-        {pad('right', 'Rechts')}
-      </div>
+      <p className="snake-hint">
+        <span aria-hidden="true">👆</span> Tippe neben die Schlange, dorthin biegt sie ab.
+      </p>
     </div>
   );
 }
 
-const ROTATE: Record<Dir, number> = { up: 0, right: 90, down: 180, left: 270 };
+/** Wohin die Schlange als Nächstes fährt (auch wenn der Abbieger noch in der Warteschlange steckt). */
+function heading(st: SnakeState): Dir {
+  return st.queue[st.queue.length - 1] ?? st.dir;
+}
 
-/** Dicker, runder Pfeil als Bild – Zeichen wie ▶ werden auf manchen Handys zu bunten Emojis. */
-function Arrow({ dir }: { dir: Dir }) {
-  return (
-    <svg className="snake-arrow" viewBox="0 0 24 24" aria-hidden="true" style={{ transform: `rotate(${ROTATE[dir]}deg)` }}>
-      <path d="M12 5 L20 17 H4 Z" />
-    </svg>
-  );
+/**
+ * Antippen → Richtung. Fährt die Schlange waagerecht, zählt nur „über“ oder „unter“ ihr,
+ * fährt sie senkrecht, nur „links“ oder „rechts“ daneben. Tippt man genau auf ihre eigene
+ * Spur (halbes Feld Spielraum), passiert nichts. Vor dem Start gilt die größere Entfernung.
+ * x/y sind Spielfeld-Koordinaten (Pixel des Spielfelds, nicht Felder).
+ */
+export function tapDir(head: Pt, dir: Dir, started: boolean, x: number, y: number): Dir | null {
+  const dx = x - (head.x + 0.5) * C;
+  const dy = y - (head.y + 0.5) * C;
+  if (!started) {
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < C / 2) return null;
+    return Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up';
+  }
+  if (dir === 'left' || dir === 'right') return Math.abs(dy) < C / 2 ? null : dy > 0 ? 'down' : 'up';
+  return Math.abs(dx) < C / 2 ? null : dx > 0 ? 'right' : 'left';
 }

@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { GAMES } from '../../src/games/registry';
 import { SLF_LETTERS } from '../../src/games/rules/slf';
 import { makeTask, type Subject } from '../../src/learn/tasks';
+import { numberTask } from '../../src/learn/trace/game';
 import { neededKeys } from '../../src/lib/voiceplan';
 import { SPRUECHE } from '../../src/lib/sprueche';
 import { ARCADE_AFTER_CHOICES } from '../../src/lib/unlock';
@@ -54,6 +55,17 @@ for (const subject of SUBJECTS)
     }
   }
 
+// Zahlen-Spuren: Hinweise über der Fläche
+add('spuren', 'Fang beim grünen Punkt an.');
+for (const level of [0, 1, 2] as const) {
+  let fresh = 0;
+  for (let i = 0; fresh < 5000; i++) {
+    const before = keys.size;
+    add(`spuren-${level}`, numberTask(level, rnd).hint);
+    fresh = keys.size === before ? fresh + 1 : 0;
+  }
+}
+
 // ───── Anleitungen ─────
 for (const g of GAMES) for (const step of g.tutorial) add('anleitung', step.say);
 add('anleitung', ['Super, das ist richtig! Du bist bereit.', 'Fast! Probier es nochmal.']);
@@ -84,7 +96,7 @@ for (const m of names.matchAll(/return '([^']+[.!?])'/g)) add('name', m[1]);
 add('name', 'Bitte nimm einen Namen vom Würfel.');
 
 // ───── Spielzimmer ─────
-add('zimmer', 'Der Zimmer-Code ist:');
+add('zimmer', 'Der Spielzimmer-Code ist:');
 for (const a of CODE_ANIMALS) add('zimmer', a.name);
 const room = readFileSync(join(root, 'src/net/room.ts'), 'utf8');
 for (const m of room.matchAll(/'([A-ZÄÖÜ][^'\n]{8,}[.!?])'/g)) add('zimmer', m[1]);

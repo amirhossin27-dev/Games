@@ -2,9 +2,8 @@ import { describe, expect, it } from 'vitest';
 import dbRules from '../../database.rules.json';
 import { CHAT_MAX, CHAT_WORDS, chatProblem, chatText, freeChat, QUICK_SENTENCES } from '../lib/chat';
 import { BAD_WORDS } from '../lib/names';
-import { canJoin, isOnline, ONLINE_MS } from '../net/presence';
-import { mergeRecent, RECENT_DAYS, RECENT_MAX, type RecentRoom } from '../net/recent';
-import { autoAdmit, chatOf, chatToPrune, CHAT_KEEP, slotsFor, type ChatMsg, type RoomInfo, type SeatDoc } from '../net/roomLogic';
+import { canJoin, friendRooms, isOnline, ONLINE_MS } from '../net/presence';
+import { admitChanges, autoAdmit, chatOf, chatToPrune, CHAT_KEEP, fillSeats, openSeat, slotsFor, waitingKids, type ChatMsg, type NetSeat, type RoomInfo, type SeatDoc } from '../net/roomLogic';
 
 const seat = (name: string, at = 1000): SeatDoc => ({ name, avatar: 'fuchs', color: '#fff', at });
 const settings = { sound: true, speech: 'auto' as const, onlyGeneratedNames: false };
@@ -68,15 +67,61 @@ describe('Ohne Klingeln rein', () => {
     expect(autoAdmit(info, seats, { n: {} })).toEqual(['k']);
   });
 
-  it('nur so viele, wie Platz ist', () => {
-    expect(autoAdmit({ ...info, robos: 1 }, seats, { f: {} })).toHaveLength(1);
-    expect(autoAdmit({ ...info, robos: 2 }, seats, { f: {} })).toEqual([]);
+  it('nur so viele Kinder, wie mitspielen können – Robos machen Platz', () => {
+    expect(autoAdmit({ ...info, robos: 2 }, seats, { f: {} })).toHaveLength(2);
+    expect(autoAdmit({ ...info, allowed: { a: 1, x: 2 } }, seats, { f: {} })).toHaveLength(1);
     expect(autoAdmit({ ...info, game: 'vier' }, seats, { f: {} })).toEqual([]);
   });
 
   it('gibt jedem einen eigenen Platz', () => {
     expect(slotsFor(info, seats, ['k', 'f'])).toEqual({ k: 2, f: 3 });
-    expect(slotsFor({ ...info, robos: 1 }, seats, ['k', 'f'])).toEqual({ k: 2 });
+    expect(slotsFor({ ...info, robos: 2 }, seats, ['k', 'f'])).toEqual({ k: 2, f: 3 });
+    expect(slotsFor({ ...info, allowed: { a: 1, x: 2 } }, seats, ['k', 'f'])).toEqual({ k: 3 });
+  });
+
+  it('beim Reinlassen gehen so viele Robos, wie nötig', () => {
+    // Anna + Gastgeber + 2 Robos = 4 → für Kim geht ein Robo
+    expect(admitChanges({ ...info, robos: 2 }, seats, ['k'])).toEqual({ 'allowed/k': 2, 'denied/k': null, 'known/k': true, robos: 1 });
+    // Mit Platz bleiben die Robos
+    expect(admitChanges({ ...info, robos: 1 }, seats, ['k'])).toEqual({ 'allowed/k': 2, 'denied/k': null, 'known/k': true });
+    // Zwei Kinder auf einmal, beide Robos gehen
+    expect(admitChanges({ ...info, robos: 2 }, seats, ['k', 'f'])).toMatchObject({ 'allowed/k': 2, 'allowed/f': 3, robos: 0 });
+    // Voll mit Kindern: nichts zu ändern
+    expect(admitChanges({ ...info, allowed: { a: 1, x: 2, n: 3 } }, { ...seats }, ['k'])).toEqual({});
+  });
+});
+
+describe('Mitten in der Runde dazukommen', () => {
+  const info: RoomInfo = { host: 'h', game: 'ludo', level: 1, status: 'playing', allowed: { a: 1 }, robos: 2, round: 1, at: 0 };
+  const seats = { h: seat('Lena'), a: seat('Ben'), m: seat('Mia') };
+  const robo = (name: string): NetSeat => ({ name, avatar: 'robo', color: '#E6E6DF', robo: true });
+  const kid = (uid: string, name: string): NetSeat => ({ uid, name, avatar: 'fuchs', color: '#fff', robo: false });
+  const players: NetSeat[] = [kid('h', 'Lena'), kid('a', 'Ben'), robo('Robo'), robo('Robbi')];
+
+  it('ein neues Kind übernimmt den ersten Robo-Platz', () => {
+    const inn = { ...info, allowed: { a: 1, m: 2 }, robos: 1 };
+    expect(waitingKids(inn, seats, players).map((w) => w.uid)).toEqual(['m']);
+    const next = fillSeats(players, inn, seats)!;
+    expect(next[2]).toMatchObject({ uid: 'm', name: 'Mia', robo: false, was: 'Robo' });
+    expect(next[3].robo).toBe(true);
+    // Danach wartet niemand mehr
+    expect(fillSeats(next, inn, seats)).toBeNull();
+  });
+
+  it('ohne Robo übernimmt man den Platz eines Kindes, das gegangen ist', () => {
+    const two = [kid('h', 'Lena'), kid('b', 'Bo'), kid('a', 'Ben')];
+    const inn = { ...info, allowed: { a: 1, m: 2 }, robos: 0 };
+    expect(openSeat(two, inn, seats)).toBe(1);
+    expect(fillSeats(two, inn, seats)![1]).toMatchObject({ uid: 'm', was: 'Bo' });
+    // Ist Bo noch im Zimmer (nur kurz weg), bleibt sein Platz seiner
+    expect(openSeat(two, { ...inn, allowed: { a: 1, b: 3, m: 2 } }, { ...seats, b: seat('Bo') })).toBe(-1);
+  });
+
+  it('ist kein Platz frei, wartet das Kind auf die nächste Runde', () => {
+    const full = [kid('h', 'Lena'), kid('a', 'Ben')];
+    const inn = { ...info, allowed: { a: 1, m: 2 }, robos: 0 };
+    expect(fillSeats(full, inn, seats)).toBeNull();
+    expect(waitingKids(inn, seats, full).map((w) => w.doc.name)).toEqual(['Mia']);
   });
 });
 
@@ -90,30 +135,37 @@ describe('Online-Punkt', () => {
 
   it('dazukommen geht nur, solange im Zimmer noch nicht gespielt wird', () => {
     expect(canJoin({ at: 1000, room: '0a3f7c', st: 'lobby' }, 2000)).toBe(true);
-    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'playing' }, 2000)).toBe(false);
+    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'playing' }, 2000)).toBe(true);
+    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'lobby', on: false }, 2000)).toBe(false);
+    expect(canJoin({ at: 1000, room: '0a3f7c', st: 'lobby' }, 1000 + ONLINE_MS + 1)).toBe(false);
     expect(canJoin({ at: 1000, room: 'kaputt', st: 'lobby' }, 2000)).toBe(false);
     expect(canJoin({ at: 1000 }, 2000)).toBe(false);
   });
 });
 
-describe('Zuletzt im Zimmer', () => {
-  const room = (code: string, at: number): RecentRoom => ({ code, game: 'vier', host: { name: 'Lena', avatar: 'katze', color: '#fff' }, mine: false, at });
-  const day = 86_400_000;
+describe('Spielzimmer mit Freunden', () => {
+  const now = 10_000;
+  const presence = {
+    lena: { at: now - 1000, room: 'aaaaaa', st: 'playing' as const, game: 'ludo' as const },
+    ben: { at: now - 1000, room: 'bbbbbb', st: 'lobby' as const, game: 'vier' as const },
+    mia: { at: now - 1000, room: 'aaaaaa', st: 'playing' as const, game: 'ludo' as const },
+    tom: { at: now - 1000 },
+    alt: { at: now - ONLINE_MS - 1, room: 'cccccc', st: 'lobby' as const },
+    weg: { at: now - 1000, on: false, room: 'dddddd', st: 'lobby' as const },
+    fremd: { at: now - 1000, room: 'eeeeee', st: 'lobby' as const },
+  };
+  const friends = ['lena', 'ben', 'mia', 'tom', 'alt', 'weg'];
 
-  it('neuestes zuerst, ohne doppelte, höchstens ein paar', () => {
-    const now = 10 * day;
-    let list: RecentRoom[] = [];
-    for (let i = 0; i < 6; i++) list = mergeRecent(list, room(`00000${i}`, now - 100 + i), now);
-    expect(list).toHaveLength(RECENT_MAX);
-    expect(list[0].code).toBe('000005');
-    list = mergeRecent(list, room('000003', now), now);
-    expect(list.map((r) => r.code)).toEqual(['000003', '000005', '000004', '000002']);
+  it('zeigt nur offene Zimmer, in denen gerade ein Spielfreund ist – nach Zimmer zusammengefasst', () => {
+    const rooms = friendRooms(presence, friends, now);
+    expect(rooms.map((r) => r.code)).toEqual(['bbbbbb', 'aaaaaa']);
+    expect(rooms[1]).toEqual({ code: 'aaaaaa', game: 'ludo', playing: true, friends: ['lena', 'mia'] });
+    expect(rooms[0].playing).toBe(false);
   });
 
-  it('vergisst alte Zimmer', () => {
-    const now = 10 * day;
-    const list = mergeRecent([room('000001', now - RECENT_DAYS * day - 1), room('000002', now - day)], null, now);
-    expect(list.map((r) => r.code)).toEqual(['000002']);
+  it('lässt das eigene Zimmer weg und ist leer ohne Freunde', () => {
+    expect(friendRooms(presence, friends, now, 'bbbbbb').map((r) => r.code)).toEqual(['aaaaaa']);
+    expect(friendRooms(presence, [], now)).toEqual([]);
   });
 });
 
