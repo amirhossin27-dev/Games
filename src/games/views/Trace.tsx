@@ -88,7 +88,7 @@ export function Trace(props: PlayProps & { game: TraceGameKind }) {
     if (s.phase !== 'ask') return;
     start.current = performance.now();
     const name = asker !== null && g.humans > 1 ? `${seats[asker].name}, ` : '';
-    if (!seats[me]?.robo) speakIfAuto(name + (task.k === 'schwung' ? 'Fang beim grünen Punkt an.' : task.hint));
+    if (!seats[me]?.robo) speakIfAuto([name, task.k === 'schwung' ? 'Fang beim grünen Punkt an.' : task.hint]);
   }, [s.q, s.phase]);
 
   const canTrace = g.myTurn && s.phase === 'ask' && !mine && !seats[me].robo;

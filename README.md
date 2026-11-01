@@ -135,6 +135,17 @@ src/
   screens/  Willkommen, Start, Spiel-Seite, Spiel, Tutorial, Ich, Eltern
 ```
 
+### Joys Stimme
+
+Joy liest mit einer freien KI-Stimme vor (Qwen3-TTS, Apache-2.0). Alle Sätze sind vorab als kleine Tondateien in `public/stimme/` aufgenommen, die App braucht dafür keinen Dienst im Netz. Rechenaufgaben und Uhrzeiten setzt sie aus Bausteinen zusammen, Sätze mit selbst getippten Namen liest sie nicht vor.
+
+Kommen neue Texte dazu (Spiele, Anleitungen, Fragen), fehlen dafür einfach die Aufnahmen. So kommen sie dazu:
+
+```bash
+npx -y tsx scripts/stimme/saetze.ts      # sammelt alle Sätze nach scripts/stimme/saetze.json
+python scripts/stimme/sprechen.py        # spricht fehlende Sätze, prüft sie mit Whisper (Python, qwen-tts)
+```
+
 Konzept und Plan: [`docs/KONZEPT.md`](docs/KONZEPT.md).
 
 ## Wie geht es weiter?

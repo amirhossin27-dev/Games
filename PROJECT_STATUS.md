@@ -1,5 +1,9 @@
 # Joyboy – Projektstatus und Übergabe
 
+## PR #24 – main übernommen
+
+Konflikt in Room.tsx gelöst. Aktuelle Sprachausgabe mit canSpeak sowie Kart-Streckenwahl und Lernfreischaltung kombiniert. Tests und Produktionsbuild des zusammengeführten Stands bestanden.
+
 ## Drei-Runden-Cup in Joyboy – lokal spielbar und geprüft am 02.11.2026
 
 [Joyboy am PC](http://127.0.0.1:60494/) → Arcade → Joy-Kart. Zwei geschlossene, nach Bogenlänge abgetastete Küstenkurse mit einer gemeinsamen Start-/Ziellinie. Sonnenbucht: 1.664 m pro Runde, Kap der Winde: 1.728 m. Gegen Robo und bei der Streckenwahl im Spielzimmer lässt sich der Startkurs wählen; die Joyboy-Revanche wechselt die Strecke. [PC-Datei](prototypes/joy-kart/dist/Joy-Kart-PC.html) separat per Doppelklick spielbar. Der kurze ältere Einzel-Fahrtest bleibt als Vergleich erhalten.

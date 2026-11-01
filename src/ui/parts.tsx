@@ -1,13 +1,14 @@
 import { useEffect, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 import { SEAT_COLORS, type SeatInfo } from '../engine/game';
-import { speak, speakIfAuto, VOICE_ENABLED } from '../lib/speech';
+import { canSpeak, speak, speakIfAuto, useVoiceReady } from '../lib/speech';
 import { cls } from '../lib/util';
 import { Avatar } from './Avatar';
 import { Icon, Star } from './Icon';
 import { Joy, type JoyMood } from './Joy';
 
-export function SpeakButton({ text, className }: { text: string; className?: string }) {
-  if (!VOICE_ENABLED) return null;
+export function SpeakButton({ text, className }: { text: string | string[]; className?: string }) {
+  useVoiceReady();
+  if (!canSpeak(text)) return null;
   return (
     <button type="button" className={cls('icon-btn soft speak', className)} aria-label="Vorlesen" onClick={() => speak(text)}>
       <Icon name="speaker" />
@@ -15,15 +16,16 @@ export function SpeakButton({ text, className }: { text: string; className?: str
   );
 }
 
-/** Joy mit Sprechblase. Liest von selbst vor, wenn das für dieses Kind eingeschaltet ist. */
-export function JoySays({ text, mood = 'talk', size = 64, children }: { text: string; mood?: JoyMood; size?: number; children?: ReactNode }) {
+/** Joy mit Sprechblase. Liest von selbst vor, wenn das für dieses Kind eingeschaltet ist (außer `quiet`). */
+export function JoySays({ text, mood = 'talk', size = 64, quiet, children }: { text: string; mood?: JoyMood; size?: number; quiet?: boolean; children?: ReactNode }) {
   useEffect(() => {
-    speakIfAuto(text);
-  }, [text]);
+    if (!quiet) speakIfAuto(text);
+  }, [text, quiet]);
+  const speakable = useVoiceReady() && canSpeak(text);
   return (
     <div className="joy-row">
       <Joy size={size} mood={mood} />
-      <div className={cls('bubble', VOICE_ENABLED && 'with-speaker')}>
+      <div className={cls('bubble', speakable && 'with-speaker')}>
         <p>{text}</p>
         {children}
         <SpeakButton text={text} />
