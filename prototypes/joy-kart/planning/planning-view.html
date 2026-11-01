@@ -1,0 +1,111 @@
+<style>
+#joy-kart-layout-probe{color:var(--foreground);width:100%}
+#joy-kart-layout-probe .jp-maps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--font-size-base)*1.5);margin-top:calc(var(--font-size-base)*.75)}
+#joy-kart-layout-probe .jp-map{width:100%;display:block;overflow:visible}
+#joy-kart-layout-probe .jp-sector-buttons{display:flex;gap:4px;flex-wrap:wrap}
+#joy-kart-layout-probe .jp-detail{min-height:calc(var(--font-size-base)*4.5);margin-top:calc(var(--font-size-base)*.5)}
+#joy-kart-layout-probe .jp-legend{display:flex;gap:calc(var(--font-size-base)*.9);flex-wrap:wrap;margin-top:calc(var(--font-size-base)*.5)}
+#joy-kart-layout-probe .jp-key{display:inline-block;width:24px;height:0;vertical-align:middle;margin-right:5px;border-top:3px solid var(--viz-series-1)}
+#joy-kart-layout-probe .jp-key-risk{border-color:var(--viz-series-2);border-top-style:dashed}
+#joy-kart-layout-probe .jp-key-runout{border-color:var(--muted-foreground);border-top-style:dotted}
+#joy-kart-layout-probe .jp-heading{margin-top:calc(var(--font-size-base)*1.5);margin-bottom:calc(var(--font-size-base)*.5)}
+#joy-kart-layout-probe .jp-map path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
+#joy-kart-layout-probe .jp-section{stroke:var(--viz-series-1);stroke-width:2.5;opacity:.55;transition:opacity .15s,stroke-width .15s}
+#joy-kart-layout-probe .jp-section.is-selected{stroke-width:4;opacity:1}
+#joy-kart-layout-probe .jp-risk{stroke:var(--viz-series-2);stroke-width:2.5;stroke-dasharray:6 4}
+#joy-kart-layout-probe .jp-runout{stroke:var(--muted-foreground);stroke-width:2;stroke-dasharray:2 4}
+#joy-kart-layout-probe .jp-map text{fill:var(--foreground);font-size:12px;font-weight:500}
+#joy-kart-layout-probe .jp-node{fill:var(--background);stroke:var(--viz-series-1);stroke-width:1.5}
+#joy-kart-layout-probe .jp-map .jp-mark{fill:var(--foreground);stroke:none}
+#joy-kart-layout-probe .jp-map .jp-mark-text{fill:var(--background);font-size:11px}
+#joy-kart-layout-probe .jp-branch-detail{margin-top:calc(var(--font-size-base)*.4);min-height:calc(var(--font-size-base)*4.5)}
+@media(max-width:620px){#joy-kart-layout-probe .jp-maps{grid-template-columns:1fr;gap:calc(var(--font-size-base)*1.5)}#joy-kart-layout-probe .jp-detail,#joy-kart-layout-probe .jp-branch-detail{min-height:0}}
+/* Product-specific styling is confined to the proposed phone controls. */
+#joy-kart-layout-probe .jk-probe{--jk-gold:#efc77f;--jk-ink:#fff4dc;--jk-muted:#bccbd1;--jk-bg:#0d1924;--jk-drift:clamp(58px,18cqw,128px);color:var(--jk-ink);font:14px/1.4 'Segoe UI',sans-serif}
+#joy-kart-layout-probe .jk-phone{container-type:inline-size;width:100%;aspect-ratio:19.5/9;position:relative;overflow:hidden;border-radius:18px;border:1px solid #ffffff30;background:radial-gradient(ellipse at 50% 120%,#496061 0,#1d333d 42%,#0d1924 80%);touch-action:none;isolation:isolate}
+#joy-kart-layout-probe .jk-road{position:absolute;left:25%;top:25%;width:50%;height:110%;background:#24323e;transform:perspective(320px) rotateX(34deg) rotateZ(-10deg);border-left:2px solid #e9d8b360;border-right:2px solid #e9d8b360;z-index:-1}
+#joy-kart-layout-probe .jk-road:after{content:'';position:absolute;left:50%;top:0;height:100%;border-left:2px dashed #e9d8b350}
+#joy-kart-layout-probe .jk-top{position:absolute;left:12px;top:8px;display:flex;gap:12px;align-items:center;max-width:calc(100% - 100px)}
+#joy-kart-layout-probe .jk-label{font-size:clamp(11px,2cqw,14px);font-weight:600;white-space:nowrap}
+#joy-kart-layout-probe .jk-probe button{font:inherit;color:inherit;touch-action:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#joy-kart-layout-probe .jk-reset{border:1px solid #ffffff40;border-radius:9px;background:#102735d9;min-width:44px;min-height:44px;padding:5px 9px;font-size:12px}
+#joy-kart-layout-probe .jk-pad{position:absolute;left:clamp(10px,3%,24px);bottom:clamp(10px,3%,24px);width:22%;max-width:142px;aspect-ratio:1;border-radius:50%;border:1px solid #fff1d578;background:#102331e8;box-shadow:inset 0 0 0 8px #fff1d506;display:grid;place-items:center}
+#joy-kart-layout-probe .jk-pad .jk-thumb{display:block;width:38%;aspect-ratio:1;border-radius:50%;background:#efd39f;border:1px solid #fff4dc;transform:translateX(calc(var(--jk-steer,0)*55%));transition:transform .07s linear;pointer-events:none}
+#joy-kart-layout-probe .jk-pad-label{position:absolute;left:0;right:0;bottom:12%;font-size:clamp(11px,2cqw,13px);pointer-events:none;color:#d5e0e3}
+#joy-kart-layout-probe .jk-arrows{position:absolute;left:clamp(10px,3%,24px);bottom:clamp(10px,3%,24px);display:flex;gap:8px}
+#joy-kart-layout-probe .jk-arrow{width:clamp(44px,10cqw,74px);height:clamp(48px,12cqw,86px);border:1px solid #fff1d578;border-radius:16px;background:#102331e8;display:grid;place-items:center}
+#joy-kart-layout-probe .jk-arrow i{font-size:28px;font-style:normal;pointer-events:none}
+#joy-kart-layout-probe .jk-drift{position:absolute;right:clamp(10px,3%,24px);bottom:clamp(10px,3%,24px);width:var(--jk-drift);height:var(--jk-drift);border:2px solid var(--jk-gold);border-radius:50%;background:radial-gradient(#4d5039,#102331);font-weight:700;display:grid;place-content:center;font-size:clamp(12px,2.4cqw,17px)}
+#joy-kart-layout-probe .jk-drift small{display:block;font-size:clamp(11px,1.8cqw,12px);font-weight:400;color:var(--jk-muted)}
+#joy-kart-layout-probe .jk-item{position:absolute;right:clamp(10px,3%,24px);bottom:calc(var(--jk-drift) + clamp(18px,5cqw,38px));min-width:44px;min-height:44px;width:clamp(54px,14%,100px);border:1px solid #f3dba0;border-radius:12px;background:#18394bdc;font-size:clamp(11px,2cqw,14px);display:flex;align-items:center;justify-content:center;gap:4px;padding:6px}
+#joy-kart-layout-probe .jk-item i{font-size:20px;font-style:normal;pointer-events:none}
+#joy-kart-layout-probe .jk-item:disabled{opacity:.6;border-color:#b9c9ce}
+#joy-kart-layout-probe .jk-probe button.is-held{background:#86662d;border-color:#ffe7b6}
+#joy-kart-layout-probe .jk-kart-dot{position:absolute;left:50%;top:50%;width:18px;height:27px;border:2px solid #fff0c9;border-radius:7px;background:#ba3c2c;transform:translate(calc(-50% + var(--jk-steer,0)*38px),-50%) rotate(calc(var(--jk-steer,0)*16deg));transition:transform .07s linear;pointer-events:none}
+#joy-kart-layout-probe .jk-output{position:absolute;left:26%;right:26%;top:max(54px,25%);text-align:center;font-size:clamp(11px,2cqw,14px);color:#e6e4ce;pointer-events:none}
+#joy-kart-layout-probe .jk-caption{margin:8px 0 0;font-size:12px;line-height:1.5;color:var(--foreground);font-family:inherit}
+@media(pointer:coarse){#joy-kart-layout-probe .jk-reset{min-height:44px}}
+@container(max-width:400px){#joy-kart-layout-probe .jk-kart-dot{display:none}}
+@media(prefers-reduced-motion:reduce){#joy-kart-layout-probe .jp-section,#joy-kart-layout-probe .jk-thumb,#joy-kart-layout-probe .jk-kart-dot{transition:none}}
+</style>
+<div id="joy-kart-layout-probe">
+ <h2>Streckenentwürfe</h2>
+ <div class="text-small text-muted">3 Runden · Ziel: 40–60 Sekunden je Runde · Grundrisse noch nicht fahrbar</div>
+ <div class="jp-maps">
+  <section data-track="sun-coast-draft" aria-label="Sonnenküste – Grundriss"><h3>Sonnenküste · Küstenbrücke</h3><svg class="jp-map" role="img" aria-label="Schematischer Streckenplan Sonnenküste mit sechs Abschnitten, Rampe und Auffangweg"></svg><div class="jp-sector-buttons" aria-label="Abschnitt auf der Sonnenküste wählen"></div><div class="jp-detail" aria-live="polite"></div><div class="jp-branch-detail text-small"></div></section>
+  <section data-track="neon-city-draft" aria-label="Neonstadt – Grundriss"><h3>Neonstadt · Nachtlinie</h3><svg class="jp-map" role="img" aria-label="Schematischer Streckenplan Neonstadt mit sechs Abschnitten, Dachsprung und Auffangweg"></svg><div class="jp-sector-buttons" aria-label="Abschnitt in der Neonstadt wählen"></div><div class="jp-detail" aria-live="polite"></div><div class="jp-branch-detail text-small"></div></section>
+ </div>
+ <div class="jp-legend text-small"><span><i class="jp-key"></i>Normale Linie</span><span><i class="jp-key jp-key-risk"></i>Rampenweg</span><span><i class="jp-key jp-key-runout"></i>Langsamer Auslauf</span><span>B Box · H Hindernis · S Sprung</span></div>
+ <h2 class="jp-heading">Bedienprobe im Querformat</h2>
+ <div class="viz-carousel viz-dotted-background" aria-label="Joy-Kart Bedienvarianten" data-previous-label="Vorige Bedienung" data-next-label="Nächste Bedienung">
+  <section data-variant="Lenkpad" aria-label="Lenkpad mit Driftgeste">
+   <div class="jk-probe" data-probe="pad" aria-label="Lenkpad-Bedienung">
+    <div class="jk-phone"><div class="jk-road"></div><div class="jk-top"><span class="jk-label">Bedienprobe · Auto-Gas</span><button type="button" class="jk-reset cursor-interaction" data-reset>Neu</button></div><div class="jk-output">Geradeaus · Item bereit</div><div class="jk-kart-dot"></div><button type="button" class="jk-pad cursor-interaction" data-role="pad" aria-label="Analog lenken: links und rechts ziehen"><span class="jk-thumb"></span><span class="jk-pad-label">Lenken</span></button><button type="button" class="jk-item cursor-interaction" data-item aria-label="Turbo einsetzen"><i data-lucide="zap" aria-hidden="true">↯</i><span>Turbo</span></button><button type="button" class="jk-drift cursor-interaction" data-role="drift" aria-label="Drift halten, für Item nach oben wischen">DRIFT<small>halten ↑ Item</small></button><span class="jk-live sr-only" role="status" aria-live="polite"></span></div>
+    <p class="jk-caption">Links ziehen zum Lenken. Rechts Drift halten; zum Item nach oben wischen. Auch einzeln antippbar. Nur Eingaben, noch kein Rennen.</p>
+   </div>
+  </section>
+  <section data-variant="Pfeiltasten" aria-label="Pfeiltasten mit Driftgeste" hidden>
+   <div class="jk-probe" data-probe="arrows" aria-label="Pfeiltasten-Bedienung">
+    <div class="jk-phone"><div class="jk-road"></div><div class="jk-top"><span class="jk-label">Bedienprobe · Auto-Gas</span><button type="button" class="jk-reset cursor-interaction" data-reset>Neu</button></div><div class="jk-output">Geradeaus · Item bereit</div><div class="jk-kart-dot"></div><div class="jk-arrows"><button type="button" class="jk-arrow cursor-interaction" data-role="left" aria-label="Nach links lenken"><i data-lucide="chevron-left" aria-hidden="true">‹</i></button><button type="button" class="jk-arrow cursor-interaction" data-role="right" aria-label="Nach rechts lenken"><i data-lucide="chevron-right" aria-hidden="true">›</i></button></div><button type="button" class="jk-item cursor-interaction" data-item aria-label="Turbo einsetzen"><i data-lucide="zap" aria-hidden="true">↯</i><span>Turbo</span></button><button type="button" class="jk-drift cursor-interaction" data-role="drift" aria-label="Drift halten, für Item nach oben wischen">DRIFT<small>halten ↑ Item</small></button><span class="jk-live sr-only" role="status" aria-live="polite"></span></div>
+    <p class="jk-caption">Links eine Lenktaste halten. Rechts Drift halten; zum Item nach oben wischen. Auch einzeln antippbar. Nur Eingaben, noch kein Rennen.</p>
+   </div>
+  </section>
+ </div>
+</div>
+<script>
+(()=>{
+/*@@CONTROL_MODEL@@*/
+const data=/*@@LAYOUT_DATA@@*/;
+const root=document.getElementById('joy-kart-layout-probe'),saved=window.openai?.widgetState?.privateContent||{},selection={...(saved.sectors||{})},probes={},mapRenders={},ns='http://www.w3.org/2000/svg';
+const persist=variant=>{if(!window.openai?.setWidgetState)return;window.openai.setWidgetState({modelContent:{plan:'Joy-Kart Strecken-/Bedienentwurf',testedInput:variant||null,laps:3,orientation:'Querformat'},privateContent:{sectors:{...selection},lastTested:variant||saved.lastTested||null}}).catch(()=>{});};
+const svgElement=(name,attributes={},parent)=>{const n=document.createElementNS(ns,name);for(const [key,value]of Object.entries(attributes))n.setAttribute(key,value);parent?.append(n);return n;};
+for(const track of data.tracks){
+ const section=root.querySelector('[data-track="'+track.id+'"]'),svg=section.querySelector('svg'),buttons=section.querySelector('.jp-sector-buttons');if(!track.sectors.some(s=>s.id===selection[track.id]))selection[track.id]=track.sectors[0].id;
+ const render=()=>{const width=Math.max(260,Math.round(svg.clientWidth)),height=Math.round(width*300/360),scale=width/360;svg.setAttribute('viewBox','0 0 '+width+' '+height);svg.style.height=height+'px';svg.replaceChildren();
+  const paths=svgElement('g',{transform:'scale('+scale+')'},svg);for(const s of track.sectors)svgElement('path',{d:s.path,class:'jp-section'+(selection[track.id]===s.id?' is-selected':''),'data-sector':s.id},paths);svgElement('path',{d:track.branch.runoutPath,class:'jp-runout'},paths);svgElement('path',{d:track.branch.path,class:'jp-risk'},paths);
+  for(const s of track.sectors){const [x,y]=s.marker.map(v=>v*scale);svgElement('circle',{cx:x,cy:y,r:11,class:'jp-node'},svg);const label=svgElement('text',{x,y:y+4,'text-anchor':'middle'},svg);label.textContent=s.number;}
+  for(const m of track.markers){const [x,y]=m.at.map(v=>v*scale);svgElement('rect',{x:x-9,y:y-9,width:18,height:18,rx:m.type==='box'?2:9,class:'jp-mark'},svg);const label=svgElement('text',{x,y:y+4,'text-anchor':'middle',class:'jp-mark-text'},svg);label.textContent=m.type==='box'?'B':m.type==='jump'?'S':'H';}
+  const [lx,ly]=track.branch.landing.map(v=>v*scale);svgElement('circle',{cx:lx,cy:ly,r:5,fill:'var(--background)',stroke:'var(--viz-series-2)','stroke-width':2},svg);const start=svgElement('text',{x:86*scale,y:278*scale},svg);start.textContent='Start / Ziel →';
+  const selected=track.sectors.find(s=>s.id===selection[track.id]);section.querySelector('.jp-detail').textContent=selected.number+' · '+selected.name+' — '+selected.detail;section.querySelector('.jp-branch-detail').textContent=track.branch.name+': '+track.branch.detail;for(const b of buttons.children)b.setAttribute('aria-pressed',String(b.dataset.sector===selected.id));
+ };
+ for(const s of track.sectors){const button=document.createElement('button');button.type='button';button.className='btn';button.dataset.sector=s.id;button.textContent=s.number+' '+s.name;button.addEventListener('click',()=>{selection[track.id]=s.id;render();persist(null);});buttons.append(button);}mapRenders[track.id]=render;let observedWidth=0;new ResizeObserver(()=>{const width=Math.round(svg.clientWidth);if(width!==observedWidth){observedWidth=width;render();}}).observe(svg);render();
+}
+for(const panel of root.querySelectorAll('[data-probe]')){
+ const name=panel.dataset.probe,phone=panel.querySelector('.jk-phone'),config={swipePx:44},owners=new Map();let api;
+ const draw=(s,reason)=>{phone.style.setProperty('--jk-steer',s.steer);for(const b of phone.querySelectorAll('[data-role]')){const role=b.dataset.role;b.classList.toggle('is-held',role==='drift'?s.driftHeld:role==='left'?s.steer<0:role==='right'?s.steer>0:s.steer!==0);}const item=phone.querySelector('[data-item]');item.disabled=!s.itemReady;item.querySelector('span').textContent=s.itemReady?'Turbo':'Leer';phone.querySelector('.jk-output').textContent=(s.driftActive?'Drift aktiv':s.driftHeld?'Drift bereit':s.itemReady?'Item bereit':'Item verbraucht');item.setAttribute('aria-label',s.itemReady?'Turbo einsetzen':'Kein Item verfügbar');if(reason!=='move'&&reason!=='initial')phone.querySelector('.jk-live').textContent=reason==='item'?'Turbo ausgelöst. Drift bleibt gehalten.':s.driftActive?'Drift aktiv.':reason==='reset'?'Neue Probe. Item bereit.':'Eingabe gelöst.';if(['end','item','reset'].includes(reason))persist(name==='pad'?'Lenkpad':'Pfeiltasten');};
+ api=createJoyKartControlProbe({...config,get swipePx(){return config.swipePx;},onChange:draw});probes[name]=api;draw(api.snapshot(),'initial');
+ const clear=()=>{api.clear();for(const [id,element]of owners){if(element.hasPointerCapture?.(id))element.releasePointerCapture(id);}owners.clear();};
+ for(const button of phone.querySelectorAll('[data-role]')){
+  button.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();const b=button.getBoundingClientRect();if(api.begin(e.pointerId,button.dataset.role,{x:e.clientX,y:e.clientY,centerX:b.x+b.width/2,halfWidth:b.width/2})){owners.set(e.pointerId,button);button.setPointerCapture?.(e.pointerId);}});
+  button.addEventListener('pointermove',e=>api.move(e.pointerId,{x:e.clientX,y:e.clientY}));
+  const end=e=>{api.end(e.pointerId);owners.delete(e.pointerId);};for(const type of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(type,end);
+  button.addEventListener('keydown',e=>{if(e.code==='Enter'&&button.dataset.role!=='pad'){e.preventDefault();if(!e.repeat)api.begin('key:'+e.code,button.dataset.role);}});
+ }
+ phone.querySelector('[data-item]').addEventListener('click',()=>api.useItem());phone.querySelector('[data-reset]').addEventListener('click',()=>{clear();api.reset();});phone.addEventListener('keydown',e=>{if(e.target.closest('[data-reset],[data-item]'))return;if(['ArrowLeft','ArrowRight','Space'].includes(e.code)){e.preventDefault();if(!e.repeat)api.begin('key:'+e.code,e.code==='Space'?'drift':e.code==='ArrowLeft'?'left':'right');}if(e.code==='KeyE'){e.preventDefault();if(!e.repeat)api.useItem();}});phone.addEventListener('keyup',e=>api.end('key:'+e.code));phone.addEventListener('focusout',e=>{if(phone.contains(e.relatedTarget))return;for(const key of ['Space','Enter','ArrowLeft','ArrowRight'])api.end('key:'+key);});
+ window.addEventListener('blur',clear);document.addEventListener('visibilitychange',()=>{if(document.hidden)clear();});new MutationObserver(()=>{if(panel.closest('[data-variant]').hidden)clear();}).observe(panel.closest('[data-variant]'),{attributes:true,attributeFilter:['hidden']});
+ if(globalThis.Tweak){const tweak=new Tweak({container:panel,onChange:clear});tweak.addSlider(config,'swipePx',{label:'Wischweg fürs Item',min:32,max:64,step:4,unit:'px',reference:'control.swipePx'});}
+}
+window.addEventListener('openai:set_globals',event=>{const next=event.detail?.globals?.widgetState?.privateContent?.sectors;if(!next)return;for(const track of data.tracks){if(track.sectors.some(sector=>sector.id===next[track.id])){selection[track.id]=next[track.id];mapRenders[track.id]();}}});
+root.__joyKartPlanning={snapshot:()=>({confirmed:data.confirmed,sectors:{...selection},controls:Object.fromEntries(Object.entries(probes).map(([name,api])=>[name,api.snapshot()]))})};
+})();
+</script>

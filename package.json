@@ -5,10 +5,14 @@
   "description": "Joyboy – Lern-Spiele für Kinder",
   "type": "module",
   "scripts": {
+    "kart": "node prototypes/joy-kart/coast-section/build-simple.cjs --duel && node prototypes/joy-kart/coast-section/build-pc.cjs",
+    "predev": "npm run kart",
+    "pretest": "npm run kart",
+    "prebuild": "npm run kart",
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host",
-    "test": "vitest run",
+    "test": "vitest run src && node --test prototypes/joy-kart/*.test.cjs prototypes/joy-kart/coast-section/*.test.cjs prototypes/joy-kart/planning/*.test.cjs",
     "typecheck": "tsc --noEmit",
     "rules": "node scripts/make-rules.mjs",
     "test:rules": "npx -y firebase-tools@14 emulators:exec --only database --project demo-joyboy \"node scripts/test-rules.mjs\""

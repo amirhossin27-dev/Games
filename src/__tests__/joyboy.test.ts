@@ -422,7 +422,7 @@ describe('Namen und Katalog', () => {
   });
 
   it('jedes Spiel hat ein Tutorial mit mindestens zwei Schritten', () => {
-    expect(GAMES).toHaveLength(31);
+    expect(GAMES).toHaveLength(32);
     for (const g of GAMES) {
       expect(g.tutorial.length, g.id).toBeGreaterThanOrEqual(2);
       for (const step of g.tutorial) expect(step.say.length, g.id).toBeGreaterThan(10);

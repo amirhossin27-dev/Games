@@ -55,5 +55,5 @@ export function defFor(id: GameId, robos: boolean[]): GameDef<unknown, unknown> 
 }
 
 /** Diese Spiele gibt es im Online-Spielzimmer (Regel-Spiele für mehrere). */
-export const ONLINE_GAMES = GAMES.filter((g) => g.kind === 'def' && g.players[1] > 1);
+export const ONLINE_GAMES = GAMES.filter((g) => (g.kind === 'def' || g.id === 'joykart') && g.players[1] > 1);
 export const isOnlineGame = (id: GameId) => ONLINE_GAMES.some((g) => g.id === id);

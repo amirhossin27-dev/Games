@@ -1,0 +1,28 @@
+<!doctype html><html lang="de"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Joy-Kart · Sonnenküste kompakt</title><style>
+*{box-sizing:border-box}body{margin:0;background:#126580;color:#fff8db;font:600 16px system-ui}main{position:relative;height:100vh;height:100svh;overflow:hidden}canvas{display:block;width:100%;height:100%}
+header,.js-speed,.js-count,.js-controls,.js-overlay{position:absolute}header{top:8px;left:12px;background:#172c3d;padding:6px 12px;border-radius:12px}
+.js-overlay{inset:0;display:grid;place-content:center;background:#21364770;padding:12px}.panel{background:#fff2cf;color:#253849;padding:18px;border-radius:18px;max-width:360px;text-align:center}h2{margin:0}a{display:block;margin-top:12px;color:#17516b}
+button{font:inherit;border:0;background:#ffe297;color:#262f38;padding:12px 20px;border-radius:14px;touch-action:none}button:disabled{opacity:.65}
+.js-controls{bottom:max(14px,env(safe-area-inset-bottom));left:5%;right:5%;display:flex;justify-content:space-between}.js-controls button{min-height:60px}
+.js-count{top:32%;width:100%;text-align:center;font-size:48px}.js-speed{bottom:14px;width:100%;text-align:center;pointer-events:none}[hidden]{display:none!important}
+</style><main id="joy-kart-simple"><canvas></canvas><header>Sonnenküste · Kompakt</header><div class="js-overlay"><div class="panel"><h2>Joy-Kart</h2><p>Der Spielserver ist erreichbar. Links ziehen zum Lenken, rechts Turbo tippen.</p><button data-action="start">Beitreten</button><a href="./3d">Zur 3D-Ansicht</a></div></div><div class="js-controls" hidden><button data-control="pad" aria-label="Lenken">↔ Lenken</button><button data-action="turbo">Turbo</button></div><div class="js-speed" hidden></div><div class="js-count" hidden></div></main><script>
+const root=document.querySelector('main'),find=q=>root.querySelector(q),keys=new Set(),held=new Map(),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+function clear(){keys.clear();held.clear();}
+function input(){let s=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft'));for(const p of held.values())s+=p.value;return clamp(s,-1,1);}
+function toast(t){find('header').textContent=t;}
+/*@@CIRCUIT@@*/
+const course=createKartCircuit();
+/*@@DUEL_CLIENT@@*/
+bindDuel();
+const canvas=find('canvas'),ctx=canvas.getContext('2d');
+/*@@COMPACT_ROAD@@*/
+function paint(){
+ drawCompactRoad(canvas,ctx,packet,course);
+ const me=packet?.me;
+ if(me){find('.js-speed').textContent='Runde '+me.lap+' / 3 · '+me.speedKmh+' km/h';find('[data-action="turbo"]').textContent=KART_ITEMS[me.item]||'Box sammeln';find('[data-action="turbo"]').disabled=!me.item||me.phase!=='running';}
+ requestAnimationFrame(paint);
+}
+root.__duelSnapshot=()=>packet&&({slot:packet.slot,me:packet.me,other:packet.other,round:packet.round});
+paint();
+</script></html>

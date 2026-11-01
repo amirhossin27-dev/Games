@@ -499,8 +499,8 @@ export async function startRound(round: number) {
   if (!info || !code) return;
   const players = buildSeats(info, seats);
   const def = defFor(info.game, players.map((p) => p.robo));
-  if (!def) return;
-  const st = def.init({ n: players.length, starter: round % players.length, level: info.level, humans: players.filter((p) => !p.robo).length, shared: false, rnd: Math.random });
+  if (!def && info.game !== 'joykart') return;
+  const st = def ? def.init({ n: players.length, starter: round % players.length, level: info.level, humans: players.filter((p) => !p.robo).length, shared: false, rnd: Math.random }) : { startingGrid: true };
   const t = await token();
   await dbRequest('PUT', `rooms/${code}/state`, t, { seq: 0, round, st: JSON.stringify(st), ack: {}, seats: JSON.stringify(players), game: info.game, level: info.level });
   await patchInfo({ status: 'playing', round });

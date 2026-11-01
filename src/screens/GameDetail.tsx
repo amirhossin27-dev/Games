@@ -139,6 +139,7 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
   const cat = CATEGORY[meta.category];
   const [level, setLevel] = useState<Level>(levelForAge(profile.age));
   const [setup, setSetup] = useState<null | 'together' | 'robo'>(null);
+  const [circuit, setCircuit] = useState<Level>(0);
   const stat = profile.games[id];
   const sub = LEVEL_SUB[id];
   // Erst lernen, dann spielen
@@ -151,7 +152,7 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
   const start = (seats: SeatInfo[]) => {
     setSetup(null);
     // Das Tutorial kommt nur, wenn man es selbst über „So geht's“ oder das ? öffnet.
-    nav.play({ game: id, seats, level });
+    nav.play({ game: id, seats, level: id === 'joykart' ? circuit : level });
   };
 
   const [min, max] = meta.players;
@@ -202,6 +203,9 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
         </span>
       </button>
 
+      {id === 'joykart' && <div className="field"><span className="field-label">Startstrecke gegen Robo</span><div className="seg">
+        {(['Sonnenbucht','Kap der Winde'] as const).map((name,i)=><button key={name} aria-pressed={circuit===i} onClick={()=>setCircuit(i as Level)}>{name}</button>)}
+      </div></div>}
       {meta.levels && (
         <div className="field">
           <span className="field-label">Schwierigkeit</span>
@@ -241,12 +245,12 @@ export function GameDetail({ id, profile }: { id: GameId; profile: Profile }) {
               <ModeTile
                 icon="robot"
                 title="Gegen Robo"
-                sub={max > 2 ? 'Robo spielt mit – bis zu 3' : 'Robo passt sich an'}
+                sub={id === 'joykart' ? 'Fahre gegen den Panda' : max > 2 ? 'Robo spielt mit – bis zu 3' : 'Robo passt sich an'}
                 main
                 onClick={() => (max > 2 ? setSetup('robo') : start([seatOf(profile), roboSeat(0)]))}
               />
             )}
-            {canTogether && <ModeTile icon="device" title="Zusammen" sub={`${Math.max(2, min)}–${max} Kinder an einem Gerät`} onClick={() => setSetup('together')} />}
+            {canTogether && id !== 'joykart' && <ModeTile icon="device" title="Zusammen" sub={`${Math.max(2, min)}–${max} Kinder an einem Gerät`} onClick={() => setSetup('together')} />}
             {canTogether && (
               <ModeTile
                 icon="globe"

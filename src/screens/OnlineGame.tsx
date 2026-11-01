@@ -4,6 +4,7 @@ import { GAME_BY_ID } from '../games/registry';
 import { rememberFriends } from '../net/cloud';
 import { admit, backToLobby, deny, leaveRoom, publishState, pushAct, serverNow, startGame, useRoom } from '../net/room';
 import { absentSeats, guestActs, knocking, roomForKid, waitingKids, type NetSeat } from '../net/roomLogic';
+import { learnLeft } from '../lib/unlock';
 import { getData } from '../lib/store';
 import { Avatar } from '../ui/Avatar';
 import { Icon } from '../ui/Icon';
@@ -131,6 +132,9 @@ export function OnlineGame({ profileId }: { profileId: string }) {
   const next = waitingKids(info, seats, game.seats).map((w) => w.doc.name);
 
   const profile = getData().profiles.find((p) => p.id === profileId);
+
+  const left = profile ? learnLeft(GAME_BY_ID[game.game], profile, getData().settings) : 0;
+  if (left) return <section className="game-screen card"><h2>Erst lernen, dann spielen</h2><p>Noch {left} Lernspiele bis zum Rennen.</p><button className="btn primary" onClick={() => void leaveRoom()}>Spielzimmer verlassen</button></section>;
 
   return (
     <>

@@ -1,0 +1,244 @@
+<style>
+#joy-kart-simple{width:100%;color:#fff0d4;font:14px/1.4 'Segoe UI',sans-serif}
+#joy-kart-simple *{box-sizing:border-box}
+#joy-kart-simple [hidden]{display:none!important}
+#joy-kart-simple .js-stage{position:relative;width:100%;aspect-ratio:19.5/9;min-height:240px;overflow:hidden;border-radius:18px;background:#102637;isolation:isolate;container-type:inline-size;--js-left:env(safe-area-inset-left,0px);--js-right:env(safe-area-inset-right,0px);--js-bottom:env(safe-area-inset-bottom,0px)}
+#joy-kart-simple canvas{display:block;position:absolute;inset:0;width:100%;height:100%}
+#joy-kart-simple .js-rush{position:absolute;inset:-5%;pointer-events:none;opacity:0;background:repeating-conic-gradient(from 5deg at 50% 46%,transparent 0deg 14deg,#fff0cd99 14.05deg 14.3deg,transparent 14.35deg 30deg);-webkit-mask-image:radial-gradient(ellipse at 50% 46%,transparent 0% 60%,#000 100%);mask-image:radial-gradient(ellipse at 50% 46%,transparent 0% 60%,#000 100%)}
+@media(prefers-reduced-motion:reduce){#joy-kart-simple .js-rush{display:none}}
+#joy-kart-simple button{font:inherit;color:inherit;min-width:44px;min-height:44px;border:1px solid #edd49b80;border-radius:12px;background:#102637ee;padding:8px 12px;touch-action:manipulation}
+#joy-kart-simple .js-top{position:absolute;top:8px;left:max(12px,calc(var(--js-left) + 8px));right:max(12px,calc(var(--js-right) + 8px));display:flex;gap:12px;align-items:start;justify-content:space-between;pointer-events:none;text-shadow:0 2px 5px #000}
+#joy-kart-simple .js-location{font-size:12px;padding-top:3px}
+#joy-kart-simple .js-location small{display:block;font-size:11px;color:#e0d7c4}
+#joy-kart-simple .js-time{font-variant-numeric:tabular-nums;font-size:17px;margin-left:auto}
+#joy-kart-simple .js-top button{pointer-events:auto;width:44px;padding:8px}
+#joy-kart-simple .js-controls{position:absolute;left:max(12px,calc(var(--js-left) + 8px));right:max(12px,calc(var(--js-right) + 8px));bottom:max(10px,calc(var(--js-bottom) + 6px));display:flex;justify-content:space-between;align-items:end;pointer-events:none}
+#joy-kart-simple .js-controls button{width:clamp(80px,14cqw,108px);height:clamp(80px,14cqw,108px);border-radius:50%;padding:0;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#joy-kart-simple .js-pad{position:relative;background:#102637ce;box-shadow:inset 0 0 0 6px #fff1d508}
+#joy-kart-simple .js-thumb{position:absolute;width:32%;height:32%;border-radius:50%;background:#efd196;left:34%;top:22%;transform:translateX(calc(var(--js-steer,0)*78%));pointer-events:none}
+#joy-kart-simple .js-pad-label{position:absolute;bottom:12%;left:0;right:0;font-size:12px;pointer-events:none}
+#joy-kart-simple .js-turbo{border:2px solid #efd196;background:radial-gradient(#775e35,#102637);font-weight:700;display:grid;place-content:center;gap:2px}
+#joy-kart-simple .js-turbo small{font-size:11px;font-weight:400}
+#joy-kart-simple .js-turbo:disabled{border-color:#9c9e94;background:#102637d9;color:#d0d1c7}
+#joy-kart-simple .js-speed{position:absolute;bottom:max(14px,calc(var(--js-bottom) + 10px));left:35%;right:35%;text-align:center;text-shadow:0 2px 5px #000;pointer-events:none;font-variant-numeric:tabular-nums}
+#joy-kart-simple .js-speed strong{font-size:clamp(24px,4cqw,34px)}
+#joy-kart-simple .js-speed small{font-size:11px}
+#joy-kart-simple .js-overlay{position:absolute;inset:0;z-index:5;background:linear-gradient(90deg,#091925ed,#09192560);display:flex;align-items:center;justify-content:center;padding:16px}
+#joy-kart-simple .js-panel{width:min(340px,100%);display:grid;gap:10px}
+#joy-kart-simple h2{font-size:clamp(25px,4cqw,36px);line-height:1.05;margin:0}
+#joy-kart-simple p{margin:0;font-size:13px;color:#e1e3db}
+#joy-kart-simple .js-actions{display:flex;gap:8px}
+#joy-kart-simple .js-primary{background:linear-gradient(115deg,#fff2cc,#e9be70);color:#102637;font-weight:700;flex:1}
+#joy-kart-simple .js-count{position:absolute;inset:0;display:grid;place-items:center;font-size:56px;font-weight:700;text-shadow:0 3px 10px #000;pointer-events:none}
+#joy-kart-simple .js-toast{position:absolute;top:24%;left:25%;right:25%;text-align:center;text-shadow:0 2px 5px #000;font-size:17px;font-weight:700;pointer-events:none}
+#joy-kart-simple .js-loading{position:absolute;inset:0;z-index:9;background:#102637;display:grid;place-content:center;gap:8px;text-align:center;padding:16px}
+#joy-kart-simple .js-live{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(max-width:380px){#joy-kart-simple .js-location{font-size:11px}#joy-kart-simple .js-time{font-size:14px}#joy-kart-simple .js-top{gap:6px}#joy-kart-simple .js-toast{font-size:14px;left:20%;right:20%}}
+#joy-kart-simple .js-map{position:absolute;right:max(12px,env(safe-area-inset-right));top:38px;width:clamp(56px,10%,112px);padding:4px;background:#142b3cbd;border-radius:12px;pointer-events:none}
+@media(max-height:340px){#joy-kart-simple .js-map{width:52px;top:29px}}
+</style>
+<div id="joy-kart-simple" aria-label="Joy-Kart – einfache Küstenprobe">
+ <div class="js-stage">
+  <canvas aria-label="Dreidimensionale Küstenstraße mit Fuchskart und durchgehendem Unterbau"></canvas>
+  <div class="js-rush" aria-hidden="true"></div>
+  <div class="js-top"><span class="js-location">Sonnenküste · Duell<small>Auto-Gas · Lenkhilfe</small></span><span class="js-time">00:00.00</span><button type="button" data-action="pause" aria-label="Pause" class="cursor-interaction" hidden>Ⅱ</button></div>
+  <div class="js-controls" hidden><button type="button" class="js-pad cursor-interaction" data-control="pad" aria-label="Lenken: halten und nach links oder rechts ziehen"><span class="js-thumb"></span><span class="js-pad-label">Lenken</span></button><button type="button" class="js-turbo cursor-interaction" data-action="turbo">TURBO<small>tippen</small></button></div>
+  <div class="js-speed" hidden><strong>0</strong><small> km/h</small></div>
+  <div class="js-count" hidden></div><div class="js-toast" role="status" aria-live="polite"></div>
+  <div class="js-overlay"><div class="js-panel"><h2>Joy-Kart</h2><p>Links sanft lenken, rechts dein Item einsetzen.<br>Auto-Gas und Lenkhilfe sind aktiv.</p><div class="js-actions"><button type="button" class="js-primary cursor-interaction" data-action="start">Losfahren</button><button type="button" class="cursor-interaction" data-action="again" hidden>Neu starten</button></div></div></div>
+  <div class="js-loading" role="status" aria-live="polite"><strong>Küstenprobe wird vorbereitet</strong><span>Grafik wird geladen …</span></div><span class="js-live" role="status" aria-live="polite"></span>
+ </div>
+</div>
+<script>
+(async()=>{
+/*@@SIMPLE_ENGINE@@*/
+/*@@CIRCUIT@@*/
+/*@@BATCHING@@*/
+/*@@MODELS@@*/
+/*@@CHARACTERS@@*/
+/*@@PRODUCTION_MODELS@@*/
+/*@@PRODUCTION_COAST@@*/
+/*@@LIGHTING@@*/
+/*@@SIMPLE_WORLD@@*/
+const root=document.getElementById('joy-kart-simple'),find=q=>root.querySelector(q),stage=find('.js-stage'),canvas=find('canvas'),loading=find('.js-loading'),loadingText=loading.querySelector('span');
+const secondCourse=location.hash.endsWith('kap')||new URLSearchParams(location.search).get('strecke')==='kap';
+const M=createCoastSimpleModule(createKartCircuit(secondCourse)),{course,clamp}=M,race=new M.SimpleRace(),held=new Map(),keys=new Set(),started=performance.now(),startup={marks:[]};
+let stopped=false,ready=false,renderer,animation,lastPhase='ready',toastUntil=0,testInput=null,lastHud=0;
+const mark=name=>startup.marks.push({name,ms:Math.round(performance.now()-started)}),persist=()=>window.openai?.setWidgetState?.({modelContent:{spiel:'Joy-Kart einfache Küstenprobe',phase:race.phase,lenkhilfe:true,extras:'Turbo, Schild, Magnet, Welle'},privateContent:null})?.catch(()=>{});
+const toast=text=>{find('.js-toast').textContent=text;toastUntil=performance.now()+1100;find('.js-live').textContent=text;};
+function input(){if(testInput!==null)return testInput;let steer=(keys.has('ArrowRight')||keys.has('KeyD')?1:0)-(keys.has('ArrowLeft')||keys.has('KeyA')?1:0);for(const p of held.values())steer+=p.value;return clamp(steer,-1,1);}
+function clear(){held.clear();keys.clear();testInput=null;stage.style.setProperty('--js-steer',0);}
+const inJoyboy=location.hash.startsWith('#joyboy') && window.parent!==window;
+const computerMode=new URLSearchParams(location.search).has('computer');
+const computer=new M.SimpleRace();
+let soloRound=0;
+function startComputerRace(){
+ clear();race.begin();computer.begin();race.k.lat=-2;computer.k.lat=2;soloRound++;
+ updateComputerRace(0);
+}
+function drivePanda(driver,dt){
+ const k=driver.k;
+ const distance=course.wrap(k.s),row=course.boxes.findIndex(mark=>mark>distance);
+ const lanes=course.lanes(Math.max(0,row)),target=lanes[lanes.length-1];
+ if(k.item && (k.item==='shield'?k.slow>0||distance%90<6:distance%75<6))driver.queueTurbo();
+ driver.advance(dt,clamp((target-k.lat)*.75,-1,1));
+}
+function updateComputerRace(dt){
+ const before=[race,computer].map(r=>r.stats.itemUses.wave||0);
+ drivePanda(computer,dt);
+ race.advance(dt,input());resolveKartWaves([race,computer],before);
+ for(const event of race.takeEvents()){
+  if(event==='go')toast('LOS!');if(event==='turbo')toast('Turbo!');if(event==='pickup')toast(KART_ITEMS[race.k.item]+' bereit');if(['wave','shield','magnet'].includes(event))toast(KART_ITEMS[event]+' aktiviert');
+ }
+ computer.takeEvents();packet={slot:0,round:soloRound,me:race.snapshot(),other:computer.snapshot()};received=performance.now();refreshLobby();
+}
+/*@@DUEL_CLIENT@@*/
+// Sample the same centre line used by collision, distance and lap counting.
+function makeCourseMap(){
+ const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+ const points=Array.from({length:112},(_,i)=>course.point(i*course.lapLength/112));
+ const xs=points.map(p=>p.x),zs=points.map(p=>p.z);
+ const left=Math.min(...xs)-40,top=Math.min(...zs)-40,w=Math.max(...xs)-left+40,h=Math.max(...zs)-top+40;
+ svg.setAttribute('viewBox',[left,top,w,h].join(' '));svg.setAttribute('aria-hidden','true');svg.classList.add('js-map');
+ const line=document.createElementNS(ns,'polygon');
+ line.setAttribute('points',points.map(p=>p.x+','+p.z).join(' '));line.setAttribute('fill','none');line.setAttribute('stroke','#f2d5a2');line.setAttribute('stroke-width','10');svg.append(line);
+ const dots=['#dc725d','#81dcad'].map(color=>{
+  const dot=document.createElementNS(ns,'circle');dot.setAttribute('fill',color);dot.setAttribute('stroke','#182c38');dot.setAttribute('stroke-width','5');dot.setAttribute('r','22');svg.append(dot);return dot;
+ });
+ stage.append(svg);svg.style.display='none';
+ return packet=>{
+  if(!packet)return;svg.style.display=packet.me.phase==='ready'?'none':'';
+  for(const [i,state] of [packet.me,packet.other].entries()){
+   const dot=dots[i?1-packet.slot:packet.slot];dot.style.display=state?'':'none';if(!state)continue;
+   const p=course.point(state.s);dot.setAttribute('cx',p.x);dot.setAttribute('cy',p.z);
+  }
+ };
+}
+const updateMap=makeCourseMap();
+function bindAppRace(){
+  const racers=[race,computer];
+  let boost=false;
+  requestBoost=()=>{if(packet?.me.phase==='running')boost=true;};
+  startButton.hidden=true;find('h2').textContent='An der Startlinie';
+  find('p').textContent='Das Rennen beginnt, sobald beide Fahrer bereit sind.';
+  window.joyKartRace={
+   stop(){stopped=true;cancelAnimationFrame(animation);},
+   input(){const action={steer:input(),turbo:boost};boost=false;return action;},
+   begin(){racers.forEach((r,i)=>{r.begin();r.k.lat=i?2:-2;});},
+   restore(states){states.forEach((state,i)=>{
+    const r=racers[i];r.reset();Object.keys(r.k).forEach(key=>{r.k[key]=state[key];});
+    r.phase=state.phase;r.time=state.time;r.countdown=state.countdown;r.stats=structuredClone(state.stats);r.taken=new Set(state.taken);
+   });},
+   advance(dt,inputs){const before=racers.map(r=>r.stats.itemUses.wave||0);racers.forEach((r,i)=>{
+    const action=inputs[i];if(action===null)drivePanda(r,dt);
+    else{if(action.turbo)r.queueTurbo();r.advance(dt,action.steer);}
+    r.takeEvents();
+   });resolveKartWaves(racers,before);return racers.map(r=>({...r.snapshot(),taken:[...r.taken]}));},
+   show(states,slot){
+    const me=states[slot],old=packet?.me;packet={slot,me,other:states[1-slot],round:1};received=performance.now();
+    if(old?.phase==='countdown'&&me.phase==='running')toast('LOS!');
+    if(old){for(const key of Object.keys(KART_ITEMS))if((me.stats.itemUses[key]||0)>(old.stats.itemUses[key]||0))toast(KART_ITEMS[key]+' aktiviert');}
+    if(old&&!old.item&&me.item)toast(KART_ITEMS[me.item]+' bereit');
+    if(old&&me.lap>old.lap)toast('Runde '+me.lap+' / 3');
+    if(old&&me.slow>old.slow)toast('Welle!');if(old&&me.blocked>old.blocked)toast('Abgewehrt!');
+    find('.js-overlay').hidden=true;find('.js-controls').hidden=me.phase!=='running';
+    find('.js-speed').hidden=false;find('.js-count').hidden=me.phase!=='countdown';
+    find('.js-count').textContent=Math.ceil(me.countdown);
+   }
+  };
+ }
+/*@@COMPACT_ROAD@@*/
+let compact=false;
+function useCompact(){
+ if(compact)return;compact=true;stopped=false;cancelAnimationFrame(animation);
+ const fallback=document.createElement('canvas');canvas.replaceWith(fallback);
+ const ctx=fallback.getContext('2d');
+ if(!ready){bindDuel();bindAppRace();ready=true;}
+ loading.hidden=true;find('.js-location').textContent='Sonnenküste · Kompakt';
+ function draw(now){
+  if(stopped||!root.isConnected)return;
+  drawCompactRoad(fallback,ctx,packet,course);if(now-lastHud>90){updateMap(packet);lastHud=now;}
+  if(packet){
+   const k=packet.me;find('.js-speed strong').textContent=k.speedKmh;find('.js-time').textContent='Runde '+k.lap+' / 3';
+   find('[data-action="turbo"]').textContent=KART_ITEMS[k.item]||'Box sammeln';find('[data-action="turbo"]').disabled=!k.item||k.phase!=='running';stage.style.setProperty('--js-steer',input());
+  }
+  if(now>toastUntil)find('.js-toast').textContent='';
+  animation=requestAnimationFrame(draw);
+ }
+ animation=requestAnimationFrame(draw);
+}
+if(inJoyboy){
+ const button=document.createElement('button');button.type='button';button.textContent='In Kompaktansicht fahren';
+ button.onclick=useCompact;loading.appendChild(button);
+}
+const decode=async url=>{const image=new Image();image.src=url;await image.decode();return image;},paintYield=()=>new Promise(resolve=>requestAnimationFrame(()=>resolve()));
+try{
+ const [THREE,atlasImage,skyImage]=await Promise.all([import('./three.module.js'),decode(/*@@MATERIAL_ATLAS@@*/),decode(/*@@SKY_TEXTURE@@*/)]);if(compact)return;mark('download');loadingText.textContent='Fuchs und Kart werden vorbereitet …';await paintYield();
+ if(compact)return;
+ const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(60,1,.15,900),materials=new Set(),geometries=new Set(),textures=new Set();
+ renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ function texture(w,h,paint){const c=document.createElement('canvas');c.width=w;c.height=h;paint(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;textures.add(t);return t;}
+ const part=(x,y)=>{const half=atlasImage.width/2,t=texture(512,512,(c,w,h)=>c.drawImage(atlasImage,x*half,y*half,half,half,0,0,w,h));t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;};
+ const artMaps={orangeFur:part(0,0),creamFur:part(1,0),asphalt:part(0,1),stone:part(1,1)};artMaps.furNeutral=texture(256,256,(c,w,h)=>{c.drawImage(artMaps.creamFur.image,0,0,w,h);const p=c.getImageData(0,0,w,h);for(let i=0;i<p.data.length;i+=4){const l=205+((p.data[i]+p.data[i+1]+p.data[i+2])/3-128)*.25;p.data[i]=p.data[i+1]=p.data[i+2]=l;}c.putImageData(p,0,0);});for(const t of[artMaps.furNeutral,artMaps.creamFur,artMaps.orangeFur]){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,3);}
+ const lighting=createProductionLighting(THREE,{scene,renderer,skyImage,texture,textures,materials,geometries}),kit=createKartModels(THREE,{scene,geometries,materials,texture}),assets=createProductionKarts(THREE,{scene,kit,artMaps,materials,texture}),cars=[assets.makeKart(false),assets.makeKart(true)];mark('fox-kart');loadingText.textContent='Küstenstraße wird aufgebaut …';await paintYield();
+ if(compact)return;
+ for(const car of cars){
+  const shield=kit.add(kit.geometry(new THREE.SphereGeometry(1,18,12)),kit.material(0x63e0ff,{transparent:true,opacity:.20,depthWrite:false}),car.group,0,1,0);
+  shield.scale.set(1.65,1.55,2);shield.visible=false;shield.castShadow=false;car.shieldEffect=shield;
+  const ring=kit.add(kit.geometry(new THREE.TorusGeometry(1,.05,6,32)),kit.material(0xf294da,{emissive:0x8a4076}),car.group,0,.15,0);
+  ring.rotation.x=-Math.PI/2;ring.castShadow=false;ring.visible=false;car.itemRing=ring;
+ }
+ const world=await createSimpleCoastWorld(THREE,{scene,course,kit,artMaps,materials,texture,lighting,yieldTask:paintYield});mark('coast');loadingText.textContent='Licht wird vorbereitet …';await paintYield();
+ const cameraDesired=new THREE.Vector3(),lookDesired=new THREE.Vector3(),look=new THREE.Vector3(),motion=matchMedia('(prefers-reduced-motion: reduce)'),rush=find('.js-rush');let cameraSet=false,frames=0,fps=0,frameWindow=performance.now(),lastFrame=performance.now(),lastCameraAngle=0,maxCameraStep=0,lastDrawS=0,speedVisual=0;
+ function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}const observer=new ResizeObserver(resize);observer.observe(stage);resize();
+ let selfVisual=null,otherVisual=null;
+ function place(dt,render=true){
+  const slot=packet?.slot||0,me=packet?.me||race.snapshot(), rival=packet?.other;
+  selfVisual=visualState(me,dt,selfVisual);
+  const k=selfVisual,p=course.point(k.s,k.lat),f=course.frame(k.s),dx=Math.sin(f.angle),dz=Math.cos(f.angle);
+  moveKart(cars[slot],k,me.time,dt);
+  cars[slot].group.visible=cars[slot].shadow.visible=true;
+  cars[1-slot].group.visible=cars[1-slot].shadow.visible=!!rival;
+  if(rival){otherVisual=visualState(rival,dt,otherVisual);moveKart(cars[1-slot],otherVisual,rival.time,dt);}
+  world.update(me.time,new Set(me.taken||race.taken),me.lap);
+  const centre=course.point(k.s,k.lat*.93),ahead=course.point(k.s+11,k.lat*.35);cameraDesired.set(centre.x-dx*4.9,p.y+2.25,centre.z-dz*4.9);lookDesired.set(ahead.x,ahead.y+1.55,ahead.z);
+  if(k.s<lastDrawS-.1){cameraSet=false;maxCameraStep=0;speedVisual=0;}lastDrawS=k.s;const snapped=!cameraSet;
+  if(snapped){camera.position.copy(cameraDesired);look.copy(lookDesired);cameraSet=true;}else{const alpha=1-Math.exp(-dt*9);camera.position.lerp(cameraDesired,alpha);const along=(cameraDesired.x-camera.position.x)*dx+(cameraDesired.z-camera.position.z)*dz;camera.position.x+=dx*along;camera.position.z+=dz*along;look.lerp(lookDesired,alpha);}camera.lookAt(look);
+  const angle=Math.atan2(look.x-camera.position.x,look.z-camera.position.z);if(render&&!snapped)maxCameraStep=Math.max(maxCameraStep,Math.abs(Math.atan2(Math.sin(angle-lastCameraAngle),Math.cos(angle-lastCameraAngle))));lastCameraAngle=angle;
+  const target=me.phase==='running'&&k.boost>0?1:0;speedVisual=motion.matches?0:speedVisual+(target-speedVisual)*(1-Math.exp(-dt*(target?10:5)));
+  const fov=55+speedVisual*8;if(Math.abs(camera.fov-fov)>.001){camera.fov=fov;camera.updateProjectionMatrix();}
+  rush.style.opacity=(me.phase==='running'?speedVisual*.6:0).toFixed(3);
+  lighting.update(camera,p.x,p.y,p.z);if(render)renderer.render(scene,camera);
+ }
+ // Establish the rear view before shader preparation; prewarm turbo's first-use material too.
+ if(compact){renderer.dispose();return;}
+ place(0,false);if(renderer.compileAsync)await renderer.compileAsync(scene,camera);if(compact){renderer.dispose();return;}place(0);
+ bindDuel();loading.hidden=true;ready=true;
+ if(computerMode&&!inJoyboy){
+  const alternate=document.createElement('a'),url=new URL(location.href);url.searchParams.set('strecke',secondCourse?'bucht':'kap');
+  alternate.href=url.href;alternate.style.color='#ffe4a8';alternate.textContent='Strecke wechseln · '+(secondCourse?'Sonnenbucht':'Kap der Winde');find('.js-actions').after(alternate);
+ }
+ if(inJoyboy)bindAppRace();
+ function loop(now){
+  if(!root.isConnected||stopped)return;
+  const dt=Math.min(.1,(now-lastFrame)/1000);lastFrame=now;if(!inJoyboy&&computerMode&&soloRound)updateComputerRace(dt);place(dt);
+  if(packet&&now-lastHud>75){
+   updateMap(packet);
+   const k=packet.me,o=packet.other,d=o?k.s-o.s:0;
+   find('.js-location').textContent=course.name+' · Runde '+k.lap+' / 3';
+   find('.js-time').textContent=o?(Math.abs(d)<.5?'Gleichauf':(d>0?'+':'-')+Math.round(Math.abs(d))+' m'):'Solo';
+   find('.js-speed strong').textContent=k.speedKmh;
+   const turbo=find('[data-action="turbo"]');turbo.disabled=!k.item||k.phase!=='running';
+   turbo.innerHTML=(KART_ITEMS[k.item]||'Item')+'<small>'+(k.item?'E · einsetzen':k.shield>0?'geschützt':k.magnet>0?'Magnet aktiv':k.slow>0?'gebremst':'Box sammeln')+'</small>';
+   stage.style.setProperty('--js-steer',input());
+   if(now>toastUntil)find('.js-toast').textContent='';lastHud=now;
+  }
+  animation=requestAnimationFrame(loop);
+ }
+ root.__duelSnapshot=()=>packet&&({slot:packet.slot,me:packet.me,other:packet.other,round:packet.round});
+ root.__duelGeometry=world.inspectGeometry;
+ lastFrame=performance.now();animation=requestAnimationFrame(loop);
+ canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();clear();if(inJoyboy){useCompact();return;}joined=false;stopped=true;cancelAnimationFrame(animation);loading.hidden=false;loadingText.textContent='Grafik unterbrochen. Bitte die Seite neu laden.';});
+}catch(error){if(inJoyboy){renderer?.dispose();useCompact();return;}stopped=true;loading.hidden=false;loading.querySelector('strong').textContent='Küstenprobe konnte nicht starten';loadingText.textContent=error.message;console.error(error);renderer?.dispose();}
+})();
+</script>

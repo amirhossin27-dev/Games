@@ -3,6 +3,7 @@ import type { Subject } from '../lib/progress';
 import type { ArtKind } from '../ui/GameArt';
 
 export type GameId =
+  | 'joykart'
   | 'rechnen'
   | 'buchstaben'
   | 'uhr'
@@ -85,6 +86,18 @@ const W = '#DCE9F3';
 const SH = '#5E6B60';
 
 export const GAMES: GameMeta[] = [
+  {
+    id: 'joykart', name: 'Joy-Kart', tagline: 'Mit Fuchs und Panda über die Sonnenküste.',
+    learn: 'Halte deine Linie, sammle Items und wähle den richtigen Moment zum Überholen.',
+    category: 'arcade', minAge: 6, players: [2, 2], minutes: '3–4 Min', art: 'joykart',
+    kind: 'duel', robo: true, levels: false,
+    tutorial: [
+      { say: 'Das Kart gibt selbst Gas. Ziehe links am Lenkpad oder lenke mit den Pfeiltasten.', art: { k: 'pics', items: ['🦊', '🏎️'], caption: 'Links und rechts lenken' } },
+      { say: 'Sammle farbige Boxen. Mit E oder der Item-Taste setzt du Turbo, Schild, Magnet oder Welle ein.', art: { k: 'pics', items: ['⚡', '🏁'], caption: 'Wer nach drei Runden zuerst im Ziel ist, gewinnt' } },
+      { say: 'Die Welle bremst den Gegner im Umkreis von 85 Metern. Der Schild wehrt eine Welle ab und löst eine laufende Bremse.', art: { k: 'pics', items: ['🌊','🛡️'], caption: 'Welle und Schild' } },
+      { say: 'Der Magnet sammelt zwölf Sekunden lang Boxen aus jeder Spur. Turbo gibt dir einen kurzen Geschwindigkeitsschub.', art: { k: 'pics', items: ['🧲','⚡'], caption: 'Magnet und Turbo' } },
+    ],
+  },
   {
     id: 'rechnen',
     name: 'Rechen-Rallye',

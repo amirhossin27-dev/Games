@@ -2177,6 +2177,13 @@ p {
   overflow-y: auto;
 }
 
+.kart-screen .g-stage, .kart-screen .g-head {
+  max-width: 1440px;
+}
+.kart-screen .g-stage {
+  padding: 0;
+}
+
 .g-stage.fixed {
   justify-content: center;
   overflow: hidden;

@@ -1,0 +1,36 @@
+{
+  "source": "docs/joy-kart-handy-v2.html",
+  "kind": "unchanged embedded concept images, not 3D assets",
+  "assets": [
+    {
+      "key": "hero",
+      "file": "hero.webp",
+      "bytes": 68014,
+      "sha256": "d6101f4e254c768c052152bb852b2855e77fcb7230955a6513cb1dec50ec1db2"
+    },
+    {
+      "key": "coast",
+      "file": "coast.webp",
+      "bytes": 75194,
+      "sha256": "c5944aeeb388d52711385d5133ccedd6887b01853e44f888e0033ef6b3f77d69"
+    },
+    {
+      "key": "forest",
+      "file": "forest.webp",
+      "bytes": 97044,
+      "sha256": "fa65db5482f05bc00efaed56767d16c0248617342badfdaa593926363e90cadc"
+    },
+    {
+      "key": "night",
+      "file": "night.webp",
+      "bytes": 88256,
+      "sha256": "a725b7aab592ac16bf38a64f6ba86034de20327716b2a772f86f9321f20c7abe"
+    },
+    {
+      "key": "tracks",
+      "file": "tracks.webp",
+      "bytes": 148474,
+      "sha256": "132acf6588db3573bbfe11de81061f8205a533cb14db86c04f309cc91321bc83"
+    }
+  ]
+}
