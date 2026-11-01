@@ -1,0 +1,62 @@
+<style>
+#cs-phone-data{position:fixed;z-index:1000;top:max(12px,calc(env(safe-area-inset-top,0px) + 8px));left:calc(50% - 49px);width:98px;min-height:44px;border:1px solid #d8b879;border-radius:10px;background:#102637ed;color:#fff0d4;font:12px system-ui}
+#cs-phone-data[hidden]{display:none}
+#cs-phone-dialog{box-sizing:border-box;max-width:390px;width:calc(100% - 32px);max-height:82svh;overflow:auto;padding:18px;border:1px solid #d8b879;border-radius:16px;background:#102637;color:#fff0d4;font:14px/1.4 system-ui}
+#cs-phone-dialog::backdrop{background:#000a}
+#cs-phone-dialog p{margin:9px 0}
+#cs-phone-dialog label{display:grid;gap:4px;margin-top:10px}
+#cs-phone-dialog select,#cs-phone-dialog textarea{box-sizing:border-box;max-width:100%;width:100%;min-height:44px;border:1px solid #dfc38d;border-radius:8px;background:#193646;color:#fff0d4;padding:8px;font:16px system-ui}
+#cs-phone-dialog textarea{min-height:64px;resize:vertical}
+#cs-phone-dialog button{width:100%;min-height:44px;margin-top:10px;border:1px solid #dfc38d;border-radius:10px;background:#efd098;color:#142b38;padding:9px;font:15px system-ui}
+#cs-phone-dialog output{display:block;font-variant-numeric:tabular-nums}
+</style>
+<button id="cs-phone-data" type="button" hidden>Testdaten</button>
+<dialog id="cs-phone-dialog" aria-labelledby="cs-phone-title">
+ <strong id="cs-phone-title">Küstenabschnitt auf dem iPhone</strong>
+ <p>Fahre mehrere kurze Versuche. Wähle vor jedem Start ein anderes Extra. Die Messung sammelt die Fahrten auf dieser Seite.</p>
+ <output id="cs-phone-summary">Noch keine Fahrt erfasst.</output>
+ <label>Wie flüssig läuft es?<select id="cs-phone-feel"><option value="unrated">Noch nicht bewertet</option><option value="smooth">Flüssig</option><option value="slight-stutter">Leichtes Ruckeln</option><option value="strong-stutter">Starkes Ruckeln</option></select></label>
+ <label>Lenken, Driften und Item-Wischen<select id="cs-phone-controls"><option value="unrated">Noch nicht bewertet</option><option value="good">Funktioniert gut</option><option value="sensitive">Lenkung zu empfindlich</option><option value="sluggish">Lenkung zu träge</option><option value="gesture-problem">Halten oder Wischen problematisch</option></select></label>
+ <label>Bemerkung, optional<textarea id="cs-phone-note" maxlength="500" placeholder="Zum Beispiel: Rampe schwer zu treffen"></textarea></label>
+ <p id="cs-phone-message" role="status" aria-live="polite"></p>
+ <button id="cs-phone-save" type="button">Messwerte auf PC speichern</button>
+ <button id="cs-phone-close" type="button">Schließen</button>
+</dialog>
+<script>
+(()=>{
+ const meta=/*@@PHONE_META@@*/,q=id=>document.getElementById(id),root=document.getElementById(meta.rootId||'joy-kart-coast-section'),api=()=>root?.[meta.apiKey||'__joyKartSection'];
+ const prefix=meta.prefix||'cs',part=name=>root.querySelector('.'+prefix+'-'+name);
+ if(['coast-simple-v1','coast-simple-v2'].includes(meta.version)){q('cs-phone-title').textContent='Einfache Küstenprobe auf dem iPhone';q('cs-phone-dialog').querySelector('p').textContent='Fahre zwei kurze Versuche: erst sanft lenken, dann auch Turbo tippen. Die Messung sammelt die Fahrten auf dieser Seite.';q('cs-phone-controls').parentElement.firstChild.textContent='Lenken und Turbo';q('cs-phone-note').placeholder='Zum Beispiel: Tempo oder Turbo zu schwach, Lenken zu empfindlich';}
+ const runs=[],viewports=[],navigation={type:performance.getEntriesByType('navigation')[0]?.type||'unknown',readyObservedMs:null,gameStartup:null};
+ let active=null,latest=null,nextId=1,windowRun=null,first=0,last=0,frames=0,deltas=[],lastPhase=null;
+ const round=n=>Math.round(n*10)/10,median=values=>{const a=[...values].sort((a,b)=>a-b),i=Math.floor(a.length/2);return a.length?a.length%2?a[i]:(a[i-1]+a[i])/2:null;};
+ function summary(){const samples=runs.flatMap(r=>r.samples),values=samples.map(s=>s.fps);return{runs:runs.length,count:values.length,medianFps:median(values),minFps:values.length?Math.min(...values):null,maxFps:values.length?Math.max(...values):null};}
+ function viewport(){const stage=part('stage'),b=stage?.getBoundingClientRect();return{atMs:Math.round(performance.now()),width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio,orientation:screen.orientation?.angle??window.orientation??null,visualViewport:window.visualViewport?{width:round(visualViewport.width),height:round(visualViewport.height),offsetTop:round(visualViewport.offsetTop),scale:visualViewport.scale}:null,controls:b?[...stage.querySelectorAll('.'+prefix+'-controls button')].map(el=>{const p=el.getBoundingClientRect();return{role:el.dataset.control||el.dataset.action,visible:!!el.getClientRects().length,width:round(p.width),height:round(p.height),left:round(p.left-b.left),top:round(p.top-b.top),inside:p.left>=b.left&&p.right<=b.right&&p.top>=b.top&&p.bottom<=b.bottom};}):[]};}
+ function rememberViewport(){const v=viewport(),key=[v.width,v.height,v.visualViewport?.offsetTop,v.controls.some(c=>c.visible)].join(':');if(viewports.at(-1)?.key!==key){viewports.push({...v,key});if(viewports.length>8)viewports.shift();}}
+ function noteInput(s){if(!active)return;const input=s.input||{};active.interaction.maxHeldPointers=Math.max(active.interaction.maxHeldPointers,input.heldPointers||0);if(Math.abs(input.steer)>.12&&input.drift)active.interaction.steerAndDriftObserved=true;const uses=Object.values(s.stats?.itemUses||{}).reduce((a,b)=>a+b,0);if(uses>active.lastItemUses&&Math.abs(input.steer)>.12&&input.drift)active.interaction.itemDuringSteerDriftObserved=true;active.lastItemUses=uses;}
+ function resetWindow(){windowRun=null;first=last=frames=0;deltas=[];}
+ function flush(continueWindow=false){
+  if(windowRun&&frames>=3&&last-first>=400){const s=api()?.snapshot(),sorted=[...deltas].sort((a,b)=>a-b),sample={startMs:round(first),endMs:round(last),frames,fps:round((frames-1)*1000/(last-first)),p95FrameMs:round(sorted[Math.min(sorted.length-1,Math.ceil(sorted.length*.95)-1)]),maxFrameMs:round(Math.max(...sorted)),longFrames:deltas.filter(d=>d>33.4).length,elapsed:round(s?.time||0),route:s?.route||null,gameFps:s?.render?.fps??null,pixelRatio:s?.render?.pixelRatio??null,drawCalls:s?.render?.drawCalls??null,triangles:s?.render?.triangles??null};windowRun.samples.push(sample);if(windowRun.samples.length>40){windowRun.samples.splice(3,1);windowRun.droppedWindows++;}if(s)noteInput(s);}
+  if(continueWindow){first=last;frames=1;deltas=[];}else resetWindow();
+ }
+ function closeRun(outcome,s){flush();if(!active)return;active.outcome=outcome;active.endedMs=Math.round(performance.now());active.latest=s;active=null;}
+ function observe(){
+  const s=api()?.snapshot();if(!s)return;latest=s;
+  if(navigation.readyObservedMs===null){navigation.readyObservedMs=Math.round(performance.now());navigation.gameStartup=s.startup;rememberViewport();}
+  if(active&&s.time+0.01<active.latest.time)closeRun('restarted',active.latest);
+  if(!active&&['countdown','running'].includes(s.phase)){active={id:nextId++,initialItem:s.item||root.querySelector('select')?.value||'turbo',startedMs:Math.round(performance.now()),endedMs:null,outcome:'in-progress',samples:[],droppedWindows:0,interaction:{maxHeldPointers:0,steerAndDriftObserved:false,itemDuringSteerDriftObserved:false,pointerCancels:0},lastItemUses:0,latest:s};runs.push(active);if(runs.length>8)runs.shift();rememberViewport();}
+  if(active){noteInput(s);active.latest=s;if(['finished','invalid'].includes(s.phase))closeRun(s.phase,s);else if(s.phase==='ready')closeRun('aborted',s);}
+  if(lastPhase!==s.phase){lastPhase=s.phase;q('cs-phone-data').hidden=['countdown','running'].includes(s.phase);}
+ }
+ function measure(t){const controls=part('controls'),count=part('count'),running=active&&controls&&!controls.hidden&&count.hidden&&!document.hidden;if(!running){flush();}else{if(windowRun!==active){flush();windowRun=active;first=last=t;frames=1;}else{deltas.push(t-last);last=t;frames++;}if(last-first>=1000)flush(true);}requestAnimationFrame(measure);}
+ function result(){flush();observe();const n=performance.getEntriesByType('navigation')[0];return{schemaVersion:1,sourceBuildHash:meta.sha256,version:meta.version,selfReportedDevice:'iPhone 15',browserUserAgent:navigator.userAgent,navigation:{...navigation,timing:n?{responseStart:round(n.responseStart),responseEnd:round(n.responseEnd),domInteractive:round(n.domInteractive),domContentLoadedEnd:round(n.domContentLoadedEventEnd),loadEventEnd:round(n.loadEventEnd),transferSize:n.transferSize,encodedBodySize:n.encodedBodySize}:null},viewports,runs:runs.map(({lastItemUses,...r})=>r),summary:summary(),feedback:{smoothness:q('cs-phone-feel').value,controls:q('cs-phone-controls').value,note:q('cs-phone-note').value.trim()}};}
+ q('cs-phone-data').addEventListener('click',()=>{observe();if(['running','countdown'].includes(latest?.phase))root.querySelector('[data-action="pause"]').click();flush();const r=result(),fps=r.summary.medianFps;q('cs-phone-summary').textContent=r.summary.count?r.summary.runs+' Fahrten · '+r.summary.count+' Bildratenfenster · Median '+round(fps)+' FPS':'Bitte zuerst einen kurzen Abschnitt fahren.';q('cs-phone-save').disabled=!r.summary.count;q('cs-phone-message').textContent='';q('cs-phone-dialog').showModal();});
+ q('cs-phone-close').addEventListener('click',()=>q('cs-phone-dialog').close());
+ q('cs-phone-save').addEventListener('click',async()=>{q('cs-phone-save').disabled=true;try{const response=await fetch('/report',{method:'POST',headers:{'Content-Type':'application/json','X-Joy-Section-Test':meta.token},body:JSON.stringify(result())});const body=await response.json();if(!response.ok)throw Error(body.error||'Speichern fehlgeschlagen');q('cs-phone-message').textContent='Gespeichert. Melde dich im Chat mit deinem Eindruck.';}catch(error){q('cs-phone-message').textContent='Nicht gespeichert: '+error.message;q('cs-phone-save').disabled=false;}});
+ root.addEventListener('pointerdown',()=>{const s=api()?.snapshot();if(s)noteInput(s);});root.addEventListener('pointercancel',()=>{if(active)active.interaction.pointerCancels++;});
+ let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(rememberViewport,250);});document.addEventListener('visibilitychange',()=>{flush();});
+ const overlay=part('overlay');let wasHidden=overlay.hidden;new MutationObserver(()=>{if(overlay.hidden!==wasHidden){wasHidden=overlay.hidden;observe();}}).observe(overlay,{attributes:true,attributeFilter:['hidden']});
+ observe();setInterval(observe,200);requestAnimationFrame(measure);
+ root.__joyKartPhoneTest={snapshot:()=>({runs,summary:summary(),navigation,viewports}),report:result};
+})();
+</script>

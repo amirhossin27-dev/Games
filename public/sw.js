@@ -23,7 +23,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== self.location.origin || url.searchParams.has('__time')) return;
 
   // Seitenaufrufe: erst Netzwerk (für Updates), sonst die gespeicherte App.
-  if (request.mode === 'navigate') {
+  if (request.mode === 'navigate' && request.destination !== 'iframe' && !url.pathname.includes('Joy-Kart-PC')) {
     event.respondWith(
       fetch(request)
         .then((res) => {

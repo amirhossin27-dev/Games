@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 
 /** Illustrationen der Spiele im Papierwelt-Stil. Arcade-Spiele bekommen ein großes Bild-Symbol. */
-export type ArtKind = 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch' | 'zahlenspur' | 'schwung' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'slf' | { emoji: string; bg: string };
+import kartCover from '../../prototypes/joy-kart/art-reference/hero.webp';
+
+export type ArtKind = 'joykart' | 'rechnen' | 'buchstaben' | 'uhr' | 'welt' | 'woerter' | 'englisch' | 'zahlenspur' | 'schwung' | 'paare' | 'vier' | 'ttt' | 'ludo' | 'maumau' | 'wuerfel' | 'schiffe' | 'slf' | { emoji: string; bg: string };
 
 const C = { sky: '#6FA8D6', plum: '#8E6BA8', terra: '#D9774F', butter: '#F2C94C', sage: '#5E9C6B', peach: '#E58F7A', ink: '#2D3A31', paper: '#FFFDF8' };
 
@@ -257,6 +259,7 @@ function art(kind: Exclude<ArtKind, object>): ReactNode {
 }
 
 export function GameArt({ kind, height = 96, className }: { kind: ArtKind; height?: number; className?: string }) {
+  if (kind === 'joykart') return <img className={`game-art ${className ?? ''}`} style={{ height, width: '100%', objectFit: 'cover' }} src={kartCover} alt="" />;
   if (typeof kind === 'object') {
     return (
       <span className={`game-art emoji-art ${className ?? ''}`} style={{ height, background: kind.bg }} aria-hidden="true">

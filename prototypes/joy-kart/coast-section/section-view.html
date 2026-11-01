@@ -1,0 +1,155 @@
+<style>
+#joy-kart-coast-section{width:100%;color:#fff0d4;font:14px/1.4 'Segoe UI',sans-serif}
+#joy-kart-coast-section *{box-sizing:border-box}
+#joy-kart-coast-section [hidden]{display:none!important}
+#joy-kart-coast-section .cs-stage{position:relative;width:100%;aspect-ratio:19.5/9;min-height:310px;overflow:hidden;border-radius:18px;background:#102637;isolation:isolate;container-type:inline-size;--cs-left:env(safe-area-inset-left,0px);--cs-right:env(safe-area-inset-right,0px);--cs-bottom:env(safe-area-inset-bottom,0px)}
+#joy-kart-coast-section canvas{display:block;width:100%;height:100%;position:absolute;inset:0}
+#joy-kart-coast-section button,#joy-kart-coast-section select{font:inherit;color:inherit;min-width:44px;min-height:44px;border:1px solid #edd49b80;border-radius:12px;background:#102637ed;padding:8px 12px;touch-action:manipulation}
+#joy-kart-coast-section select{font-size:16px;width:100%;background:#142d3c;color:#fff0d4}
+#joy-kart-coast-section .cs-top{position:absolute;top:12px;left:max(14px,calc(var(--cs-left) + 8px));right:max(14px,calc(var(--cs-right) + 8px));display:flex;gap:12px;align-items:start;justify-content:space-between;pointer-events:none;text-shadow:0 2px 5px #000}
+#joy-kart-coast-section .cs-top button{pointer-events:auto;background:#102637e8;width:44px;padding:8px}
+#joy-kart-coast-section .cs-location{font-size:12px;color:#fff0d4;max-width:45%;padding-top:3px}
+#joy-kart-coast-section .cs-time{font-variant-numeric:tabular-nums;font-size:18px;white-space:nowrap;margin-left:auto}
+#joy-kart-coast-section .cs-overlay{position:absolute;inset:0;z-index:5;background:linear-gradient(90deg,#091925ec,#09192574);display:flex;align-items:center;justify-content:center;padding:18px}
+#joy-kart-coast-section .cs-panel{width:min(410px,100%);display:grid;gap:10px}
+#joy-kart-coast-section h2{margin:0;font-size:clamp(25px,5cqw,40px);font-weight:700;line-height:1.05}
+#joy-kart-coast-section p{margin:0;font-size:13px;color:#d7e0dc}
+#joy-kart-coast-section .cs-choice{display:grid;gap:4px;font-size:12px}
+#joy-kart-coast-section .cs-actions{display:flex;gap:8px;flex-wrap:wrap}
+#joy-kart-coast-section .cs-primary{background:linear-gradient(115deg,#fff2cc,#e9be70);color:#102637;font-weight:700;flex:1}
+#joy-kart-coast-section .cs-controls{position:absolute;left:max(14px,calc(var(--cs-left) + 8px));right:max(14px,calc(var(--cs-right) + 8px));bottom:max(14px,calc(var(--cs-bottom) + 8px));display:flex;justify-content:space-between;align-items:end;gap:14px;pointer-events:none}
+#joy-kart-coast-section .cs-controls button{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+#joy-kart-coast-section .cs-pad{width:clamp(76px,15cqw,116px);height:clamp(76px,15cqw,116px);border-radius:50%;padding:0;position:relative;background:#0f2334de;box-shadow:inset 0 0 0 7px #fff1d508}
+#joy-kart-coast-section .cs-thumb{position:absolute;width:34%;height:34%;border-radius:50%;background:#efd196;left:33%;top:24%;transform:translateX(calc(var(--cs-steer,0)*70%));pointer-events:none}
+#joy-kart-coast-section .cs-pad-label{position:absolute;bottom:10%;left:0;right:0;font-size:12px;pointer-events:none}
+#joy-kart-coast-section .cs-right{display:grid;gap:8px;justify-items:end}
+#joy-kart-coast-section .cs-item{min-width:90px;font-size:12px;max-width:130px}
+#joy-kart-coast-section .cs-item:disabled{opacity:.65}
+#joy-kart-coast-section .cs-drift{width:clamp(78px,15cqw,112px);height:clamp(78px,15cqw,112px);border:2px solid #e9c27b;border-radius:50%;background:radial-gradient(#50513b,#102637);display:grid;place-content:center;gap:2px;font-size:14px;padding:0}
+#joy-kart-coast-section .cs-drift small{font-size:11px;color:#d7e0dc}
+#joy-kart-coast-section .cs-drift.is-held{background:#815a29}
+#joy-kart-coast-section .cs-telemetry{position:absolute;bottom:max(16px,calc(var(--cs-bottom) + 10px));left:36%;right:32%;text-align:center;text-shadow:0 2px 5px #000;pointer-events:none}
+#joy-kart-coast-section .cs-speed{font-size:clamp(23px,5cqw,38px);font-weight:700;font-variant-numeric:tabular-nums}
+#joy-kart-coast-section .cs-unit{font-size:11px}
+#joy-kart-coast-section .cs-effect{font-size:12px;min-height:18px}
+#joy-kart-coast-section .cs-toast{position:absolute;left:20%;right:20%;top:22%;text-align:center;pointer-events:none;text-shadow:0 2px 5px #000;font-size:clamp(16px,3cqw,24px);font-weight:700}
+#joy-kart-coast-section .cs-count{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;font-size:64px;font-weight:700;text-shadow:0 3px 10px #000}
+#joy-kart-coast-section .cs-loading{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:8px;padding:20px;background:#102637;z-index:9}
+#joy-kart-coast-section .cs-live{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(max-width:380px){#joy-kart-coast-section .cs-location{max-width:42%;font-size:11px}#joy-kart-coast-section .cs-top{gap:7px}#joy-kart-coast-section .cs-time{font-size:15px}#joy-kart-coast-section .cs-telemetry{left:32%;right:36%;bottom:22px}#joy-kart-coast-section .cs-effect{font-size:11px}#joy-kart-coast-section .cs-toast{left:16%;right:16%;top:24%}}
+</style>
+<div id="joy-kart-coast-section" aria-label="Joy-Kart – spielbarer Küstenabschnitt">
+ <div class="cs-stage">
+  <canvas aria-label="Dreidimensionaler Küstenabschnitt mit Fuchskart, Brücke, Rampe und Auffangweg"></canvas>
+  <div class="cs-top"><span class="cs-location">Terrassen-S · Küstenprobe</span><span class="cs-time">00:00.00</span><button type="button" data-action="pause" aria-label="Pause" class="cursor-interaction"><i data-lucide="pause" aria-hidden="true">Ⅱ</i></button></div>
+  <div class="cs-controls" hidden><button type="button" class="cs-pad cursor-interaction" data-control="pad" aria-label="Analog lenken: links und rechts ziehen"><span class="cs-thumb"></span><span class="cs-pad-label">Lenken</span></button><div class="cs-right"><button type="button" class="cs-item cursor-interaction" data-action="item">Turbo</button><button type="button" class="cs-drift cursor-interaction" data-control="drift" aria-label="Drift halten; für Item nach oben wischen">DRIFT<small>halten ↑ Item</small></button></div></div>
+  <div class="cs-telemetry" hidden><span class="cs-speed">0</span><span class="cs-unit"> km/h</span><div class="cs-effect"></div></div>
+  <div class="cs-toast" role="status" aria-live="polite"></div><div class="cs-count" hidden></div>
+  <div class="cs-overlay"><div class="cs-panel"><h2>Joy-Kart</h2><p class="cs-subtitle">Terrassen-S, Brückenrampe und Wasserfallbogen.<br>Auto-Gas · links lenken · rechts Drift halten.</p><label class="cs-choice">Start-Extra<select aria-label="Start-Extra"><option value="turbo">Turbo</option><option value="spring">Sprungfeder</option><option value="shield">Schutzblase</option><option value="grip">Haftreifen</option><option value="impulse">Impulsring</option></select></label><div class="cs-actions"><button type="button" class="cs-primary cursor-interaction" data-action="start">Abschnitt fahren</button><button type="button" data-action="again" class="cursor-interaction" hidden>Zur Auswahl</button></div></div></div>
+  <div class="cs-loading" role="status" aria-live="polite"><strong>Küstenprobe wird vorbereitet</strong><span>Grafik wird geladen …</span></div>
+  <span class="cs-live" role="status" aria-live="polite"></span>
+ </div>
+</div>
+<script>
+(async()=>{
+/*@@SECTION_ENGINE@@*/
+/*@@BATCHING@@*/
+/*@@MODELS@@*/
+/*@@CHARACTERS@@*/
+/*@@PRODUCTION_MODELS@@*/
+/*@@PRODUCTION_COAST@@*/
+/*@@LIGHTING@@*/
+const root=document.getElementById('joy-kart-coast-section'),find=q=>root.querySelector(q),stage=find('.cs-stage'),canvas=find('canvas'),loading=find('.cs-loading'),loadingText=loading.querySelector('span');
+const M=createCoastSectionModule(),{course,clamp,wrap}=M,names={turbo:'Turbo',spring:'Sprungfeder',shield:'Schutzblase',grip:'Haftreifen',impulse:'Impulsring'};
+const restored=window.openai?.widgetState?.privateContent?.item;let selected=M.ITEMS.includes(restored)?restored:'turbo';const race=new M.CoastSection(selected);find('select').value=selected;
+let stopped=false,ready=false,renderer,animation,toastUntil=0,lastPhase='',lastHud=0,testInput=null;const held=new Map(),keys=new Set(),started=performance.now(),startup={marks:[]};
+const mark=name=>startup.marks.push({name,ms:Math.round(performance.now()-started)});
+const persist=()=>window.openai?.setWidgetState?.({modelContent:{spiel:'Joy-Kart Küstenabschnitt',item:names[selected],phase:race.phase,route:race.k.routeProof},privateContent:{item:selected}})?.catch(()=>{});
+const toast=text=>{find('.cs-toast').textContent=text;toastUntil=performance.now()+1600;find('.cs-live').textContent=text;};
+function input(){if(testInput)return testInput;let steer=(keys.has('ArrowRight')||keys.has('KeyD')?1:0)-(keys.has('ArrowLeft')||keys.has('KeyA')?1:0),drift=keys.has('Space');for(const p of held.values()){if(p.role==='pad')steer+=p.value;if(p.role==='drift')drift=true;}return{steer:clamp(steer,-1,1),drift};}
+function clear(){held.clear();keys.clear();testInput=null;stage.style.setProperty('--cs-steer',0);find('[data-control="drift"]').classList.remove('is-held');}
+function pause(){clear();race.pause();syncUI();}
+function syncUI(){
+ if(race.phase==='ready'&&lastPhase!=='ready'){toastUntil=0;find('.cs-toast').textContent='';}
+ const phase=race.phase,show=['ready','paused','finished','invalid'].includes(phase);find('.cs-overlay').hidden=!show;find('.cs-controls').hidden=!['running','countdown'].includes(phase);find('.cs-telemetry').hidden=!['running','countdown'].includes(phase);find('[data-action="pause"]').hidden=show;find('.cs-count').hidden=phase!=='countdown';
+ if(lastPhase!==phase){lastPhase=phase;find('.cs-choice').hidden=phase==='paused';find('[data-action="again"]').hidden=phase==='ready';find('h2').textContent=phase==='paused'?'Pause':phase==='finished'?'Abschnitt geschafft':phase==='invalid'?'Kontrollpunkt fehlt':'Joy-Kart';find('[data-action="start"]').textContent=phase==='paused'?'Weiter':phase==='finished'||phase==='invalid'?'Noch einmal fahren':'Abschnitt fahren';find('.cs-subtitle').textContent=phase==='finished'?race.time.toFixed(2).replace('.',',')+' s · '+({main:'Brückenlinie',landing:'Rampe sauber gelandet',runout:'Über den Auffangweg'}[race.k.routeProof]||'Küstenprobe'):phase==='invalid'?'Der Weg wurde nicht vollständig durchfahren. Starte den Abschnitt erneut.':phase==='paused'?'Das Rennen und alle Extras warten.':'Terrassen-S bis Wasserfallbogen. Auto-Gas; links lenken, rechts Drift halten.';if(['finished','invalid'].includes(phase)){clear();persist();}}
+}
+function bindInputs(){
+find('select').value=selected;
+find('[data-action="start"]').addEventListener('click',()=>{if(!ready)return;clear();if(race.phase==='paused')race.resume();else race.begin(selected);syncUI();find('[data-control="pad"]').focus();});
+find('[data-action="again"]').addEventListener('click',()=>{clear();race.reset(selected);syncUI();find('[data-action="start"]').focus();});find('[data-action="pause"]').addEventListener('click',pause);find('[data-action="item"]').addEventListener('click',()=>race.queueItem());
+find('select').addEventListener('change',e=>{selected=e.target.value;if(race.phase!=='paused')race.reset(selected);persist();});
+window.addEventListener('openai:set_globals',e=>{const item=e.detail?.globals?.widgetState?.privateContent?.item;if(M.ITEMS.includes(item)&&race.phase==='ready'){selected=item;find('select').value=item;race.reset(item);}});
+for(const button of root.querySelectorAll('[data-control]')){
+ const role=button.dataset.control;
+ const move=e=>{const p=held.get(e.pointerId);if(!p)return;if(role==='pad'){const b=button.getBoundingClientRect(),v=clamp((e.clientX-b.x-b.width/2)/(b.width/2),-1,1);p.value=Math.abs(v)<=.1?0:Math.sign(v)*(Math.abs(v)-.1)/.9;}else if(!p.swiped&&p.y-e.clientY>=44&&Math.abs(p.x-e.clientX)<=56){p.swiped=true;race.queueItem();}e.preventDefault();};
+ button.addEventListener('pointerdown',e=>{if(race.phase!=='running'||[...held.values()].some(p=>p.role===role))return;e.preventDefault();button.focus();held.set(e.pointerId,{role,x:e.clientX,y:e.clientY,value:0,swiped:false});button.setPointerCapture(e.pointerId);move(e);});button.addEventListener('pointermove',move);
+ const end=e=>{if(held.has(e.pointerId)&&e.type!=='pointerup')race.cancelDrift();held.delete(e.pointerId);};for(const name of['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,end);
+}
+root.addEventListener('keydown',e=>{if(e.target.closest('select'))return;if(e.code==='Escape'){pause();return;}if(race.phase!=='running')return;if(['ArrowLeft','ArrowRight','KeyA','KeyD','Space'].includes(e.code)&&!(e.code==='Space'&&e.target.closest('[data-action]'))){e.preventDefault();keys.add(e.code);}if(e.code==='KeyE'){e.preventDefault();if(!e.repeat)race.queueItem();}});root.addEventListener('keyup',e=>keys.delete(e.code));root.addEventListener('focusout',e=>{if(!root.contains(e.relatedTarget)){clear();race.cancelDrift();}});window.addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
+}
+const decode=async url=>{const image=new Image();image.src=url;await image.decode();return image;},paintYield=()=>new Promise(resolve=>requestAnimationFrame(()=>resolve()));
+try{
+ const [THREE,atlasImage,skyImage]=await Promise.all([import('https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js'),decode(/*@@MATERIAL_ATLAS@@*/),decode(/*@@SKY_TEXTURE@@*/)]);mark('download');loadingText.textContent='Fuchs und Kart werden vorbereitet …';await paintYield();
+ const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(60,1,.15,900),materials=new Set(),geometries=new Set(),textures=new Set();
+ renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ const geo=g=>{geometries.add(g);return g;},mat=(color,options={})=>{const m=new THREE.MeshStandardMaterial({color,roughness:.8,...options});materials.add(m);return m;};
+ function texture(w,h,paint){const c=document.createElement('canvas');c.width=w;c.height=h;paint(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;textures.add(t);return t;}
+ const part=(x,y)=>{const half=atlasImage.width/2,t=texture(512,512,(c,w,h)=>c.drawImage(atlasImage,x*half,y*half,half,half,0,0,w,h));t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;};
+ const artMaps={orangeFur:part(0,0),creamFur:part(1,0),asphalt:part(0,1),stone:part(1,1)};artMaps.furNeutral=texture(256,256,(c,w,h)=>{c.drawImage(artMaps.creamFur.image,0,0,w,h);const p=c.getImageData(0,0,w,h);for(let i=0;i<p.data.length;i+=4){const l=205+((p.data[i]+p.data[i+1]+p.data[i+2])/3-128)*.25;p.data[i]=p.data[i+1]=p.data[i+2]=l;}c.putImageData(p,0,0);});for(const t of[artMaps.furNeutral,artMaps.creamFur,artMaps.orangeFur]){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(3,3);}
+ const lighting=createProductionLighting(THREE,{scene,renderer,skyImage,texture,textures,materials,geometries});const kit=createKartModels(THREE,{scene,geometries,materials,texture}),assets=createProductionKarts(THREE,{scene,kit,artMaps,materials,texture}),hero=assets.makeKart(false);mark('fox-kart');loadingText.textContent='Brücke und Küstenwelt werden aufgebaut …';await paintYield();
+ const at=(s,lat=0,route='main',extra=0)=>{const p=course.point(s,lat,route);return new THREE.Vector3(p.x,p.y+extra,p.z);};
+ const staticRoot=new THREE.Group();scene.add(staticRoot);const boxGeo=geo(new THREE.BoxGeometry(1,1,1));
+ const box=(w,h,d,m,p,x=0,y=0,z=0)=>{const o=kit.add(boxGeo,m,p,x,y,z);o.scale.set(w,h,d);return o;};
+ const road=mat(0x96978e,{map:artMaps.asphalt,bumpMap:artMaps.asphalt,bumpScale:.015,roughness:.85}),stone=mat(0xdbccb0,{map:artMaps.stone,bumpMap:artMaps.stone,bumpScale:.045}),curb=mat(0xffffff,{vertexColors:true}),lowerRoad=mat(0xb7a583,{map:artMaps.stone,roughness:1}),wet=mat(0x4b6c73,{map:artMaps.asphalt,roughness:.25,metalness:.15}),wood=mat(0x79563b),dark=mat(0x22322f),red=mat(0xad3626),gold=mat(0xe4be76,{metalness:.5,roughness:.3});
+ function strip(start,end,inner,outer,route,material,colored=false,extra=.02){
+  const positions=[],uv=[],colors=[],indices=[];for(let s=start;s<end;s+=1){const next=Math.min(s+1,end),j=positions.length/3;for(const [distance,lat]of[[s,inner],[s,outer],[next,inner],[next,outer]]){const p=at(distance,lat,route,extra);positions.push(p.x,p.y,p.z);uv.push((lat-inner)/(outer-inner),distance/7);if(colored){const c=new THREE.Color(Math.floor(s/2)%2?0xd6c8a7:0xa33e2c);colors.push(c.r,c.g,c.b);}}indices.push(j,j+1,j+2,j+1,j+3,j+2);}const g=geo(new THREE.BufferGeometry());g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));if(colored)g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(indices);g.computeVertexNormals();const o=kit.add(g,material,staticRoot);o.receiveShadow=true;
+ }
+ strip(-20,96,-19,-5,'main',stone,false,0);strip(-20,96,5,19,'main',stone,false,0);
+ strip(-20,260,-4.5,4.5,'main',road);strip(-20,260,-5,-4.5,'main',curb,true,.05);strip(-20,96,4.5,5,'main',curb,true,.05);strip(117,182,4.5,5,'main',curb,true,.05);strip(202,260,4.5,5,'main',curb,true,.05);strip(176,210,-4.3,1.3,'main',wet,false,.045);
+ const retaining=mat(0xb9a784,{map:artMaps.stone,bumpMap:artMaps.stone,bumpScale:.05,side:THREE.DoubleSide});
+ for(const side of[-1,1]){const positions=[],uv=[],indices=[];for(let s=-20;s<96;s+=1){const p=at(s,side*19),q=at(s+1,side*19),i=positions.length/3;positions.push(p.x,p.y,p.z,q.x,q.y,q.z,p.x,-2,p.z,q.x,-2,q.z);uv.push(0,0,1,0,0,2,1,2);indices.push(i,i+1,i+2,i+1,i+3,i+2);}const g=geo(new THREE.BufferGeometry());g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(indices);g.computeVertexNormals();kit.add(g,retaining,staticRoot);}
+ for(const [a,b]of[[100,120],[139,196]]){strip(a,b,-2.6,2.6,'ramp',road);strip(a,b,-3,-2.6,'ramp',curb,true,.06);strip(a,b,2.6,3,'ramp',curb,true,.06);}strip(120,196,-5.7,5.7,'runout',lowerRoad);
+ // Local arched supports carry the actual bridge surface, not the distant panorama.
+ const shape=new THREE.Shape();shape.moveTo(-7,0);shape.lineTo(-7,8.5);shape.lineTo(7,8.5);shape.lineTo(7,0);shape.lineTo(5.7,0);shape.lineTo(5.7,1.7);shape.absarc(0,1.7,5.7,0,Math.PI,false);shape.lineTo(-5.7,0);shape.closePath();const arch=geo(new THREE.ExtrudeGeometry(shape,{depth:.9,bevelEnabled:false,curveSegments:18}));
+ for(const s of[99,115,131,147])for(const side of[-1,1]){const p=at(s,side*4.8),o=kit.add(arch,stone,staticRoot,p.x,-1.5,p.z);o.rotation.y=Math.PI/2;}
+ const rails=[];for(let s=-18;s<=260;s+=2.5)for(const side of[-1,1])if(!(side===1&&((s>95&&s<118)||(s>180&&s<202))))rails.push(at(s,side*5.8));for(const [a,b,route,width]of[[112,120,'ramp',3.8],[139,194,'ramp',3.8],[125,188,'runout',6.9]])for(let s=a;s<=b;s+=2.5)for(const side of[-1,1])rails.push(at(s,side*width,route));
+ const railGeo=geo(new THREE.LatheGeometry([new THREE.Vector2(.14,0),new THREE.Vector2(.14,.1),new THREE.Vector2(.07,.2),new THREE.Vector2(.12,.5),new THREE.Vector2(.075,.9),new THREE.Vector2(.15,1)],8)),posts=new THREE.InstancedMesh(railGeo,stone,rails.length),dummy=new THREE.Object3D();rails.forEach((p,i)=>{dummy.position.copy(p);dummy.updateMatrix();posts.setMatrixAt(i,dummy.matrix);});posts.castShadow=true;posts.receiveShadow=true;posts.computeBoundingSphere();scene.add(posts);
+ function rail(a,b,side,width,route){for(let s=a;s<b;s+=2.5){const p=at(s,side*width,route,1.05),q=at(Math.min(s+2.5,b),side*width,route,1.05);kit.rod(p.toArray(),q.toArray(),.10,stone,staticRoot,6);}}
+ rail(-18,260,-1,5.8,'main');for(const[a,b]of[[-18,95],[118,180],[202,260]])rail(a,b,1,5.8,'main');for(const[a,b,r,w]of[[112,120,'ramp',3.8],[139,194,'ramp',3.8],[125,188,'runout',6.9]])for(const side of[-1,1])rail(a,b,side,w,r);
+ // This section supplies its own roads; an empty route requests only reusable distant coast assets.
+ const backdrop=new THREE.Group();backdrop.rotation.y=Math.PI;backdrop.position.z=-180;scene.add(backdrop);const seeded=n=>()=>{n=(n*1664525+1013904223)>>>0;return n/4294967296;};
+ const coast=await createProductionCoast(THREE,{scene:backdrop,P:{seeded,WALL:8,trackPoint:()=>({x:640,y:640}),locate:()=>({lat:0})},track:{len:0},scale:1,at:()=>new THREE.Vector3(),models:kit,artMaps,materials,texture,yieldTask:paintYield});
+ const waterMat=new THREE.MeshPhysicalMaterial({color:0x276c85,roughness:.36,metalness:.08,clearcoat:.4});materials.add(waterMat);lighting.tuneWater(waterMat);const water=kit.add(geo(new THREE.PlaneGeometry(700,700)),waterMat,scene,0,-2,0);water.rotation.x=-Math.PI/2;water.castShadow=false;
+ // A few close facades and cypresses frame the S; all are outside the collision corridor.
+ const plaster=[0xd8bf91,0xc99e7d,0xe0d0a9].map(c=>mat(c,{bumpMap:artMaps.stone,bumpScale:.018,roughness:.92})),roofMat=mat(0x99513b),windowMat=mat(0x293c42,{metalness:.2});
+ for(let i=0;i<12;i++){const s=15+i*5.5,side=i%2?-1:1,p=at(s,side*(12+i%3*2)),g=new THREE.Group();g.position.copy(p);g.rotation.y=course.frame(s).angle+side*Math.PI/2;staticRoot.add(g);const h=5+i%3;box(4,h,3,plaster[i%3],g,0,h/2,0);const roof=kit.add(geo(new THREE.ConeGeometry(1,1,4)),roofMat,g,0,h+.7,0);roof.rotation.y=Math.PI/4;roof.scale.set(3.1,1.4,2.5);for(const y of[1.5,3.5])for(const x of[-1,1]){box(.8,1,.05,stone,g,x,y,1.52);box(.6,.8,.06,windowMat,g,x,y,1.56);box(.8,.08,.3,stone,g,x,y-.55,1.63);}box(.8,1.8,.06,dark,g,0,.9,1.55);}
+ const treeGeo=geo(new THREE.SphereGeometry(1,10,8)),leaf=mat(0x344e38);for(let s=5;s<92;s+=6)for(const side of[-1,1]){const p=at(s,side*8.6);box(.17,3,.17,wood,staticRoot,p.x,p.y+1.5,p.z);const o=kit.add(treeGeo,leaf,staticRoot,p.x,p.y+2.5,p.z);o.scale.set(.65,2.6,.65);}
+ function sign(s,lat,text,route='main'){const t=texture(512,128,(c,w,h)=>{c.fillStyle='#142b38';c.fillRect(0,0,w,h);c.fillStyle='#f5db9f';c.font='500 43px sans-serif';c.textAlign='center';c.fillText(text,w/2,82);}),m=mat(0xffffff,{map:t,roughness:1}),p=at(s,lat,route),g=new THREE.Group();g.position.copy(p);g.rotation.y=course.frame(s,route).angle+Math.PI;staticRoot.add(g);box(3.9,.9,.09,m,g,0,3.1,0);box(.10,3,.10,wood,g,0,1.5,0);}
+ sign(87,-5,'BRÜCKE');sign(94,5.5,'RAMPE →');sign(166,3.5,'AUSLAUF','runout');sign(173,-5.5,'NASS');sign(255,-5.5,'ZIEL');kit.mergeStatic(staticRoot);
+ const cart=new THREE.Group();scene.add(cart);box(1.65,.9,2.2,wood,cart,0,.8,0);box(1.85,.16,2.35,dark,cart,0,.3,0);for(const x of[-.85,.85])for(const z of[-.75,.75]){const wheel=kit.add(geo(new THREE.CylinderGeometry(.3,.3,.15,12)),dark,cart,x,.3,z);wheel.rotation.z=Math.PI/2;}for(const x of[-.5,.4])box(.65,.55,.75,plaster[0],cart,x,1.5,0);kit.mergeStatic(cart);
+ const pickupMaterial=mat(0xd6bd7d,{metalness:.65,roughness:.26,emissive:0x876423,emissiveIntensity:.3}),pickups=course.boxes.map((s,row)=>[-2.5,0,2.5].map(lat=>{const o=kit.add(geo(new THREE.OctahedronGeometry(.48)),pickupMaterial,scene);o.position.copy(at(s,lat,'main',1.1));return{object:o,s,row,lat};})).flat();
+ const shieldMaterial=new THREE.MeshPhysicalMaterial({color:0x7cd2df,transparent:true,opacity:.18,roughness:.1,metalness:.1,side:THREE.DoubleSide,depthWrite:false});materials.add(shieldMaterial);const shield=kit.add(geo(new THREE.SphereGeometry(2,24,16)),shieldMaterial,hero.group,0,1,0);shield.scale.set(1,1,1.2);
+ const effectMat=new THREE.MeshBasicMaterial({color:0xeccc80,transparent:true,opacity:.8,depthWrite:false});materials.add(effectMat);const impulse=kit.add(geo(new THREE.TorusGeometry(1.8,.035,6,48)),effectMat,hero.group,0,.3,0);impulse.rotation.x=Math.PI/2;
+ const gripGroup=new THREE.Group();hero.group.add(gripGroup);const gripMat=new THREE.MeshBasicMaterial({color:0x83d9df});materials.add(gripMat);for(const x of[-1,1])for(const z of[-.83,.87]){const o=kit.add(geo(new THREE.TorusGeometry(.48,.025,5,24)),gripMat,gripGroup,x,.47,z);o.rotation.y=Math.PI/2;}
+ const sparkPositions=new Float32Array(96*3),sparkLife=new Float32Array(96),sparkVel=new Float32Array(96*3);sparkPositions.fill(-100);const sparkGeo=geo(new THREE.BufferGeometry());sparkGeo.setAttribute('position',new THREE.BufferAttribute(sparkPositions,3));const sparkMat=new THREE.PointsMaterial({color:0xffce78,size:.11,transparent:true,opacity:.8,depthWrite:false,blending:THREE.AdditiveBlending});materials.add(sparkMat);scene.add(new THREE.Points(sparkGeo,sparkMat));let sparkIndex=0;
+ mark('coast');loadingText.textContent='Licht wird vorbereitet …';await paintYield();
+ const cameraTarget=new THREE.Vector3(),look=new THREE.Vector3();let cameraSet=false,frames=0,fps=0,frameWindow=performance.now(),lastFrame=performance.now();
+ function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}new ResizeObserver(resize).observe(stage);resize();
+ function draw(dt){
+  const k=race.k,p=course.point(k.s,k.lat,k.route,k.y),f=course.frame(k.s,k.route),a=f.angle-k.yaw;hero.group.position.set(p.x,p.y+.06,p.z);hero.group.rotation.y=a;hero.body.rotation.z=-k.turn*.07;hero.body.rotation.x=k.grounded?-Math.atan(((course.top(k.s+.2,k.route)??k.y)-(course.top(k.s-.2,k.route)??k.y))/.4):clamp(-k.vy*.025,-.25,.25);hero.animate(k.v/24,input().steer,k.boost>0,race.time);for(const w of hero.wheels){w.spin.rotation.x+=k.v*dt/.47;if(w.front)w.pivot.rotation.y=-input().steer*.32;}
+  const floor=course.top(k.s,k.route)??course.top(k.s,'runout');hero.shadow.position.set(p.x,floor+.04,p.z);hero.shadow.rotation.z=-a;hero.shadow.material.opacity=k.grounded?.65:.25;shield.visible=k.shield>0;impulse.visible=k.impulse>0;impulse.rotation.z=race.time;gripGroup.visible=k.grip>0;
+  const cartP=at(68,Math.sin(race.time*.7)*2.4);cart.position.copy(cartP);cart.rotation.y=course.frame(68).angle+Math.PI/2;for(const q of pickups){q.object.visible=!race.boxesTaken.has(q.row);q.object.rotation.y=race.time*1.7;q.object.position.y=course.height(q.s)+1.1+Math.sin(race.time*3+q.row)*.1;}
+  coast.update(race.time);const rear=['running','countdown','paused','finished','invalid'].includes(race.phase),dirX=Math.sin(f.angle),dirZ=Math.cos(f.angle);cameraTarget.set(p.x-dirX*(rear?8: -7)+(!rear?4:0),p.y+(!rear?3.4:3.1),p.z-dirZ*(rear?8:-7));if(!cameraSet){camera.position.copy(cameraTarget);cameraSet=true;}else camera.position.lerp(cameraTarget,1-Math.exp(-dt*7));look.set(p.x+dirX*(rear?6:0),p.y+(rear?1.1:.9),p.z+dirZ*(rear?6:0));camera.lookAt(look);lighting.update(camera,p.x,p.y,p.z,!rear);renderer.render(scene,camera);
+  for(let i=0;i<96;i++)if(sparkLife[i]>0){sparkLife[i]-=dt;for(let j=0;j<3;j++)sparkPositions[i*3+j]+=sparkVel[i*3+j]*dt;if(sparkLife[i]<=0)sparkPositions[i*3+1]=-100;}
+  if(k.grounded&&(k.drifting||k.boost>0)&&race.phase==='running')for(const side of[-1,1]){const i=sparkIndex++%96,j=i*3;sparkLife[i]=.25;sparkPositions[j]=p.x-dirX+side*f.nx;sparkPositions[j+1]=p.y+.25;sparkPositions[j+2]=p.z-dirZ+side*f.nz;sparkVel[j]=-dirX*3;sparkVel[j+1]=1.2;sparkVel[j+2]=-dirZ*3;}sparkGeo.attributes.position.needsUpdate=true;
+ }
+ if(renderer.compileAsync)await renderer.compileAsync(scene,camera);mark('shaders');draw(1);mark('ready');startup.readyMs=Math.round(performance.now()-started);bindInputs();loading.hidden=true;ready=true;syncUI();
+ function hud(now){const k=race.k;find('.cs-speed').textContent=Math.round(k.v*3.6);find('.cs-time').textContent=new Date(Math.round(race.time*1000)).toISOString().slice(14,22);find('.cs-location').textContent=k.route==='runout'?'Langsamer Auffangweg':k.route==='ramp'?'Brückenrampe':k.s<90?'Terrassen-S':k.s<176?'Aquädukt':k.s<215?'Wasserfallbogen':'Zielausfahrt';const item=find('[data-action="item"]');item.textContent=k.item?names[k.item]:'Box sammeln';item.disabled=!k.item||race.phase!=='running';find('.cs-effect').textContent=k.shield>0?'Schutz aktiv':k.grip>0?'Haftreifen':k.impulse>0?'Ring geladen':k.boost>0?'Schub':k.drifting?'Drift '+Math.round(k.charge/1.8*100)+' %':k.grounded?'':'In der Luft';find('.cs-count').textContent=Math.max(1,Math.ceil(race.countdown));if(now>toastUntil)find('.cs-toast').textContent='';}
+ function events(){for(const e of race.takeEvents()){const text=e.type==='go'?'LOS!':e.type==='item-used'?names[e.detail]+' aktiv':e.type==='protected'?'Schutz hat den Treffer abgefangen':e.type==='hit'?'Treffer – weiterfahren':e.type==='takeoff'?'Sprung!':e.type==='runout'?'Auffangweg – bleib in Fahrt':e.type==='landed'?e.detail==='clean'?'Sauber gelandet':'Weiter geht’s':e.type==='bonus'?'Drift-Schub':e.type==='impulse-bonus'?'Impuls geladen → Schub':e.type==='item-rejected'?e.detail:e.type==='pickup'?names[e.detail]+' bereit':null;if(text)toast(text);}}
+ function loop(now){if(stopped)return;if(!root.isConnected){stopped=true;renderer.dispose();for(const s of[geometries,materials,textures])for(const v of s)v.dispose();return;}const dt=Math.min((now-lastFrame)/1000,.1);lastFrame=now;race.advance(dt,input());events();syncUI();stage.style.setProperty('--cs-steer',input().steer);find('[data-control="drift"]').classList.toggle('is-held',input().drift);draw(dt);if(now-lastHud>80){hud(now);lastHud=now;}frames++;if(now-frameWindow>1000){fps=Math.round(frames*1000/(now-frameWindow));frames=0;frameWindow=now;}animation=requestAnimationFrame(loop);}
+ root.__joyKartSection={snapshot:()=>({...race.snapshot(),version:'coast-section-v1',role:'practice-section',input:{...input(),heldPointers:held.size},startup,render:{fps,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,pixelRatio:renderer.getPixelRatio(),cameraY:camera.position.y,kartY:hero.group.position.y}}),setTestInput:value=>{testInput=value?{steer:clamp(value.steer||0,-1,1),drift:value.drift===true}:null;},course};
+ canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();pause();stopped=true;cancelAnimationFrame(animation);loading.hidden=false;loadingText.textContent='Grafik unterbrochen. Bitte die Seite neu laden.';});animation=requestAnimationFrame(loop);
+}catch(error){stopped=true;loading.hidden=false;loading.querySelector('strong').textContent='Küstenprobe konnte nicht starten';loadingText.textContent=error.message;console.error(error);renderer?.dispose();}
+})();
+</script>

@@ -18,6 +18,7 @@ import type { GameOutcome, GameProps as ArcadeProps, Player } from '../arcade/ty
 import type { Outcome, PlayProps, SeatInfo } from '../engine/game';
 import { animalInfo } from '../lib/names';
 import type { GameId } from './registry';
+import { JoyKart } from './views/JoyKart';
 import { Memory, ConnectFour, TicTacToe } from './views/Classic';
 import { MauMau } from './views/Cards';
 import { Ludo } from './views/Ludo';
@@ -56,6 +57,7 @@ function convert(o: GameOutcome): Outcome {
 
 export function GameView({ id, props }: { id: GameId; props: PlayProps }) {
   switch (id) {
+    case 'joykart': return <JoyKart {...props} />;
     case 'rechnen':
     case 'buchstaben':
     case 'uhr':

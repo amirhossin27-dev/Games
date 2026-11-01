@@ -1,0 +1,414 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+#joy-kart-drive{display:flex;justify-content:center;padding:24px 0;color-scheme:dark}
+#joy-kart-drive [hidden]{display:none!important}
+#joy-kart-drive .drive-phone{--d-safe-top:env(safe-area-inset-top,0px);--d-safe-bottom:env(safe-area-inset-bottom,0px);--d-gold:#efc77f;--d-ink:#fff4dc;--d-muted:#bacbd3;--d-bg:#0d1924;--d-button:64px;width:100%;max-width:410px;position:relative;isolation:isolate;overflow:hidden;border-radius:28px;border:1px solid #ffffff29;background:var(--d-bg);color:var(--d-ink);font-family:'DM Sans','Segoe UI',sans-serif;box-shadow:0 14px 42px #0005}
+#joy-kart-drive .drive-phone *{box-sizing:border-box}
+#joy-kart-drive .drive-stage{height:650px;position:relative;isolation:isolate;overflow:hidden;touch-action:none;background:linear-gradient(#64a4b8,#f5d5a4 55%,#789a66)}
+#joy-kart-drive canvas.drive-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:-2;touch-action:none}
+#joy-kart-drive .drive-shade{position:absolute;inset:0;background:linear-gradient(180deg,#06121c9c,transparent 27%,transparent 59%,#07142080);z-index:-1;pointer-events:none}
+#joy-kart-drive button{font:inherit;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#joy-kart-drive .drive-icon{height:48px;width:48px;border-radius:50%;border:1px solid #ffffff36;background:#0a1825c9;backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#joy-kart-drive svg{width:22px;height:22px;stroke-width:1.8}
+#joy-kart-drive .drive-top{position:absolute;top:max(19px,calc(var(--d-safe-top) + 10px));left:22px;right:22px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:3}
+#joy-kart-drive .drive-brand{font-size:13px;font-weight:700;letter-spacing:3px;text-shadow:0 2px 12px #0007}
+#joy-kart-drive .drive-top-actions{display:flex;gap:8px}
+#joy-kart-drive .drive-start{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:flex-end;flex-direction:column;padding:25px;background:linear-gradient(180deg,#08162305 15%,#08162310 32%,#081623e8 65%,#081623 100%)}
+#joy-kart-drive .drive-eyebrow{font-size:11px;font-weight:600;letter-spacing:1.7px;color:var(--d-gold);text-transform:uppercase;margin:0 0 9px}
+#joy-kart-drive h1{font-family:'Barlow Condensed',Impact,sans-serif;font-size:68px;font-style:italic;line-height:1;font-weight:900;letter-spacing:-1px;color:#fff0cd;text-shadow:0 3px 0 #9c4c32;margin:0 0 13px}
+#joy-kart-drive p,#joy-kart-drive h2{margin:0}
+#joy-kart-drive .drive-intro{font-size:13px;line-height:1.5;color:var(--d-muted);margin-bottom:20px}
+#joy-kart-drive .drive-modes{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:17px}
+#joy-kart-drive .drive-mode{min-height:54px;border:1px solid #ffffff25;border-radius:13px;background:#162a37e6;display:flex;gap:8px;align-items:center;justify-content:center;font-size:12px;padding:10px 6px}
+#joy-kart-drive .drive-mode[aria-pressed=true]{border-color:var(--d-gold);background:#514333c9}
+#joy-kart-drive .drive-mode svg{width:20px;height:20px}
+#joy-kart-drive .drive-assist-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;padding:3px 0 17px}
+#joy-kart-drive .drive-switch{width:48px;height:44px;background:transparent;border:0;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#joy-kart-drive .drive-switch span{width:44px;height:26px;border-radius:18px;position:relative;background:#40505a;border:1px solid #ffffff16}
+#joy-kart-drive .drive-switch span:after{content:'';width:18px;height:18px;border-radius:50%;position:absolute;top:3px;left:3px;background:#eaf1e9;transition:transform .15s}
+#joy-kart-drive .drive-switch[aria-checked=true] span{background:#c7a466}
+#joy-kart-drive .drive-switch[aria-checked=true] span:after{transform:translateX(18px)}
+#joy-kart-drive .drive-primary{border:1px solid #ffe6ae;border-radius:14px;min-height:55px;background:linear-gradient(115deg,#fff5d8,#edc987);color:#17232d;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 17px;width:100%}
+#joy-kart-drive .drive-primary:disabled{opacity:.55}
+#joy-kart-drive .drive-small{font-size:11px;line-height:1.5;color:var(--d-muted);text-align:center;margin-top:12px}
+#joy-kart-drive .drive-hud{position:absolute;top:max(18px,calc(var(--d-safe-top) + 10px));left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right));display:grid;grid-template-columns:minmax(65px,1fr) auto 48px;gap:12px;align-items:start}
+#joy-kart-drive .drive-place{display:flex;align-items:baseline;gap:5px;text-shadow:0 2px 7px #0009}
+#joy-kart-drive .drive-place b{font-family:'Barlow Condensed',Impact,sans-serif;font-style:italic;font-size:46px;font-weight:800;line-height:1}
+#joy-kart-drive .drive-place span{font-size:11px;font-weight:600;letter-spacing:1px}
+#joy-kart-drive .drive-clock{text-align:center;font-size:12px;font-variant-numeric:tabular-nums;line-height:1.4;min-width:90px;text-shadow:0 2px 6px #000c}
+#joy-kart-drive .drive-lap{font-size:11px;font-weight:600;letter-spacing:.8px;margin-bottom:5px}
+#joy-kart-drive .drive-lap-line{height:3px;margin:6px auto 7px;background:#fff4d733;border-radius:3px;overflow:hidden;width:80px}
+#joy-kart-drive .drive-lap-line i{display:block;height:100%;background:var(--d-gold);width:0}
+#joy-kart-drive .drive-map{position:absolute;top:max(89px,calc(var(--d-safe-top) + 81px));right:19px;width:80px;height:80px;opacity:.9;pointer-events:none;filter:drop-shadow(0 2px 5px #0008)}
+#joy-kart-drive .drive-controls{position:absolute;left:max(18px,env(safe-area-inset-left));right:max(18px,env(safe-area-inset-right));bottom:max(23px,calc(var(--d-safe-bottom) + 12px));display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+#joy-kart-drive .drive-control-wrap{display:flex;flex-direction:column;gap:8px;align-items:center}
+#joy-kart-drive .drive-steer{display:flex;gap:11px}
+#joy-kart-drive .drive-button{height:var(--d-button);width:var(--d-button);display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid #fff0ce80;background:#0b1c2bca;backdrop-filter:blur(10px);box-shadow:inset 0 0 0 3px #ffffff08;touch-action:none;user-select:none}
+#joy-kart-drive .drive-button svg{height:28px;width:28px;stroke-width:2.5}
+#joy-kart-drive .drive-button.is-down{background:#ac7c37d9;border-color:#fff0ca;box-shadow:0 0 18px #d6aa4e44}
+#joy-kart-drive .drive-boost{width:74px;height:74px;border:2px solid #f6d58f;background:radial-gradient(#735428c9,#152532d9);color:#ffe0a4;box-shadow:0 0 15px #e8bb5e35}
+#joy-kart-drive .drive-boost svg{fill:#efc77f;stroke-width:1.3}
+#joy-kart-drive .drive-boost:disabled{opacity:.5;border-color:#c0c9c366;box-shadow:none;background:#102331bc;color:#c0c9c3}
+#joy-kart-drive .drive-control-label{font-size:11px;font-weight:500;text-shadow:0 2px 6px #000b;color:#fff1d4;min-height:16px;text-align:center}
+#joy-kart-drive .drive-speed{font-family:'Barlow Condensed',Impact,sans-serif;font-size:30px;font-style:italic;font-weight:700;text-shadow:0 2px 9px #0009;line-height:1}
+#joy-kart-drive .drive-speed small{font-family:'DM Sans',sans-serif;font-size:11px;font-style:normal;margin-left:3px;font-weight:500}
+#joy-kart-drive .drive-toast{position:absolute;right:15px;bottom:172px;font-family:'Barlow Condensed',Impact,sans-serif;font-size:24px;font-weight:700;font-style:italic;color:#ffe3a5;text-shadow:0 2px 10px #000b;max-width:170px;text-align:right;pointer-events:none}
+#joy-kart-drive .drive-count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#joy-kart-drive .drive-count b{font-family:'Barlow Condensed',Impact,sans-serif;font-size:115px;font-style:italic;color:#fff1cf;text-shadow:0 4px 0 #ab6840,0 0 28px #d4ad60a8;line-height:1}
+#joy-kart-drive .drive-dialog{color:var(--d-ink);background:#10202d;border:1px solid #d2b07177;border-radius:23px;width:calc(100% - 40px);max-width:345px;padding:23px;box-shadow:0 18px 65px #000b;font:inherit}
+#joy-kart-drive .drive-dialog::backdrop{background:#040e19ba;backdrop-filter:blur(5px)}
+#joy-kart-drive .drive-dialog h2{font-size:25px;font-weight:600;letter-spacing:-.5px;margin-bottom:9px}
+#joy-kart-drive .drive-dialog p{font-size:12px;line-height:1.5;color:var(--d-muted);margin-bottom:17px}
+#joy-kart-drive .drive-secondary{border:1px solid #ffffff26;border-radius:12px;background:#203440;color:var(--d-ink);min-height:48px;padding:11px 14px;width:100%;font-size:13px;margin-top:9px}
+#joy-kart-drive .drive-quiet{border:0;background:transparent;color:var(--d-muted);min-height:44px;padding:10px;font-size:12px;width:100%;margin-top:4px}
+#joy-kart-drive .drive-quality{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;margin:16px 0}
+#joy-kart-drive select{font:inherit;font-size:16px;color:var(--d-ink);background:#213542;border:1px solid #ffffff30;border-radius:9px;min-height:44px;padding:7px 10px;max-width:170px}
+#joy-kart-drive .drive-result{position:absolute;inset:0;background:linear-gradient(#08152155,#081521f7 70%);display:flex;flex-direction:column;justify-content:flex-end;padding:26px;text-align:center}
+#joy-kart-drive .drive-result h2{font-family:'Barlow Condensed',Impact,sans-serif;font-size:47px;font-weight:800;font-style:italic;line-height:1.05;margin:0 0 13px}
+#joy-kart-drive .drive-result p{font-size:13px;line-height:1.5;color:var(--d-muted);margin-bottom:22px}
+#joy-kart-drive .drive-result-time{font-family:'Barlow Condensed',Impact,sans-serif;font-size:48px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:1px;margin-bottom:5px}
+#joy-kart-drive .drive-result-label{font-size:11px;letter-spacing:1px;color:var(--d-muted);margin-bottom:25px}
+#joy-kart-drive .drive-showcase{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:flex-end;flex-direction:column;padding:25px;background:linear-gradient(transparent 48%,#0a1927ed 88%);pointer-events:none}
+#joy-kart-drive .drive-showcase>*{pointer-events:auto}
+#joy-kart-drive .drive-showcase h2{font-family:'Barlow Condensed',Impact,sans-serif;font-size:32px;font-weight:700;margin-bottom:5px}
+#joy-kart-drive .drive-showcase p{font-size:12px;line-height:1.5;color:var(--d-muted);margin-bottom:16px}
+#joy-kart-drive .drive-gallery-link{margin:0 0 9px;min-height:42px;border:0;background:transparent;color:#e9c98b;text-align:left;padding:0;font-size:12px;display:flex;align-items:center;gap:7px}
+#joy-kart-drive .drive-gallery-link svg{width:17px;height:17px}
+#joy-kart-drive .drive-model-swap{margin-bottom:9px;margin-top:0}
+#joy-kart-drive .drive-home-line{position:absolute;bottom:7px;left:calc(50% - 41px);height:3px;width:82px;background:#fff0cc70;border-radius:4px;pointer-events:none}
+#joy-kart-drive.is-playing .drive-phone{max-width:720px}
+#joy-kart-drive.is-playing .drive-stage{height:auto;aspect-ratio:19.5/9;min-height:326px}
+#joy-kart-drive.is-playing .drive-start{padding:24px}
+#joy-kart-drive .drive-error{position:absolute;inset:0;background:#0d1b28ed;padding:28px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;gap:13px;z-index:20}
+#joy-kart-drive .drive-error strong{font-size:19px}
+#joy-kart-drive .drive-error p{font-size:13px;line-height:1.6;color:var(--d-muted)}
+@media(max-width:520px){#joy-kart-drive{padding-top:56px}#joy-kart-drive.is-playing .drive-stage{height:650px;aspect-ratio:auto}#joy-kart-drive .drive-start{padding:23px}#joy-kart-drive .drive-controls{left:16px;right:16px;bottom:max(27px,calc(var(--d-safe-bottom) + 12px))}#joy-kart-drive .drive-hud{left:16px;right:16px;gap:9px}#joy-kart-drive .drive-map{top:max(93px,calc(var(--d-safe-top) + 85px));right:16px;width:72px;height:72px}}
+@media(max-width:350px){#joy-kart-drive h1{font-size:60px}#joy-kart-drive .drive-start{padding:19px}#joy-kart-drive .drive-modes{gap:7px}#joy-kart-drive .drive-mode{font-size:11px;gap:5px}#joy-kart-drive .drive-hud{left:13px;right:13px;gap:7px}#joy-kart-drive .drive-controls{left:13px;right:13px;gap:11px}#joy-kart-drive .drive-steer{gap:9px}#joy-kart-drive .drive-boost{width:70px;height:70px}#joy-kart-drive .drive-clock{min-width:87px}}
+#joy-kart-drive .drive-start,#joy-kart-drive .drive-result,#joy-kart-drive .drive-showcase{padding-bottom:max(25px,calc(var(--d-safe-bottom) + 16px))}
+@media(prefers-reduced-motion:reduce){#joy-kart-drive *{transition:none!important}}
+</style>
+<div id="joy-kart-drive" class="viz-dotted-background">
+ <main class="drive-phone" aria-label="Joy-Kart – fahrbare Teststrecke" aria-busy="true">
+  <div class="drive-stage">
+   <canvas class="drive-canvas" aria-label="Dreidimensionale Kart-Teststrecke"></canvas>
+   <div class="drive-shade"></div>
+   <header class="drive-top"><span class="drive-brand">JOYBOY</span><button type="button" class="drive-icon cursor-interaction" data-action="sound" aria-label="Ton einschalten" aria-pressed="false"><i data-lucide="volume-x" aria-hidden="true"></i></button></header>
+   <section class="drive-start" aria-label="Rennen vorbereiten">
+    <div class="drive-eyebrow">Teststrecke · Küstenkulisse</div><h1>JOY-KART</h1>
+    <p class="drive-intro">Dein Kart gibt selbst Gas.<br>Du lenkst, driftest und sammelst Turbo.</p>
+    <button type="button" class="drive-gallery-link cursor-interaction" data-action="showcase"><i data-lucide="box" aria-hidden="true">◇</i>Die neuen Karts ansehen</button>
+    <div class="drive-modes" aria-label="Spielmodus"><button type="button" class="drive-mode cursor-interaction" data-mode="solo" aria-pressed="false"><i data-lucide="timer" aria-hidden="true">◷</i>Zeitfahren</button><button type="button" class="drive-mode cursor-interaction" data-mode="cpu" aria-pressed="true"><i data-lucide="bot" aria-hidden="true">R</i>Gegen Robo</button></div>
+    <div class="drive-assist-row"><span>Lenkhilfe</span><button type="button" class="drive-switch cursor-interaction" data-action="assist" role="switch" aria-checked="true" aria-label="Lenkhilfe"><span></span></button></div>
+    <button type="button" class="drive-primary cursor-interaction" data-action="start" disabled><span data-ui="loading" role="status" aria-live="polite">3D-Grafik wird geladen …</span><i data-lucide="flag" aria-hidden="true"></i></button>
+    <p class="drive-small">3 Runden · Finger oder Pfeiltasten · Leertaste für Turbo</p>
+   </section>
+   <div class="drive-hud" hidden><div class="drive-place"><b data-hud="place">2</b><span data-hud="place-label">PLATZ</span></div><div class="drive-clock"><div class="drive-lap" data-hud="lap">RUNDE 1 / 3</div><div class="drive-lap-line"><i data-hud="progress"></i></div><div data-hud="time">00:00.00</div></div><button type="button" class="drive-icon cursor-interaction" data-action="pause" aria-label="Rennen pausieren"><i data-lucide="pause" aria-hidden="true">Ⅱ</i></button></div>
+   <canvas class="drive-map" width="160" height="160" aria-label="Streckenübersicht" hidden></canvas>
+   <div class="drive-controls" hidden><div class="drive-control-wrap"><div class="drive-steer"><button type="button" class="drive-button cursor-interaction" data-action="left" aria-label="Nach links lenken"><i data-lucide="chevron-left" aria-hidden="true">‹</i></button><button type="button" class="drive-button cursor-interaction" data-action="right" aria-label="Nach rechts lenken"><i data-lucide="chevron-right" aria-hidden="true">›</i></button></div><span class="drive-control-label">Lenken</span></div><div class="drive-control-wrap"><div class="drive-speed"><span data-hud="speed">0</span><small>km/h</small></div><button type="button" class="drive-button drive-boost cursor-interaction" data-action="boost" aria-label="Turbo einsetzen"><i data-lucide="zap" aria-hidden="true">↯</i></button><span class="drive-control-label" data-hud="item">Turbo</span></div></div>
+   <div class="drive-count" role="status" aria-live="polite" hidden><b>3</b></div>
+   <div class="drive-toast" role="status" aria-live="polite"></div>
+   <section class="drive-result" aria-label="Rennergebnis" hidden><div class="drive-eyebrow">3 Testrunden · Küstenkulisse</div><h2 data-result="title">Ziel erreicht!</h2><p data-result="copy"></p><div class="drive-result-time" data-result="time"></div><div class="drive-result-label">DEINE ZEIT</div><button type="button" class="drive-primary cursor-interaction" data-action="start">Nochmal fahren<i data-lucide="rotate-ccw" aria-hidden="true"></i></button><button type="button" class="drive-secondary cursor-interaction" data-action="home">Zur Rennvorbereitung</button></section>
+   <section class="drive-showcase" aria-label="Kart und Figur ansehen" hidden><div class="drive-eyebrow">Dein Fahrzeug aus jeder Richtung</div><h2 data-model="name">Fuchs im roten Kart</h2><p>Mit dem Finger über das Bild streichen, um das Kart zu drehen.</p><button type="button" class="drive-secondary drive-model-swap cursor-interaction" data-action="showcase-swap">Panda ansehen</button><button type="button" class="drive-primary cursor-interaction" data-action="showcase-close">Zur Rennvorbereitung<i data-lucide="arrow-right" aria-hidden="true"></i></button></section>
+   <dialog class="drive-dialog" data-dialog="pause" aria-label="Rennen pausiert"><div class="drive-eyebrow">Kurz durchatmen</div><h2>Deine Pause.</h2><p>Die Uhr wartet auf dich.</p><button type="button" class="drive-primary cursor-interaction" data-action="resume">Weiterfahren<i data-lucide="play" aria-hidden="true"></i></button><button type="button" class="drive-secondary cursor-interaction" data-action="recover">Auf die Fahrbahn zurück</button><button type="button" class="drive-secondary cursor-interaction" data-action="restart">Neu starten</button><label class="drive-quality">Darstellung<select aria-label="Darstellungsqualität" data-setting="quality"><option value="auto">Automatisch</option><option value="low">Flüssiger</option><option value="high">Detailreicher</option></select></label><button type="button" class="drive-quiet cursor-interaction" data-action="home">Zur Rennvorbereitung</button></dialog>
+   <div class="drive-error" role="alert" hidden><strong>Die 3D-Ansicht konnte nicht starten.</strong><p data-error></p></div>
+   <div class="drive-home-line" aria-hidden="true"></div>
+  </div>
+ </main>
+</div>
+<script type="module">
+const root = document.getElementById('joy-kart-drive');
+const find = selector => root.querySelector(selector);
+const startup={marks:[{label:'module',at:performance.now()}],readyAt:null},startupMark=label=>startup.marks.push({label,at:performance.now()});
+const paintYield=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+const loadingStep=async text=>{find('[data-ui="loading"]').textContent=text;await paintYield();};
+const preparationButtons=[...root.querySelectorAll('.drive-start button,.drive-top button')];preparationButtons.forEach(button=>button.disabled=true);
+const physics = (() => { const exports = {}; /*@@PHYSICS@@*/ return exports; })();
+const engine = (() => { const exports = {}; const require = id => { if (id === './physics') return physics; throw new Error('Unexpected module'); }; /*@@ENGINE@@*/ return exports; })();
+/*@@BATCHING@@*/
+/*@@MODELS@@*/
+/*@@CHARACTERS@@*/
+/*@@SCENERY@@*/
+/*@@PRODUCTION_MODELS@@*/
+/*@@PRODUCTION_COAST@@*/
+/*@@LIGHTING@@*/
+try {
+ await loadingStep('3D-Grafik wird geladen …');
+ const atlasImage=new Image(),skyImage=new Image();atlasImage.src=/*@@MATERIAL_ATLAS@@*/;skyImage.src=/*@@SKY_TEXTURE@@*/;
+ const [THREE]=await Promise.all([import('https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js'),atlasImage.decode(),skyImage.decode()]);startupMark('library-and-images');
+ await loadingStep('Oberflächen werden vorbereitet …');
+ const P = physics, S = 0.12, TAU = Math.PI * 2;
+ const { KartRace } = engine;
+ const saved = window.openai?.widgetState?.privateContent;
+ const prefs = { version:1, mode:saved?.mode === 'solo' ? 'solo' : 'cpu', assist:saved?.assist !== false, sound:saved?.sound === true, quality:['low','high'].includes(saved?.quality) ? saved.quality : 'auto' };
+ let race = new KartRace(prefs), frame = 0, lastFrame = 0, toastUntil = 0, visiblePhase = 'ready', ready = false, disposed = false;
+ let useQueued = false, pulse = 0, pulseUntil = 0, previousCount = 4, wheelDistance = 0, cameraAngle = race.human.a;
+ let showroom=saved?.view==='model',showroomPanda=saved?.model==='Panda',showroomAngle=Number.isFinite(saved?.modelAngle)?Math.max(-Math.PI*4,Math.min(Math.PI*4,saved.modelAngle)):-.45,showroomPointer=null;
+ const showroomRival=P.newKart(race.track,-15);
+ const touches = new Map(), keys = new Set();
+ const stats = { fps:0, frames:0, seconds:0, scale:1.25, drawCalls:0, triangles:0, renderMs:0, autoReduced:false };
+ const canvas = find('.drive-canvas'), stage = find('.drive-stage'), mapCanvas = find('.drive-map'), mapCtx = mapCanvas.getContext('2d');
+ const scene = new THREE.Scene();
+ scene.fog = new THREE.FogExp2(0xa9b5ba, 0.0021);
+ const camera = new THREE.PerspectiveCamera(59, 1, 0.12, 900);
+ const renderer = new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});
+ startupMark('renderer');
+ renderer.outputColorSpace = THREE.SRGBColorSpace;
+ renderer.toneMapping = THREE.ACESFilmicToneMapping;
+ renderer.toneMappingExposure = 1.12;
+ renderer.shadowMap.enabled = true;
+ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+ const materials = new Set(), geometries = new Set(), textures = new Set();
+ const mat = (color,more={}) => { const m = new THREE.MeshStandardMaterial({color,roughness:.82,metalness:0,...more}); materials.add(m); return m; };
+ const geo = g => { geometries.add(g); return g; };
+ const mesh = (g,m,parent=scene) => { const o=new THREE.Mesh(g,m); parent.add(o); return o; };
+ const basic = (color,more={}) => { const m=new THREE.MeshBasicMaterial({color,...more});materials.add(m);return m; };
+ const random = P.seeded(1587);
+ const roadY = s => 3.2 + Math.sin(s / race.track.len * TAU * 2) * .72 + Math.sin(s / race.track.len * TAU * 3 + .6) * .30;
+ const world = (p,y=0) => new THREE.Vector3((p.x-640)*S,y,(p.y-640)*S);
+ const at = (s,lat=0,extra=0) => world(P.trackPoint(race.track,s,lat),roadY(s)+extra);
+ const boxGeo = geo(new THREE.BoxGeometry(1,1,1));
+ const sphereGeo = geo(new THREE.IcosahedronGeometry(1,2));
+ const smallSphereGeo = geo(new THREE.IcosahedronGeometry(1,1));
+ const box = (w,h,d,m,parent,x=0,y=0,z=0) => {const o=mesh(boxGeo,m,parent);o.scale.set(w,h,d);o.position.set(x,y,z);return o;};
+ const ball = (x,y,z,rx,ry,rz,m,parent) => {const o=mesh(sphereGeo,m,parent);o.position.set(x,y,z);o.scale.set(rx,ry,rz);return o;};
+
+ function texture(width,height,paint) {
+  const c=document.createElement('canvas');c.width=width;c.height=height;const ctx=c.getContext('2d');paint(ctx,width,height);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;textures.add(t);return t;
+ }
+ const atlasHalf=atlasImage.width/2;
+ const atlasPart=(x,y)=>{const t=texture(512,512,(c,w,h)=>c.drawImage(atlasImage,x*atlasHalf,y*atlasHalf,atlasHalf,atlasHalf,0,0,w,h));t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;};
+ const artMaps={orangeFur:atlasPart(0,0),creamFur:atlasPart(1,0),asphalt:atlasPart(0,1),stone:atlasPart(1,1)};
+ artMaps.furNeutral=texture(256,256,(c,w,h)=>{c.drawImage(artMaps.creamFur.image,0,0,w,h);const image=c.getImageData(0,0,w,h);for(let i=0;i<image.data.length;i+=4){const light=205+((image.data[i]+image.data[i+1]+image.data[i+2])/3-128)*.25;image.data[i]=image.data[i+1]=image.data[i+2]=light;}c.putImageData(image,0,0);});artMaps.furNeutral.wrapS=artMaps.furNeutral.wrapT=THREE.RepeatWrapping;artMaps.furNeutral.repeat.set(4,3);
+ artMaps.orangeFur.repeat.set(2.5,2);artMaps.creamFur.repeat.set(2.5,2);
+ const lighting=createProductionLighting(THREE,{scene,renderer,skyImage,texture,textures,materials,geometries}),sun=lighting.sun;
+ const asphalt=texture(512,1024,(c,w,h)=>{for(let y=0;y<h;y+=128)for(let x=0;x<w;x+=128)c.drawImage(artMaps.asphalt.image,x,y,128,128);c.fillStyle='#4e504c66';c.fillRect(0,0,w,h);c.fillStyle='#dcd6be';c.fillRect(18,0,3,h);c.fillRect(w-21,0,3,h);});
+ asphalt.wrapS=asphalt.wrapT=THREE.RepeatWrapping;asphalt.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+ const grassTex=texture(128,128,(c,w,h)=>{c.fillStyle='#c2c7a0';c.fillRect(0,0,w,h);for(let i=0;i<3000;i++){c.fillStyle=random()>.4?'#abb58c':'#d9d4b5';c.globalAlpha=.12;c.fillRect(random()*w,random()*h,1,2);}c.globalAlpha=1;});grassTex.wrapS=grassTex.wrapT=THREE.RepeatWrapping;grassTex.repeat.set(36,36);
+ const roadMat=mat(0xffffff,{map:asphalt,bumpMap:asphalt,bumpScale:.008,roughness:.83,metalness:.04});
+ const redMat=mat(0xb84f38),ivoryMat=mat(0xe6dab4),woodMat=mat(0x826642),trunkMat=mat(0x71513c),leafMat=mat(0x5b824a),rockMat=mat(0x9c9277),sandMat=mat(0xd4c18e);
+ const groundMat=mat(0xffffff,{map:grassTex,vertexColors:true,roughness:1});
+
+ function strip(inner,outer,material,height=.0,colored=false) {
+  const positions=[],uv=[],colors=[],indices=[],n=race.track.n;
+  for(let i=0;i<n;i++){
+   const s=i*race.track.spacing,ns=(i+1)*race.track.spacing;
+   const points=[at(s,inner,height),at(s,outer,height),at(ns,inner,height),at(ns,outer,height)];
+   const j=positions.length/3;for(const p of points)positions.push(p.x,p.y,p.z);
+   uv.push(0,s*S/12,1,s*S/12,0,ns*S/12,1,ns*S/12);
+   if(colored){const c=new THREE.Color(i%4<2?0xb94c37:0xf1dfba);for(let k=0;k<4;k++)colors.push(c.r,c.g,c.b);}
+   indices.push(j,j+1,j+2,j+1,j+3,j+2);
+  }
+  const g=geo(new THREE.BufferGeometry());g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));if(colored)g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(indices);g.computeVertexNormals();
+  const o=mesh(g,material);o.receiveShadow=true;return o;
+ }
+ strip(-P.HALF,P.HALF,roadMat,.08);
+ const curbMat=mat(0xffffff,{vertexColors:true,roughness:.93});
+ strip(-P.HALF-5,-P.HALF,curbMat,.13,true);strip(P.HALF,P.HALF+5,curbMat,.13,true);
+ strip(-P.HALF-9,-P.HALF-5,sandMat,.025);strip(P.HALF+5,P.HALF+9,sandMat,.025);
+ const apronMap=artMaps.stone.clone();apronMap.repeat.set(2,4);textures.add(apronMap);const apron=mat(0xd7cbb3,{map:apronMap,bumpMap:apronMap,bumpScale:.025,roughness:.95});strip(-P.WALL+4,-P.HALF-9,apron,-.025);strip(P.HALF+9,P.WALL-4,apron,-.025);
+
+ function groundHeight(x,z){
+  const loc=P.locate(race.track,x/S+640,z/S+640),p=P.trackPoint(race.track,loc.s),cx=(p.x-640)*S,cz=(p.y-640)*S,distance=Math.hypot(x-cx,z-cz),outside=Math.hypot(x,z)>Math.hypot(cx,cz)+.5;
+  const ripple=Math.sin(x*.17)*Math.cos(z*.14)*.23+Math.sin(x*.43+z*.19)*.08,edge=P.WALL*S+.5,road=roadY(loc.s)-.16;
+  if(distance<edge)return road+ripple*.12;
+  if(outside)return Math.max(-8,road-(distance-edge)*2.0+ripple*.45);
+  const blend=Math.max(0,1-(distance-edge)/4);return (1.5+ripple)*(1-blend)+road*blend;
+ }
+ const terrain=geo(new THREE.PlaneGeometry(196,196,76,76));terrain.rotateX(-Math.PI/2);
+ const tPos=terrain.getAttribute('position'),tColors=[];
+ for(let i=0;i<tPos.count;i++){
+  const x=tPos.getX(i),z=tPos.getZ(i),r=Math.hypot(x*.97,z*1.02);
+  const y=groundHeight(x,z);
+  tPos.setY(i,y);
+  const c=new THREE.Color(y<-.9?0x747d77:y<.5?0xa79878:0x657753);c.multiplyScalar(.88+(Math.sin(x*.17+z*.23)+1)*.07);tColors.push(c.r,c.g,c.b);
+ }
+ terrain.setAttribute('color',new THREE.Float32BufferAttribute(tColors,3));terrain.computeVertexNormals();const island=mesh(terrain,groundMat);island.receiveShadow=true;
+ const waterMat=mat(0x3c8990,{roughness:.35,metalness:.28});const water=mesh(geo(new THREE.PlaneGeometry(1600,1600)),waterMat);water.rotation.x=-Math.PI/2;water.position.y=-2.1;
+
+
+ const dummy=new THREE.Object3D();
+ function instances(g,m,list,cast=false) {
+  const o=new THREE.InstancedMesh(g,m,list.length);geometries.add(g);o.castShadow=cast;o.receiveShadow=true;
+  list.forEach((p,i)=>{dummy.position.set(p.x,p.y,p.z);dummy.rotation.set(p.rx||0,p.a||0,p.rz||0);dummy.scale.set(p.sx||1,p.sy||1,p.sz||1);dummy.updateMatrix();o.setMatrixAt(i,dummy.matrix);if(p.color)o.setColorAt(i,new THREE.Color(p.color));});o.instanceMatrix.needsUpdate=true;if(o.instanceColor)o.instanceColor.needsUpdate=true;o.computeBoundingSphere();scene.add(o);return o;
+ }
+
+ const trunks=[],crowns=[],pineCrowns=[];
+ for(const t of race.track.trees){const x=(t.x-640)*S,z=(t.y-640)*S;const h=3.2+random()*3.6;const y=1.4+Math.sin(x*.11)*Math.cos(z*.09)*.65;trunks.push({x,y:y+h*.30,z,sx:.22,sy:h*.68,sz:.22});
+  if(t.k===1){for(let i=0;i<3;i++)pineCrowns.push({x,y:y+h*(.54+i*.18),z,sx:h*(.33-i*.065),sy:h*.31,sz:h*(.33-i*.065),a:random()*6,color:new THREE.Color().setHSL(.27+random()*.04,.30,.27+random()*.08).getHex()});}
+  else for(let i=0;i<3;i++)crowns.push({x:x+(i-1)*h*.16,y:y+h*(.73+(i===1?.15:0)),z:z+(i%2)*h*.12,sx:h*.37,sy:h*.37,sz:h*.34,a:random()*6,color:new THREE.Color().setHSL(.23+random()*.08,.32,.30+random()*.10).getHex()});
+ }
+ const foliage=geo(new THREE.SphereGeometry(1,14,12)),foliagePosition=foliage.getAttribute('position');for(let i=0;i<foliagePosition.count;i++){const x=foliagePosition.getX(i),y=foliagePosition.getY(i),z=foliagePosition.getZ(i),n=1+Math.sin(x*25+z*17+y*21)*.09;foliagePosition.setXYZ(i,x*.51*n,y*1.60,z*.51*n);}foliage.computeVertexNormals();leafMat.color.set(0x41623c);
+ instances(geo(new THREE.CylinderGeometry(1,1.2,1,8)),trunkMat,trunks);instances(foliage,leafMat,crowns,true);instances(foliage,leafMat,pineCrowns,true);
+ const rocks=[],shrubs=[],flowers=[];
+ for(let i=0;i<175;i++){
+  const s=random()*race.track.len,lat=(random()<.5?-1:1)*(P.WALL+13+random()*110);const p=P.trackPoint(race.track,s,lat);if(p.x<20||p.x>1260||p.y<20||p.y>1260)continue;
+  const near=P.locate(race.track,p.x,p.y);if(Math.abs(near.lat)<P.WALL+8)continue;const x=(p.x-640)*S,z=(p.y-640)*S;
+  if(Math.hypot(x,z)>82)continue;const y=1.35+Math.sin(x*.11)*Math.cos(z*.09)*.65;
+  const r=.35+random()*.8;rocks.push({x,y:y+r*.3,z,sx:r,sy:r*.7,sz:r*.8,a:random()*6});
+  if(i%2===0)shrubs.push({x:x+1.3,y:y+.45,z:z-.7,sx:.8,sy:.5,sz:.7,color:new THREE.Color().setHSL(.25,.34,.30+random()*.08).getHex()});
+ }
+ for(let i=0;i<200;i++){const s=random()*race.track.len,lat=(random()<.5?-1:1)*(P.HALF+12+random()*26),p=at(s,lat,.02);flowers.push({x:p.x,y:p.y+.12,z:p.z,sx:.075,sy:.15,sz:.075,color:i%3===0?0xe5af69:i%3===1?0xe8d9ba:0xbd7f77});}
+ instances(smallSphereGeo,rockMat,rocks);instances(smallSphereGeo,leafMat,shrubs);instances(geo(new THREE.IcosahedronGeometry(1,0)),ivoryMat,flowers);
+
+ const castle=new THREE.Group();castle.position.set(0,4,0);scene.add(castle);const stone=mat(0xd0be99),roof=mat(0x6e797b);const hill=mesh(geo(new THREE.IcosahedronGeometry(1,1)),rockMat,castle);hill.scale.set(13,6,11);hill.position.y=0;
+ for(const [x,z,h]of[[-5,-2,8],[5,-2,7],[-3,4,6],[4,4,9]]){const tower=mesh(geo(new THREE.CylinderGeometry(1.3,1.5,h,9)),stone,castle);tower.position.set(x,5+h/2,z);const cap=mesh(geo(new THREE.ConeGeometry(1.8,3.4,9)),roof,castle);cap.position.set(x,5+h+1.7,z);}box(9,6,6,stone,castle,0,7,0);
+
+ const startPos=at(0,0,.12),startAngle=P.trackPoint(race.track,0).a;
+ const flagTex=texture(128,128,(c,w,h)=>{c.fillStyle='#eee5c7';c.fillRect(0,0,w,h);for(let y=0;y<8;y++)for(let x=0;x<8;x++)if((x+y)%2===0){c.fillStyle='#26363c';c.fillRect(x*16,y*16,16,16);}});flagTex.wrapS=flagTex.wrapT=THREE.RepeatWrapping;flagTex.repeat.set(5,1);
+ const finishMat=mat(0xffffff,{map:flagTex,roughness:.9});const finish=mesh(geo(new THREE.PlaneGeometry(P.ROAD*S,.70)),finishMat);finish.rotation.x=-Math.PI/2;finish.rotation.z=-startAngle+Math.PI/2;finish.position.copy(startPos);finish.position.y+=.03;
+ const gate=new THREE.Group();gate.position.copy(startPos);gate.rotation.y=Math.PI/2-startAngle;scene.add(gate);
+
+ const padMat=basic(0xe8bd65,{transparent:true,opacity:.88});
+ const pads=[];for(const p of race.track.pads){const o=mesh(geo(new THREE.PlaneGeometry(2.3,2.4)),padMat);o.rotation.x=-Math.PI/2;o.rotation.z=-p.a+Math.PI/2;o.position.copy(at(p.s,p.lat,.15));pads.push(o);}
+ const pickupMat=mat(0xe6bd65,{emissive:0xa16324,emissiveIntensity:.3,roughness:.28,metalness:.3});
+ const pickups=[];
+ race.track.boxes.forEach((p,i)=>{const loc=P.locate(race.track,p.x,p.y),o=mesh(geo(new THREE.OctahedronGeometry(.5)),pickupMat);o.position.set((p.x-640)*S,roadY(loc.s)+1.18,(p.y-640)*S);o.userData.baseY=o.position.y;pickups.push(o);});
+
+ startupMark('base-world');await loadingStep('Dein Fuchs wird vorbereitet …');
+ const modelKit=createKartModels(THREE,{scene,geometries,materials,texture});
+ const modelAssets=createProductionKarts(THREE,{scene,kit:modelKit,artMaps,materials,texture});
+ const hero=modelAssets.makeKart(false);startupMark('fox');await loadingStep('Panda wird vorbereitet …');const rivalModel=modelAssets.makeKart(true);startupMark('panda');await loadingStep('Die Küste wird aufgebaut …');
+ const scenery=createKartScenery(THREE,{scene,P,track:race.track,scale:S,roadY,at,texture,water,gate,models:modelAssets,textures,materials,groundHeight});
+ lighting.tuneWater(water.material);
+ startupMark('base-scenery');
+ const productionCoast=await createProductionCoast(THREE,{scene,P,track:race.track,scale:S,at,models:modelAssets,artMaps,materials,texture,yieldTask:paintYield});startupMark('coast');
+ castle.visible=false;
+
+ const particleCount=96,particlePositions=new Float32Array(particleCount*3),particleLife=new Float32Array(particleCount),particleVelocity=new Float32Array(particleCount*3);let particleIndex=0;
+ for(let i=0;i<particleCount;i++)particlePositions[i*3+1]=-100;
+ const particleGeo=geo(new THREE.BufferGeometry());particleGeo.setAttribute('position',new THREE.BufferAttribute(particlePositions,3));
+ const particleMat=new THREE.PointsMaterial({color:0xffcf76,size:.10,transparent:true,opacity:.85,depthWrite:false,blending:THREE.AdditiveBlending});materials.add(particleMat);scene.add(new THREE.Points(particleGeo,particleMat));
+ const cameraPosition=new THREE.Vector3(),lookPosition=new THREE.Vector3(),cameraTarget=new THREE.Vector3();let cameraReady=false;
+
+ function applyModel(model,k,dt){
+  const y=roadY(k.s),a=k.a;
+  model.group.position.set((k.x-640)*S,y+.12,(k.y-640)*S);model.group.rotation.y=Math.PI/2-a;
+  const slope=(roadY(k.s+8)-roadY(k.s-8))/(16*S);model.body.rotation.x=-Math.atan(slope);model.body.rotation.z=-k.st*.055;
+  model.driver.rotation.z=Math.sin(race.elapsed*7)*Math.min(k.v/P.VMAX,.8)*.018;
+  model.animate(Math.min(k.v/P.VMAX,1.5),k.st,k.boost>0,race.elapsed);
+  const distance=k.v*S*dt;
+  for(const w of model.wheels){w.spin.rotation.x+=distance/(w.radius||.43);if(w.front)w.pivot.rotation.y=-k.st*.34;}
+  model.shadow.position.set(model.group.position.x,y+.10,model.group.position.z);model.shadow.rotation.z=-a+Math.PI/2;
+ }
+ function updateCamera(dt=1,reset=false){
+  const k=race.human,portrait=stage.clientWidth/stage.clientHeight<1;
+  if(race.phase==='ready'||showroom){
+   const subject=showroom&&showroomPanda?(race.rival||showroomRival):k,a=subject.a+(showroom?showroomAngle:-.52),distance=showroom?(portrait?7.7:6.6):(portrait?9.0:8.1),y=roadY(subject.s);
+   camera.position.set((subject.x-640)*S+Math.cos(a)*distance,y+(showroom?2.65:3.5),(subject.y-640)*S+Math.sin(a)*distance);camera.lookAt((subject.x-640)*S,y+(showroom?.65:-.25),(subject.y-640)*S);camera.fov=showroom?(portrait?47:43):(portrait?54:48);camera.updateProjectionMatrix();cameraReady=false;lighting.update(camera,(subject.x-640)*S,y,(subject.y-640)*S,true);return;
+  }
+  cameraAngle=P.wrapAngle(cameraAngle+P.wrapAngle(k.a-cameraAngle)*(reset?1:1-Math.exp(-dt*5.8)));
+  const dirX=Math.cos(cameraAngle),dirZ=Math.sin(cameraAngle),boost=k.boost>0;
+  const distance=(portrait?8.8:7.8)+(boost?.9:0),height=portrait?3.7:3.0;
+  cameraTarget.set((k.x-640)*S-dirX*distance,roadY(k.s)+height,(k.y-640)*S-dirZ*distance);
+  if(reset||!cameraReady){cameraPosition.copy(cameraTarget);cameraReady=true;}else cameraPosition.lerp(cameraTarget,1-Math.exp(-dt*9));
+  camera.position.copy(cameraPosition);lookPosition.set((k.x-640)*S+dirX*5,roadY(k.s)+1.3,(k.y-640)*S+dirZ*5);camera.lookAt(lookPosition);
+  const fov=(portrait?71:58)+(boost?4:0);camera.fov+= (fov-camera.fov)*(reset?1:1-Math.exp(-dt*4));camera.updateProjectionMatrix();
+  lighting.update(camera,hero.group.position.x,roadY(k.s),hero.group.position.z,false);
+ }
+ function setQuality(){
+  const ratio=prefs.quality==='low'?Math.min(devicePixelRatio,1):prefs.quality==='high'?Math.min(devicePixelRatio,1.8):Math.min(devicePixelRatio,stats.scale);
+  renderer.setPixelRatio(ratio);renderer.shadowMap.enabled=prefs.quality==='high'||(prefs.quality==='auto'&&stats.scale>=1);sun.shadow.needsUpdate=true;resize();
+ }
+ function resize(){
+  const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();if(ready){updateCamera(.1,true);draw(0);}
+ }
+ function spark(dt){
+  const k=race.human;
+  for(let i=0;i<particleCount;i++)if(particleLife[i]>0){particleLife[i]-=dt;const j=i*3;particlePositions[j]+=particleVelocity[j]*dt;particlePositions[j+1]+=particleVelocity[j+1]*dt;particlePositions[j+2]+=particleVelocity[j+2]*dt;if(particleLife[i]<=0)particlePositions[j+1]=-100;}
+  if((k.boost>0||k.driftDir)&&race.phase==='racing')for(let n=0;n<2;n++){
+   const i=particleIndex++%particleCount,j=i*3,side=n%2===0?-1:1,fx=Math.cos(k.a),fz=Math.sin(k.a);
+   particleLife[i]=.2+random()*.3;particlePositions[j]=hero.group.position.x-fx*1.25-fz*side*.7;particlePositions[j+1]=roadY(k.s)+.3;particlePositions[j+2]=hero.group.position.z-fz*1.25+fx*side*.7;
+   particleVelocity[j]=-fx*(1+random()*2)+(random()-.5);particleVelocity[j+1]=random()*1.5;particleVelocity[j+2]=-fz*(1+random()*2)+(random()-.5);
+  }
+  particleGeo.attributes.position.needsUpdate=true;
+ }
+ function draw(dt){
+  hero.group.visible=hero.shadow.visible=!showroom||!showroomPanda;applyModel(hero,race.human,dt);rivalModel.group.visible=rivalModel.shadow.visible=showroom?showroomPanda:!!race.rival;if(race.rival||showroomPanda)applyModel(rivalModel,race.rival||showroomRival,dt);
+  scenery.update(race.elapsed);
+  productionCoast.update(race.elapsed);
+  for(let i=0;i<pickups.length;i++){const o=pickups[i];o.visible=race.course.boxes[i]<=0;o.rotation.y=race.elapsed*.7+i;o.position.y=o.userData.baseY+Math.sin(race.elapsed*2+i)*.12;}
+  spark(dt);updateCamera(dt);const before=performance.now();renderer.render(scene,camera);stats.renderMs=performance.now()-before;stats.drawCalls=renderer.info.render.calls;stats.triangles=renderer.info.render.triangles;
+ }
+ function minimap(){
+  const c=mapCtx,w=160;c.clearRect(0,0,w,w);c.strokeStyle='#f8e5b2b8';c.lineWidth=3;c.beginPath();for(let i=0;i<race.track.n;i++){const x=race.track.px[i]/1280*132+14,y=race.track.py[i]/1280*132+7;if(i===0)c.moveTo(x,y);else c.lineTo(x,y);}c.closePath();c.stroke();
+  for(const [k,color]of[[race.rival,'#84c5b4'],[race.human,'#ffe7a2']]){if(!k)continue;c.fillStyle=color;c.beginPath();c.arc(k.x/1280*132+14,k.y/1280*132+7,6,0,TAU);c.fill();c.strokeStyle='#163139';c.lineWidth=2;c.stroke();}
+ }
+ function steering(){const values=[...touches.values()];return Math.max(-1,Math.min(1,(values.includes('right')||keys.has('arrowright')||keys.has('d')?1:0)-(values.includes('left')||keys.has('arrowleft')||keys.has('a')?1:0)+(performance.now()<pulseUntil?pulse:0)));}
+ function updatePressed(){for(const action of['left','right'])find(`[data-action="${action}"]`).classList.toggle('is-down',[...touches.values()].includes(action)||keys.has(action==='left'?'arrowleft':'arrowright')||keys.has(action==='left'?'a':'d'));}
+ function clearInput(){touches.clear();keys.clear();useQueued=false;pulse=0;pulseUntil=0;showroomPointer=null;updatePressed();}
+ let toastText='',lastWarning=0;
+ function toast(text,duration=1300){toastText=text;find('.drive-toast').textContent=text;toastUntil=performance.now()+duration;}
+ function formatTime(seconds){const h=Math.floor(seconds*100);return String(Math.floor(h/6000)).padStart(2,'0')+':'+String(Math.floor(h/100)%60).padStart(2,'0')+'.'+String(h%100).padStart(2,'0');}
+ function hud(){
+  find('[data-hud="place"]').textContent=prefs.mode==='solo'?'':String(race.place);find('[data-hud="place-label"]').textContent=prefs.mode==='solo'?'ZEITFAHREN':'PLATZ';
+  find('[data-hud="lap"]').textContent='RUNDE '+race.human.lap+' / 3';find('[data-hud="progress"]').style.width=(race.progress*100)+'%';find('[data-hud="time"]').textContent=formatTime(race.elapsed);find('[data-hud="speed"]').textContent=String(race.speedKmh);
+  const item=race.human.item==='pilz',rolling=race.human.roll>0;find('[data-action="boost"]').disabled=!item||race.phase!=='racing';find('[data-hud="item"]').textContent=item?'Turbo':rolling?'Wird gesammelt':'Box sammeln';
+  for(const action of['left','right'])find(`[data-action="${action}"]`).disabled=race.phase!=='racing';
+  find('.drive-count').hidden=race.phase!=='countdown';find('.drive-count b').textContent=String(Math.max(1,Math.ceil(race.countdown)));
+  if(performance.now()>toastUntil&&toastText){toastText='';find('.drive-toast').textContent='';}
+  if(race.human.wrong>2&&performance.now()-lastWarning>5000){lastWarning=performance.now();toast('Falsche Richtung',1800);}
+  minimap();
+ }
+ function sync(){
+  const phase=race.phase,playing=phase!=='ready'&&phase!=='finished';root.classList.toggle('is-playing',playing);find('.drive-top').hidden=playing;find('.drive-start').hidden=phase!=='ready'||showroom;find('.drive-showcase').hidden=!showroom;find('[data-model="name"]').textContent=showroomPanda?'Panda im grünen Kart':'Fuchs im roten Kart';find('[data-action="showcase-swap"]').textContent=showroomPanda?'Fuchs ansehen':'Panda ansehen';find('.drive-hud').hidden=!playing;find('.drive-controls').hidden=!playing;mapCanvas.hidden=!playing;find('.drive-result').hidden=phase!=='finished';
+  if(phase==='finished'){find('[data-result="title"]').textContent=prefs.mode==='solo'?'Ziel erreicht!':race.place===1?'Erster im Ziel!':'Stark gefahren!';find('[data-result="copy"]').textContent=prefs.mode==='solo'?'Drei echte Runden. Deine Fahrt, deine Zeit.':'Platz '+race.place+' von 2. Lust auf die nächste Runde?';find('[data-result="time"]').textContent=formatTime(race.human.fin??race.elapsed);}
+  find('[data-action="assist"]').setAttribute('aria-checked',String(prefs.assist));root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===prefs.mode)));find('[data-setting="quality"]').value=prefs.quality;syncSound();hud();visiblePhase=phase;
+ }
+ function syncSound(){const b=find('[data-action="sound"]'),name=prefs.sound?'volume-2':'volume-x';b.setAttribute('aria-pressed',String(prefs.sound));b.setAttribute('aria-label',prefs.sound?'Ton ausschalten':'Ton einschalten');if(b.dataset.icon!==name){b.dataset.icon=name;b.innerHTML='<i data-lucide="'+name+'" aria-hidden="true">'+(prefs.sound?'♪':'×')+'</i>';if(globalThis.lucide)lucide.createIcons();}}
+ function persist(){if(window.openai?.setWidgetState)window.openai.setWidgetState({modelContent:{spiel:'Joy-Kart',typ:'fahrbare Teststrecke',modus:prefs.mode==='cpu'?'Gegen Robo':'Zeitfahren',lenkhilfe:prefs.assist,phase:race.phase,ansicht:showroom?'Modellansicht':'Fahrt',modell:showroom&&showroomPanda?'Panda':'Fuchs',zeit:race.phase==='finished'?Number(race.elapsed.toFixed(2)):null},privateContent:{...prefs,view:showroom?'model':'race',model:showroom&&showroomPanda?'Panda':'Fuchs',modelAngle:showroomAngle}}).catch(()=>{});}
+ let audio=null,motor=null;
+ function audioReady(){if(!prefs.sound)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();audio.resume();if(!motor){const o=audio.createOscillator(),filter=audio.createBiquadFilter(),g=audio.createGain();o.type='sawtooth';filter.type='lowpass';filter.frequency.value=370;g.gain.value=0;o.connect(filter).connect(g).connect(audio.destination);o.start();motor={o,g};}}catch{}}
+ function beep(freq,duration=.09){if(!prefs.sound)return;audioReady();if(!audio)return;const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(.03,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+duration);}
+ function motorUpdate(){if(!motor||!audio)return;motor.o.frequency.setTargetAtTime(55+race.speedKmh*1.35,audio.currentTime,.06);motor.g.gain.setTargetAtTime(prefs.sound&&race.phase==='racing'?.015:0,audio.currentTime,.06);}
+ function events(){for(const e of race.takeEvents()){if(e==='go'){toast('LOS!',800);beep(880,.14);}else if(e==='pilz'){toast('TURBO!',1000);beep(690,.12);}else if(e==='turbo'){toast('Drift-Turbo!',1100);beep(790,.10);}else if(e==='item'){toast('Turbo bereit',1000);beep(980,.08);}else if(e==='pad'){toast('Turbofeld!',800);}else if(e==='lap'){toast('Nächste Runde',1300);}else if(e==='final'){toast('Letzte Runde!',1600);}else if(e==='wall'&&performance.now()-lastWarning>1800){lastWarning=performance.now();toast(P.onRoad(race.human)?'Am Rand!':'Wiese bremst',1000);}else if(e==='finish'){beep(1040,.22);persist();}}}
+ function schedule(){if(!frame&&!disposed)frame=requestAnimationFrame(loop);}
+ function loop(now){
+  frame=0;if(disposed||!root.isConnected){dispose();return;}const dt=lastFrame?Math.min((now-lastFrame)/1000,.2):1/60;lastFrame=now;
+  if(useQueued){race.queueBoost();useQueued=false;}race.advance(dt,steering());events();
+  if(race.phase!==visiblePhase){sync();clearInput();}
+  const count=Math.ceil(race.countdown);if(race.phase==='countdown'&&count!==previousCount){previousCount=count;beep(440,.06);}
+  draw(dt);hud();motorUpdate();if(race.phase==='racing'||race.phase==='countdown'){stats.frames++;stats.seconds+=dt;}
+  if(stats.seconds>=1.5){stats.fps=Math.round(stats.frames/stats.seconds);if(prefs.quality==='auto'&&stats.fps<30&&stats.scale>.75){stats.scale=Math.max(.75,stats.scale-.2);stats.autoReduced=true;setQuality();}stats.frames=0;stats.seconds=0;}
+  if(race.phase==='racing'||race.phase==='countdown')schedule();else{lastFrame=0;motorUpdate();}
+ }
+ function start(){if(!ready)return;showroom=false;find('[data-dialog="pause"]').close();clearInput();race=new KartRace(prefs);race.begin();previousCount=4;lastFrame=0;cameraReady=false;stats.frames=0;stats.seconds=0;sync();updateCamera(1,true);audioReady();persist();schedule();}
+ function pause(){race.pause();clearInput();motorUpdate();find('[data-dialog="pause"]').showModal();persist();}
+ function resume(){find('[data-dialog="pause"]').close();race.resume();clearInput();lastFrame=0;sync();schedule();persist();}
+ function home(){showroom=false;find('[data-dialog="pause"]').close();if(frame)cancelAnimationFrame(frame);frame=0;clearInput();race=new KartRace(prefs);cameraReady=false;sync();updateCamera(1,true);draw(0);motorUpdate();persist();}
+ function showModels(open){if(race.phase!=='ready')return;showroom=open;showroomPointer=null;showroomPanda=false;if(open)showroomAngle=-.45;sync();updateCamera(1,true);draw(0);persist();}
+ function boost(){if(race.phase==='racing')useQueued=true;}
+ root.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||b.disabled)return;const action=b.dataset.action;
+  if(action==='showcase'){showModels(true);return;}if(action==='showcase-close'){showModels(false);return;}if(action==='showcase-swap'&&showroom){showroomPanda=!showroomPanda;sync();updateCamera(1,true);draw(0);persist();return;}
+  if(b.dataset.mode){prefs.mode=b.dataset.mode==='solo'?'solo':'cpu';home();return;}
+  if(action==='start'||action==='restart'){start();return;}if(action==='pause'){pause();return;}if(action==='resume'){resume();return;}if(action==='home'){home();return;}
+  if(action==='recover'){race.returnToRoad();cameraReady=false;resume();toast('Weiter geht’s!',900);return;}
+  if(action==='assist'){prefs.assist=!prefs.assist;race.assist=prefs.assist;sync();persist();return;}
+  if(action==='sound'){prefs.sound=!prefs.sound;syncSound();audioReady();motorUpdate();persist();return;}
+  if(action==='boost'&&e.detail===0){boost();return;}
+  if((action==='left'||action==='right')&&e.detail===0){pulse=action==='left'?-1:1;pulseUntil=performance.now()+180;}
+ });
+ root.addEventListener('pointerdown',e=>{if(showroom&&!e.target.closest('button,select')){showroomPointer={id:e.pointerId,x:e.clientX};stage.setPointerCapture?.(e.pointerId);return;}const b=e.target.closest('button[data-action]');if(!b||b.disabled||race.phase!=='racing')return;const action=b.dataset.action;if(action==='boost'){boost();return;}if(action==='left'||action==='right'){touches.set(e.pointerId,action);b.setPointerCapture?.(e.pointerId);updatePressed();}});
+ root.addEventListener('pointermove',e=>{if(!showroomPointer||showroomPointer.id!==e.pointerId)return;showroomAngle+=(e.clientX-showroomPointer.x)*.012;showroomPointer.x=e.clientX;schedule();});
+ const release=e=>{if(showroomPointer?.id===e.pointerId){showroomPointer=null;persist();}if(!touches.has(e.pointerId))return;touches.delete(e.pointerId);updatePressed();};for(const name of['pointerup','pointercancel','lostpointercapture'])root.addEventListener(name,release);
+ document.addEventListener('keydown',e=>{if(e.target.closest('input,textarea,select'))return;const k=e.key.toLowerCase();if(showroom&&e.key==='Escape'){showModels(false);return;}if((k==='arrowleft'||k==='arrowright'||k==='a'||k==='d')&&race.phase==='racing'){e.preventDefault();keys.add(k);updatePressed();}if(e.code==='Space'&&race.phase==='racing'&&!e.target.closest('[data-action="pause"]')){e.preventDefault();if(!e.repeat)boost();}if(e.key==='Escape'&&['racing','countdown'].includes(race.phase))pause();});
+ document.addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());updatePressed();});
+ root.addEventListener('cancel',e=>{if(e.target.matches('[data-dialog="pause"]')){e.preventDefault();resume();}},true);
+ root.addEventListener('change',e=>{if(e.target.matches('[data-setting="quality"]')){prefs.quality=e.target.value;stats.scale=1.25;setQuality();persist();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden&&['racing','countdown'].includes(race.phase))pause();});window.addEventListener('blur',clearInput);
+ window.addEventListener('openai:set_globals',e=>{const v=e.detail?.globals?.widgetState?.privateContent;if(!v||race.phase!=='ready')return;const next={...prefs,mode:v.mode==='solo'?'solo':'cpu',assist:v.assist!==false,sound:v.sound===true,quality:['low','high'].includes(v.quality)?v.quality:'auto'};if(JSON.stringify(next)!==JSON.stringify(prefs)){Object.assign(prefs,next);home();setQuality();}});
+ const resizeObserver=new ResizeObserver(resize);resizeObserver.observe(stage);
+ function dispose(){if(disposed)return;disposed=true;if(frame)cancelAnimationFrame(frame);resizeObserver.disconnect();clearInput();if(audio)audio.close();for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t.dispose();renderer.dispose();}
+ window.addEventListener('pagehide',dispose,{once:true});
+ canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();if(['racing','countdown'].includes(race.phase))pause();find('.drive-error').hidden=false;find('[data-error]').textContent='Die Grafikverbindung wurde unterbrochen. Öffne die Vorschau erneut, um weiterzufahren.';});
+ await loadingStep('Licht und Schatten werden vorbereitet …');setQuality();sync();updateCamera(1,true);startupMark('shader-start');await renderer.compileAsync(scene,camera);startupMark('shader-end');await loadingStep('Die Startaufstellung wird vorbereitet …');startupMark('first-render-start');draw(0);startupMark('first-render-end');ready=true;resize();startupMark('ready');startup.readyAt=performance.now();find('[data-ui="loading"]').textContent='Rennen starten';preparationButtons.forEach(button=>button.disabled=false);find('.drive-phone').setAttribute('aria-busy','false');
+ root.__joyKart=Object.freeze({snapshot:()=>({phase:race.phase,view:showroom?'model':'race',model:showroomPanda?'Panda':'Fuchs',modelAngle:showroomAngle,assetVersion:'production-v9',trackId:'coast-lab',trackRole:'test',foxSculpt:hero.head.userData.sculpt,pandaSculpt:rivalModel.head.userData.sculpt,materialAtlas:true,panoramaWidth:lighting.panoramaWidth,panoramaHeight:lighting.panoramaHeight,environmentWidth:lighting.environmentWidth,environmentHeight:lighting.environmentHeight,houses:scenery.houses+productionCoast.houses,closeHouses:productionCoast.closeHouses,balusters:productionCoast.balusters,bridges:productionCoast.bridges,waterfalls:productionCoast.waterfalls,palms:scenery.palms,mode:prefs.mode,assist:race.assist,x:race.human.x,y:race.human.y,angle:race.human.a,progress:race.human.prog,lap:race.human.lap,elapsed:race.elapsed,speed:race.speedKmh,boost:race.human.boost,item:race.human.item,steer:steering(),place:race.place,trackLength:race.track.len,renderer:'WebGL2 / Three.js r180',quality:prefs.quality,startup:{...startup,marks:startup.marks.map(m=>({...m})),geometryCache:{...modelKit.geometryCache}},...stats})});
+ find('[data-action="sound"]').setAttribute('aria-pressed',String(prefs.sound));
+ if(globalThis.lucide)lucide.createIcons({attrs:{width:22,height:22}});
+} catch(error) {
+ find('.drive-phone').setAttribute('aria-busy','false');
+ find('.drive-error').hidden=false;find('[data-error]').textContent='Diese Teststrecke benötigt WebGL 2 und eine Verbindung zum Laden der 3D-Bibliothek. '+(error?.message||'Bitte öffne die Vorschau erneut.');
+ console.error('Joy-Kart initialization:',error);
+}
+</script>

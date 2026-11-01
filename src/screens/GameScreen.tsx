@@ -112,7 +112,7 @@ export function GameScreen({ session, net, online }: { session: Session; net?: N
   };
 
   return (
-    <div ref={ref} className={cls('game-screen', meta.kind !== 'def' && 'dark')} onPointerDown={unlockAudio}>
+    <div ref={ref} className={cls('game-screen', meta.id === 'joykart' && 'kart-screen', meta.kind !== 'def' && 'dark')} onPointerDown={unlockAudio}>
       <header className="g-head">
         <button type="button" className="icon-btn" onClick={close} aria-label="Spiel beenden">
           <Icon name="close" />
@@ -198,6 +198,7 @@ function ResultCard({
 
   const scoreText = (i: number) => {
     if (outcome.correct && outcome.asked) return `${outcome.correct[i]} von ${outcome.asked[i]} ${meta.scoreLabel ?? 'richtig'}`;
+    if (meta.id === 'joykart' && outcome.scores) return outcome.scores[i].toFixed(2) + ' s';
     if (outcome.scores) return `${outcome.scores[i]} ${meta.id === 'maumau' ? 'Karten übrig' : meta.id === 'paare' ? 'Paare' : 'Punkte'}`;
     return '';
   };

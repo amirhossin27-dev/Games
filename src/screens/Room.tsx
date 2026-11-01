@@ -9,7 +9,8 @@ import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, 
 import { isAway, knocking, maxPlayers, members, ROBO_NAMES, roomForKid, taken, type ReactionId } from '../net/roomLogic';
 import { nav, useNav } from '../lib/nav';
 import { speak, speakIfAuto, VOICE_ENABLED } from '../lib/speech';
-import { LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
+import { getData, LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
+import { learnLeft } from '../lib/unlock';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
 import { GameArt } from '../ui/GameArt';
@@ -25,11 +26,11 @@ import { CallFriends, FriendRooms, InviteFriends } from './Friends';
 const codeOpen = new Set<string>();
 
 export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: string }[] = [
-  { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: '#2F5F86' },
-  { id: 'smile', icon: 'smile', label: 'Lachen', color: '#6B5410' },
-  { id: 'wow', icon: 'wow', label: 'Staunen', color: '#5E4277' },
-  { id: 'party', icon: 'party', label: 'Juhu', color: '#8F3E1F' },
-  { id: 'star', icon: 'sparkle', label: 'Super', color: '#33673E' },
+  { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: 'var(--reaction-sky, #2F5F86)' },
+  { id: 'smile', icon: 'smile', label: 'Lachen', color: 'var(--reaction-butter, #6B5410)' },
+  { id: 'wow', icon: 'wow', label: 'Staunen', color: 'var(--reaction-plum, #5E4277)' },
+  { id: 'party', icon: 'party', label: 'Juhu', color: 'var(--terra-ink)' },
+  { id: 'star', icon: 'sparkle', label: 'Super', color: 'var(--sage-ink)' },
 ];
 
 function CodeAnimals({ code, size = 46 }: { code: string; size?: number }) {
@@ -54,7 +55,8 @@ function GamePicker({ profile, title, initial, kids = 1, onPick, onClose }: { pr
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Spiele, für die schon zu viele Kinder im Zimmer sind, lassen sich nicht wählen.
-  const fits = (id: GameId) => GAME_BY_ID[id].players[1] >= kids;
+  const remaining = (id: GameId) => learnLeft(GAME_BY_ID[id], profile, getData().settings);
+  const fits = (id: GameId) => GAME_BY_ID[id].players[1] >= kids && !remaining(id);
   return (
     <Sheet title={title} onClose={onClose}>
       <div className="pick-games">
@@ -62,17 +64,18 @@ function GamePicker({ profile, title, initial, kids = 1, onPick, onClose }: { pr
           <button key={g.id} type="button" className="pick-game" aria-pressed={g.id === game} disabled={!fits(g.id)} onClick={() => setGameId(g.id)}>
             <GameArt kind={g.art} height={54} />
             <b>{g.name}</b>
-            <span className="small muted">{fits(g.id) ? `${playersText(g)} Spieler` : `nur bis ${g.players[1]} – ihr seid ${kids}`}</span>
+            <span className="small muted">{remaining(g.id) ? `Noch ${remaining(g.id)} Lernspiele` : fits(g.id) ? `${playersText(g)} Spieler` : `nur bis ${g.players[1]} – ihr seid ${kids}`}</span>
           </button>
         ))}
       </div>
-      <div className="seg">
+      {game === 'joykart' && <div className="seg">{(['Sonnenbucht','Kap der Winde'] as const).map((name,i)=><button key={name} aria-pressed={(level===1?1:0)===i} onClick={()=>setLevel(i as Level)}>{name}</button>)}</div>}
+      {GAME_BY_ID[game].levels && <div className="seg">
         {([0, 1, 2] as Level[]).map((l) => (
           <button key={l} type="button" aria-pressed={level === l} onClick={() => setLevel(l)}>
             {LEVEL_LABEL[l]}
           </button>
         ))}
-      </div>
+      </div>}
       {error && <p className="error">{error}</p>}
       <button
         type="button"
@@ -173,7 +176,7 @@ function CallPicker({ profile, friend, onClose }: { profile: Profile; friend: Ca
   const [error, setError] = useState<string | null>(null);
   const last = lastCallGames(profile.id);
   const rank = (id: GameId) => (last.includes(id) ? last.indexOf(id) : last.length + ONLINE_GAMES.findIndex((g) => g.id === id));
-  const games = [...ONLINE_GAMES].sort((a, b) => rank(a.id) - rank(b.id));
+  const games = ONLINE_GAMES.filter(g => !learnLeft(g, profile, getData().settings)).sort((a, b) => rank(a.id) - rank(b.id));
   const call = async (game: GameId) => {
     setBusy(game);
     setError(null);
@@ -321,7 +324,8 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
   const count = taken(info, seats);
   const max = maxPlayers(info);
   const min = Math.max(2, meta.players[0]);
-  const enough = count >= min && count <= max;
+  const learningLeft = learnLeft(meta, profile, getData().settings);
+  const enough = count >= min && count <= max && !learningLeft;
   const code = room.code!;
   const showCode = codeTapped || codeOpen.has(code);
   // Platz für ein weiteres Kind? Robos machen dafür Platz.
@@ -404,7 +408,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
             <div className="grow">
               <b className="display">{meta.name}</b>
               <p className="small muted">
-                {LEVEL_LABEL[info.level]} · {playersText(meta)} Spieler
+                {info.game==='joykart'?(info.level===1?'Kap der Winde':'Sonnenbucht'):LEVEL_LABEL[info.level]} · {playersText(meta)} Spieler
               </p>
             </div>
             {isHost && info.status === 'lobby' && (
@@ -490,17 +494,17 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
                     </span>
                   </span>
                   {doc?.tut ? (
-                    <span className="tag" style={{ '--tag-bg': '#F7EDC8', '--tag-fg': '#6B5410' } as CSSProperties}>
+                    <span className="tag" style={{ '--tag-bg': 'var(--butter-soft)', '--tag-fg': 'var(--reaction-butter, #6B5410)' } as CSSProperties}>
                       lernt die Regeln
                     </span>
                   ) : doc?.solo && !isAway(doc, now) ? (
-                    <span className="tag" style={{ '--tag-bg': '#DCE9F3', '--tag-fg': '#2F5F86' } as CSSProperties}>
+                    <span className="tag" style={{ '--tag-bg': 'var(--sky-soft)', '--tag-fg': 'var(--reaction-sky, #2F5F86)' } as CSSProperties}>
                       spielt kurz allein
                     </span>
                   ) : isAway(doc, now) ? (
                     <span className="tag">ist kurz weg</span>
                   ) : (
-                    <span className="tag" style={{ '--tag-bg': '#DDEBDD', '--tag-fg': '#33673E' } as CSSProperties}>
+                    <span className="tag" style={{ '--tag-bg': 'var(--sage-soft)', '--tag-fg': 'var(--sage-ink)' } as CSSProperties}>
                       da
                     </span>
                   )}
@@ -556,7 +560,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
             <p className="card center display">Die Runde läuft gerade …</p>
           ) : isHost ? (
             <button type="button" className="btn primary big block" disabled={!enough} onClick={() => void startGame()}>
-              {enough ? 'Spiel starten' : count > max ? `Zu viele für ${meta.name} – höchstens ${max}` : `Noch ${min - count} Mitspieler`}
+              {learningLeft ? `Noch ${learningLeft} Lernspiele` : enough ? 'Spiel starten' : count > max ? `Zu viele für ${meta.name} – höchstens ${max}` : `Noch ${min - count} Mitspieler`}
             </button>
           ) : (
             <p className="card center display">Warte, bis {hostName} das Spiel startet …</p>
