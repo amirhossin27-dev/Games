@@ -6,7 +6,7 @@ import { AnswerGrid, TaskCard } from '../games/views/Quiz';
 import { inkColor, TraceTaskCard, TraceTaskPad } from '../games/views/Trace';
 import { nav } from '../lib/nav';
 import { finishTutorial } from '../lib/progress';
-import { speak, speakIfAuto, stopSpeaking, VOICE_ENABLED } from '../lib/speech';
+import { canSpeak, speak, speakIfAuto, stopSpeaking, useVoiceReady } from '../lib/speech';
 import { useProfile } from '../lib/store';
 import { cls } from '../lib/util';
 import { GameArt } from '../ui/GameArt';
@@ -138,6 +138,7 @@ export function Tutorial({ game }: { game: GameId }) {
   const steps: TutorialStep[] = meta.tutorial;
   const [i, setI] = useState(0);
   const [solved, setSolved] = useState<boolean | null>(null);
+  const voiceReady = useVoiceReady();
   const step = steps[i];
   const last = i === steps.length - 1;
   const needsTry = (step.art.k === 'quiz' || step.art.k === 'trace') && !!step.art.tryIt;
@@ -190,7 +191,7 @@ export function Tutorial({ game }: { game: GameId }) {
         </div>
         <div className="joy-row">
           <Joy size={66} mood={solved ? 'cheer' : 'talk'} />
-          <div className={cls('bubble', VOICE_ENABLED && 'with-speaker')}>
+          <div className={cls('bubble', voiceReady && canSpeak(say) && 'with-speaker')}>
             <p style={{ fontSize: '1.1rem', fontWeight: 700 }}>{say}</p>
             <SpeakButton text={say} />
           </div>
@@ -209,7 +210,7 @@ export function Tutorial({ game }: { game: GameId }) {
             </button>
           )}
         </div>
-        {VOICE_ENABLED && (
+        {voiceReady && canSpeak(say) && (
           <button type="button" className="btn ghost small" onClick={() => speak(say)}>
             Nochmal vorlesen
           </button>

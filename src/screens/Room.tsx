@@ -8,7 +8,7 @@ import { endCall, lastCallGames, rememberCallGame, ringAgain, RING_MS, startCall
 import { admit, backToLobby, createRoom, deny, forgetRoom, joinRoom, leaveRoom, ONLINE_OFF, react, serverNow, setGame, setLearning, setRobos, startGame, useRoom } from '../net/room';
 import { isAway, knocking, maxPlayers, members, ROBO_NAMES, roomForKid, taken, type ReactionId } from '../net/roomLogic';
 import { nav, useNav } from '../lib/nav';
-import { speak, speakIfAuto, VOICE_ENABLED } from '../lib/speech';
+import { canSpeak, speak, speakIfAuto } from '../lib/speech';
 import { LEVEL_LABEL, levelForAge, useData, type Level, type Profile } from '../lib/store';
 import { cls } from '../lib/util';
 import { Avatar } from '../ui/Avatar';
@@ -23,6 +23,9 @@ import { CallFriends, FriendRooms, InviteFriends } from './Friends';
  * offen. Sonst (Anruf, Freund dazu) braucht ihn keiner und er bleibt hinter einem Knopf.
  */
 const codeOpen = new Set<string>();
+
+/** Spielzimmer-Code zum Vorlesen: jeder Tiername ist eine eigene Aufnahme */
+const codeSpeech = (code: string) => ['Der Spielzimmer-Code ist:', ...codeAnimals(code).map((a) => a.name)];
 
 export const REACTIONS: { id: ReactionId; icon: IconName; label: string; color: string }[] = [
   { id: 'thumb', icon: 'thumb', label: 'Daumen hoch', color: 'var(--reaction-sky, #2F5F86)' },
@@ -111,7 +114,6 @@ function JoinSheet({ profile, initial, onClose }: { profile: Profile; initial?: 
       onClose();
     } catch (e) {
       setError((e as Error).message);
-      speakIfAuto((e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -295,7 +297,8 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
         <div className="topbar">
           <h1>Spielzimmer</h1>
         </div>
-        {error ? <JoySays text={error} mood="happy" /> : <JoySays text="Ich verbinde mich mit dem Spielzimmer …" mood="talk" />}
+        {/* Im Spielzimmer liest Joy nicht von selbst vor (Amirs Wunsch), nur über den Lautsprecher-Knopf */}
+        {error ? <JoySays quiet text={error} mood="happy" /> : <JoySays quiet text="Ich verbinde mich mit dem Spielzimmer …" mood="talk" />}
         {error && (
           <button type="button" className="btn primary block" onClick={forgetRoom}>
             Okay
@@ -371,7 +374,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
 
       {!admitted ? (
         <>
-          <JoySays text={doorText} mood={denied || doorFull ? 'happy' : 'talk'} />
+          <JoySays quiet text={doorText} mood={denied || doorFull ? 'happy' : 'talk'} />
           <section className="card row" aria-label="Spielzimmer">
             {seats[info.host] ? <Avatar kind={seats[info.host].avatar} size={52} bg={seats[info.host].color} /> : <Avatar kind="robo" size={52} bg="#E6E6DF" />}
             <div className="grow">
@@ -396,7 +399,7 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
         </>
       ) : (
         <>
-          {waitingForRound && <JoySays text={`Du bist drin! Die anderen spielen gerade noch ${meta.name}. In der nächsten Runde bist du dabei – ich hole dich, sobald es losgeht.`} mood="happy" />}
+          {waitingForRound && <JoySays quiet text={`Du bist drin! Die anderen spielen gerade noch ${meta.name}. In der nächsten Runde bist du dabei – ich hole dich, sobald es losgeht.`} mood="happy" />}
           <section className="card row" aria-label="Spiel">
             <span style={{ width: 84, flexShrink: 0 }}>
               <GameArt kind={meta.art} height={62} />
@@ -431,8 +434,8 @@ function Lobby({ profile, preset }: { profile: Profile; preset?: GameId }) {
               <div className="row between">
                 <b className="display">Spielzimmer-Code</b>
                 <div className="row" style={{ gap: 8 }}>
-                  {VOICE_ENABLED && (
-                    <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(`Der Spielzimmer-Code ist: ${codeWords(code)}`)}>
+                  {canSpeak(codeSpeech(code)) && (
+                    <button type="button" className="icon-btn soft" aria-label="Code vorlesen" onClick={() => speak(codeSpeech(code))}>
                       <Icon name="speaker" />
                     </button>
                   )}
@@ -598,7 +601,7 @@ export function RoomScreen({ profile, joinCode, preset }: { profile: Profile; jo
       <div className="topbar">
         <h1>Spielzimmer</h1>
       </div>
-      <JoySays text={hasFriends ? 'Tipp auf einen Spielfreund, dann rufe ich ihn an!' : 'Spielt zusammen, jeder Freund an seinem eigenen Gerät – bis zu vier!'} mood="happy" size={72} />
+      <JoySays quiet text={hasFriends ? 'Tipp auf einen Spielfreund, dann rufe ich ihn an!' : 'Spielt zusammen, jeder Freund an seinem eigenen Gerät – bis zu vier!'} mood="happy" size={72} />
       {!onlineConfigured() ? (
         <p className="card">Online-Spielen ist noch nicht eingerichtet.</p>
       ) : !allowed ? (

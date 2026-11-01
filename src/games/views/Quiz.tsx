@@ -4,7 +4,8 @@ import type { PlayProps } from '../../engine/game';
 import { useGame } from '../../engine/useGame';
 import { quizDef, quizPoints, type QuizState } from '../../learn/quiz';
 import type { Subject, Task } from '../../learn/tasks';
-import { speak, speakIfAuto, VOICE_ENABLED } from '../../lib/speech';
+import { canSpeak, speak, speakIfAuto } from '../../lib/speech';
+import { tipSpeech } from '../../lib/speechtexts';
 import { cls } from '../../lib/util';
 import { Icon } from '../../ui/Icon';
 import { AnalogClock, SeatStrip, SpeakButton } from '../../ui/parts';
@@ -136,7 +137,7 @@ export function Quiz(props: PlayProps & { subject: Subject }) {
     askStart.current = performance.now();
     setElapsed(0);
     const name = asker !== null && g.humans > 1 ? `${seats[asker].name}, ` : '';
-    if (!seats[me]?.robo) speakIfAuto(name + task.say);
+    if (!seats[me]?.robo) speakIfAuto([name, task.say]);
     const t = window.setInterval(() => setElapsed(performance.now() - askStart.current), 250);
     return () => window.clearInterval(t);
   }, [s.q, s.phase]);
@@ -188,8 +189,8 @@ export function Quiz(props: PlayProps & { subject: Subject }) {
           <span className="grow">
             {right ? `Richtig! +${quizPoints(mine.ms)} Punkte` : `Richtig ist: ${task.options[task.correct]}. ${task.explain ?? ''}`}
           </span>
-          {VOICE_ENABLED && !right && task.explain && (
-            <button type="button" className="icon-btn soft" aria-label="Tipp vorlesen" onClick={() => speak(`Richtig ist ${task.options[task.correct]}. ${task.explain}`)}>
+          {!right && task.explain && canSpeak(tipSpeech(task)) && (
+            <button type="button" className="icon-btn soft" aria-label="Tipp vorlesen" onClick={() => speak(tipSpeech(task))}>
               <Icon name="speaker" />
             </button>
           )}
